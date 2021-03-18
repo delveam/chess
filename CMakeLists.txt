@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.11) # FetchContent is available in 3.11+
+cmake_minimum_required(VERSION 3.14)
+
 project(chess)
 
-# raylib
+# Make sure we have raylib.
 find_package(raylib 3.5.0 QUIET)
 if (NOT raylib_FOUND)
     include(FetchContent)
@@ -21,7 +22,7 @@ if (NOT raylib_FOUND)
     endif()
 endif()
 
-# raylib-cpp
+# Make sure we have raylib-cpp.
 find_package(raylib-cpp 3.5.0 QUIET)
 if (NOT raylib-cpp_FOUND)
     include(FetchContent)
@@ -40,11 +41,10 @@ if (NOT raylib-cpp_FOUND)
     endif()
 endif()
 
-# This is the main part:
-set(PROJECT_NAME chess)
-set(PROJECT_SOURCES main.cpp)
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-set(raylib_VERBOSE 1)
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib-cpp)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(raylib_VERBOSE 1)
+
+add_executable(chess
+    ./src/main.cpp
+)
+target_link_libraries(chess PUBLIC raylib raylib-cpp)
