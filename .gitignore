@@ -1,0 +1,11 @@
+.ccls-cache
+CMakeFiles
+_deps
+cmake
+CMakeCache.txt
+CPackConfig.cmake
+CPackSourceConfig.cmake
+Makefile
+chess
+cmake_install.cmake
+compile_commands.json
