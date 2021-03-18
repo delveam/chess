@@ -13,10 +13,10 @@ int main() {
     while (!window.ShouldClose())
     {
         BeginDrawing();
-				{
-					background.ClearBackground();
-					textColor.DrawText("Congrats! You created your first window!", 190, 200, 20);
-				}
+        {
+          background.ClearBackground();
+          textColor.DrawText("Congrats! You created your first window!", 190, 200, 20);
+        }
         EndDrawing();
     }
 
