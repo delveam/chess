@@ -15,7 +15,7 @@ bin/debug: | bin
 	mkdir $@
 
 debug: build/Makefile | bin/debug
-	cd build; make; mv chess ../bin/debug
+	cd build; make && mv chess ../bin/debug
 
 dev: debug
 	cd ./bin/debug; ./chess
