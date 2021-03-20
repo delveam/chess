@@ -44,7 +44,10 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(raylib_VERBOSE 1)
 
-add_executable(chess
+add_executable(${PROJECT_NAME}
     ./src/main.cpp
+    ./src/Game.cpp
+    ./src/Chess.cpp
 )
-target_link_libraries(chess PUBLIC raylib raylib-cpp)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib-cpp)
