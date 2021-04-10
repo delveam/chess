@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <allegro5/allegro5.h>
-#include "game.hpp"
 #include <iostream>
+#include "chess.hpp"
 
 int main()
 {
@@ -46,7 +46,7 @@ int main()
     bool redraw = true;
     ALLEGRO_EVENT event;
 
-    auto game = game::Chess();
+    auto game = Chess();
     game.initialize();
 
     al_start_timer(timer);
@@ -75,6 +75,7 @@ int main()
         if(redraw && al_is_event_queue_empty(queue))
         {
             game.draw();
+            al_flip_display();
             redraw = false;
         }
     }
@@ -82,6 +83,8 @@ int main()
     al_destroy_display(disp);
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
+
+    game.destroy();
 
     return 0;
 }

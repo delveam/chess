@@ -1,14 +1,12 @@
-#include <allegro5/allegro_font.h>
-
-namespace game {
-  class Chess {
-    public:
-      Chess();
-      void initialize();
-      void update();
-      void draw();
-      ~Chess();
-    private:
-      ALLEGRO_FONT* font;
-  };
-}
+// TODO: we need one more layer of abstraction (um some sort of platform layer).
+class Game {
+  public:
+    Game();
+    void run();
+    virtual bool should_close() = 0;
+    virtual void initialize() = 0;
+    virtual void update() = 0;
+    virtual void draw() = 0;
+    virtual void destroy() = 0;
+    ~Game();
+};
