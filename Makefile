@@ -15,7 +15,7 @@ bin:
 bin/debug: | bin
 	mkdir $@
 
-build/%.o: src/%.cpp | build 
+build/%.o: src/%.cpp | build
 	$(CC) -c $< -o $@
 
 bin/debug/$(EXC): $(wildcard src/*.cpp) | bin/debug
