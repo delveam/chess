@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <allegro5/allegro5.h>
-#include <allegro5/allegro_font.h>
+#include "game.hpp"
+#include <iostream>
 
 int main()
 {
@@ -37,13 +38,6 @@ int main()
         return 1;
     }
 
-    ALLEGRO_FONT* font = al_create_builtin_font();
-    if(!font)
-    {
-        printf("couldn't initialize font\n");
-        return 1;
-    }
-
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
@@ -51,6 +45,9 @@ int main()
     bool done = false;
     bool redraw = true;
     ALLEGRO_EVENT event;
+
+    auto game = game::Chess();
+    game.initialize();
 
     al_start_timer(timer);
     while(1)
@@ -61,6 +58,8 @@ int main()
         {
             case ALLEGRO_EVENT_TIMER:
                 // game logic goes here.
+                game.update();
+
                 redraw = true;
                 break;
 
@@ -75,15 +74,11 @@ int main()
 
         if(redraw && al_is_event_queue_empty(queue))
         {
-            al_clear_to_color(al_map_rgb(0, 0, 0));
-            al_draw_text(font, al_map_rgb(255, 255, 255), 0, 0, 0, "Hello world!");
-            al_flip_display();
-
+            game.draw();
             redraw = false;
         }
     }
-
-    al_destroy_font(font);
+    
     al_destroy_display(disp);
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
