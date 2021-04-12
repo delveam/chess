@@ -1,12 +1,13 @@
-// TODO: we need one more layer of abstraction (um some sort of platform layer).
+#ifndef GAME_HPP
+#define GAME_HPP
 class Game {
-  public:
-    Game();
-    void run();
-    virtual bool should_close() = 0;
-    virtual void initialize() = 0;
-    virtual void update() = 0;
-    virtual void draw() = 0;
-    virtual void destroy() = 0;
-    ~Game();
+	public:
+		Game();
+		bool loop;
+		virtual void initialize() = 0;
+		virtual void update() = 0;
+		virtual void draw() = 0;
+		virtual void destroy() = 0;
+		~Game();
 };
+#endif

@@ -1,15 +1,17 @@
+#ifndef HEADER_HPP
+#define HEADER_HPP
 #include <allegro5/allegro_font.h>
 #include "game.hpp"
 
-class Chess : Game {
-  public:
-    Chess();
-    bool should_close();
-    void initialize();
-    void update();
-    void draw();
-    void destroy();
-    ~Chess();
-  private:
-    ALLEGRO_FONT* font;
+class Chess : public Game {
+	public:
+		Chess();
+		void initialize() override;
+		void update() override;
+		void draw() override;
+		void destroy() override;
+		~Chess();
+	private:
+		ALLEGRO_FONT* font;
 };
+#endif
