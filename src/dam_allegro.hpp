@@ -1,3 +1,5 @@
+#ifndef DAM_ALLEGRO_HPP
+#define DAM_ALLEGRO_HPP
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
@@ -20,3 +22,4 @@ namespace dam {
 		al_draw_bitmap(texture, x, y, 0);
 	}
 }
+#endif
