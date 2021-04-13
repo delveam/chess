@@ -16,7 +16,7 @@ void Chess::update() {
 
 void Chess::draw() {
 	dam::draw_rect(32, 32, 128, 32, al_map_rgb(255, 0, 255));
-	dam::draw_text("Hello World", font, 16, 16, 32);
+	dam::draw_text("Hello World", font, 16, 16, al_map_rgb(255, 255, 255));
 	dam::draw_texture(64, 64, texture);
 }
 
