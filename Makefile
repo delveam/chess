@@ -1,6 +1,10 @@
-FLAGS = `pkg-config --cflags --libs allegro-5 allegro_primitives-5 allegro_font-5 allegro_audio-5 allegro_ttf-5 allegro_image-5 allegro_acodec-5 allegro_color-5` -lm
 EXC = chess
 CC = g++
+
+SOURCES = $(wildcard src/*.cpp)
+HEADERS = $(shell find src/*.hpp)
+OBJECTS = $(patsubst src/%.cpp, build/%.o, $(SOURCES))
+LIBRARIES = -lm $(shell pkg-config --cflags --libs allegro-5 allegro_primitives-5 allegro_font-5 allegro_audio-5 allegro_ttf-5 allegro_image-5 allegro_acodec-5 allegro_color-5)
 
 .PHONY: all clean debug dev
 
@@ -15,13 +19,16 @@ bin:
 bin/debug: | bin
 	mkdir $@
 
-build/%.o: src/%.cpp | build
+build/%.o: src/%.cpp $(HEADERS) | build
 	$(CC) -c $< -o $@
 
-bin/debug/$(EXC): $(wildcard src/*.cpp) | bin/debug
-	$(CC) $^ $(FLAGS) -o $@
+build/$(EXC): $(OBJECTS) | build
+	$(CC) -o $@ $^ $(LIBRARIES)
 
-debug: bin/debug/$(EXC)
+debug: build/$(EXC) | bin/debug
+	rm -rf bin/debug/*
+	cp -r ./content ./bin/debug
+	cp ./build/$(EXC) ./bin/debug
 
 dev: debug
 	cd ./bin/debug; ./$(EXC)

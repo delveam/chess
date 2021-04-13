@@ -1,4 +1,5 @@
 #include <allegro5/allegro5.h>
+#include <allegro5/allegro_image.h>
 #include <iostream>
 #include "allegro.hpp"
 
@@ -33,6 +34,11 @@ void Allegro::run(Game& game) {
 	if(!disp)
 	{
 		std::cout << "Couldn't initialize display.\n";
+		return;
+	}
+
+	if (!al_init_image_addon()) {
+		std::cout << "Couldn't initialize image addon.\n";
 		return;
 	}
 

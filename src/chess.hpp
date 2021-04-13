@@ -13,5 +13,6 @@ class Chess : public Game {
 		~Chess();
 	private:
 		ALLEGRO_FONT* font;
+		ALLEGRO_BITMAP* texture;
 };
 #endif
