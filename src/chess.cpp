@@ -21,8 +21,8 @@ void Chess::draw() {
 }
 
 void Chess::destroy() {
-	 al_destroy_font(font);
-	 al_destroy_bitmap(texture);
+	al_destroy_font(font);
+	al_destroy_bitmap(texture);
 }
 
 Chess::~Chess() {
