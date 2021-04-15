@@ -1,5 +1,6 @@
 EXC = chess
 CC = g++
+FLAGS = -std=c++17
 
 SOURCES = $(wildcard src/*.cpp)
 HEADERS = $(shell find src/*.hpp)
@@ -20,10 +21,10 @@ bin/debug: | bin
 	mkdir $@
 
 build/%.o: src/%.cpp $(HEADERS) | build
-	$(CC) -c $< -o $@
+	$(CC) $(FLAGS) -c $< -o $@
 
 build/$(EXC): $(OBJECTS) | build
-	$(CC) -o $@ $^ $(LIBRARIES)
+	$(CC) $(FLAGS) -o $@ $^ $(LIBRARIES)
 
 debug: build/$(EXC) | bin/debug
 	rm -rf bin/debug/*
