@@ -6,10 +6,10 @@
 class Chess : public Game {
 	public:
 		Chess();
-		void initialize() override;
-		void update() override;
-		void draw() override;
-		void destroy() override;
+		void initialize(DamContext& context) override;
+		void update(DamContext& context) override;
+		void draw(DamContext& context) override;
+		void destroy(DamContext& context) override;
 		~Chess();
 	private:
 		ALLEGRO_FONT* font;

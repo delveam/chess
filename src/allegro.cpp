@@ -2,6 +2,7 @@
 #include <allegro5/allegro_image.h>
 #include <iostream>
 #include "allegro.hpp"
+#include "allegro_context.hpp"
 
 void Allegro::run(Game& game) {
 	if(!al_init())
@@ -50,7 +51,9 @@ void Allegro::run(Game& game) {
 	bool should_close = false;
 	bool redraw = true;
 
-	game.initialize();
+	AllegroContext context = AllegroContext();
+
+	game.initialize(context);
 
 	al_start_timer(timer);
 	while(!should_close)
@@ -60,7 +63,7 @@ void Allegro::run(Game& game) {
 		switch(event.type)
 		{
 			case ALLEGRO_EVENT_TIMER:
-				game.update();
+				game.update(context);
 				redraw = true;
 				if (!game.loop) {
 					should_close = true;
@@ -75,11 +78,13 @@ void Allegro::run(Game& game) {
 
 		if(redraw && al_is_event_queue_empty(queue))
 		{
-			game.draw();
+			game.draw(context);
 			al_flip_display();
 			redraw = false;
 		}
 	}
+
+	game.destroy(context);
 
 	al_destroy_display(disp);
 	al_destroy_timer(timer);

@@ -1,28 +1,27 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 #include "chess.hpp"
-#include "dam.hpp"
 
 Chess::Chess() {
 }
 
-void Chess::initialize() {
+void Chess::initialize(DamContext& context) {
 	font = al_create_builtin_font();
-	texture = al_load_bitmap("content/sprites/pawn.png");
+	texture = context.load_texture<ALLEGRO_BITMAP*>("content/sprites/pawn.png");
 }
 
-void Chess::update() {
+void Chess::update(DamContext& context) {
 }
 
-void Chess::draw() {
-	dam::draw_rect(32, 32, 128, 32, al_map_rgb(255, 0, 255));
-	dam::draw_text("Hello World", font, 16, 16, al_map_rgb(255, 255, 255));
-	dam::draw_texture(64, 64, texture);
+void Chess::draw(DamContext& context) {
+	context.draw_rectangle(128, 128, 256, 300, al_map_rgb(255, 0, 0));
+	context.draw_text(32, 32, "yeet", font, al_map_rgb(255, 255, 255));
+	context.draw_texture(64, 64, texture);
 }
 
-void Chess::destroy() {
+void Chess::destroy(DamContext& context) {
 	al_destroy_font(font);
-	al_destroy_bitmap(texture);
+	context.unload_texture(texture);
 }
 
 Chess::~Chess() {
