@@ -10,7 +10,8 @@ class AllegroContext : public DamContext {
 		void draw_rectangle_impl(float x, float y, float width, float height, std::any color) override;
 		void draw_texture_impl(float x, float y, std::any texture) override;
 		void draw_text_impl(float x, float y, std::string text, std::any font, std::any color) override;
-		void unload_texture_impl(std::any texture) const override;
-		void unload_font_impl(std::any font) const override;
+		void unload_texture_impl(std::any texture) override;
+		void unload_font_impl(std::any font) override;
+		std::any get_keyboard_state_impl() override;
 };
 #endif

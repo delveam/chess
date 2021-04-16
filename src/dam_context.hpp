@@ -35,13 +35,19 @@ class DamContext {
 		void unload_font(FONT font) {
 			unload_font_impl(std::any(font));
 		}
+		template <typename KEYBOARD_STATE>
+			KEYBOARD_STATE get_keyboard_state() {
+				std::any state = get_keyboard_state_impl();
+				return std::any_cast<KEYBOARD_STATE>(state);
+		}
 	protected:
 		virtual std::any load_texture_impl(std::string path) = 0;
 		virtual std::any load_font_impl(std::string path) = 0;
 		virtual void draw_rectangle_impl(float x, float y, float width, float height, std::any color) = 0;
 		virtual void draw_texture_impl(float x, float y, std::any texture) = 0;
 		virtual void draw_text_impl(float x, float y, std::string text, std::any font, std::any color) = 0;
-		virtual void unload_texture_impl(std::any texture) const = 0;
-		virtual void unload_font_impl(std::any font) const = 0;
+		virtual void unload_texture_impl(std::any texture) = 0;
+		virtual void unload_font_impl(std::any font) = 0;
+		virtual std::any get_keyboard_state_impl() = 0;
 };
 #endif

@@ -27,12 +27,18 @@ void AllegroContext::draw_text_impl(float x, float y, std::string text, std::any
 	al_draw_text(_font, _color, x, y, 0, text.c_str());
 }
 
-void AllegroContext::unload_texture_impl(std::any texture) const {
+void AllegroContext::unload_texture_impl(std::any texture) {
 	ALLEGRO_BITMAP* _texture = std::any_cast<ALLEGRO_BITMAP*>(texture);
 	al_destroy_bitmap(_texture);
 }
 
-void AllegroContext::unload_font_impl(std::any font) const {
+void AllegroContext::unload_font_impl(std::any font) {
 	ALLEGRO_FONT* _font = std::any_cast<ALLEGRO_FONT*>(font);
 	al_destroy_font(_font);
+}
+
+std::any AllegroContext::get_keyboard_state_impl() {
+	ALLEGRO_KEYBOARD_STATE* state;
+	al_get_keyboard_state(state);
+	return std::any(state);
 }
