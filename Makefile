@@ -7,7 +7,7 @@ HEADERS = $(shell find src/*.hpp)
 OBJECTS = $(patsubst src/%.cpp, build/%.o, $(SOURCES))
 LIBRARIES = -lm $(shell pkg-config --cflags --libs allegro-5 allegro_primitives-5 allegro_font-5 allegro_audio-5 allegro_ttf-5 allegro_image-5 allegro_acodec-5 allegro_color-5)
 
-.PHONY: all clean debug dev
+.PHONY: all clean debug dev format
 
 all: clean debug
 
@@ -33,6 +33,9 @@ debug: build/$(EXC) | bin/debug
 
 dev: debug
 	cd ./bin/debug; ./$(EXC)
+
+format: $(shell find src)
+	astyle --style=stroustrup -n --recursive ./src/*.cpp,*.hpp
 
 clean:
 	if [ -d "./build" ]; then rm -rf build; fi
