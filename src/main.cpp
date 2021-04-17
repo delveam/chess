@@ -3,9 +3,9 @@
 
 int main()
 {
-	Chess chess = Chess();
-	Allegro allegro = Allegro();
-	allegro.run(chess);
+    Chess chess = Chess();
+    Allegro allegro = Allegro();
+    allegro.run(chess);
 
-	return 0;
+    return 0;
 }

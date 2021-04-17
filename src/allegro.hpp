@@ -3,7 +3,7 @@
 #include "backend.hpp"
 
 class Allegro : public Backend {
-	public:
-		void run(Game &game) override;
+public:
+    void run(Game &game) override;
 };
 #endif

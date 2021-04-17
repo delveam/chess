@@ -3,7 +3,7 @@
 #include "game.hpp"
 
 class Backend {
-	public:
-		virtual void run(Game& game) = 0;
+public:
+    virtual void run(Game& game) = 0;
 };
 #endif
