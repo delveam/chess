@@ -1,7 +1,10 @@
 #ifndef GAME_HPP
 #define GAME_HPP
+namespace dam {
+class Game;
+}
 
-class Game {
+class dam::Game {
 public:
     Game();
     bool loop;

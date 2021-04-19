@@ -2,7 +2,11 @@
 #define BACKEND_HPP
 #include "game.hpp"
 
-class Backend {
+namespace dam {
+class Backend;
+}
+
+class dam::Backend {
 public:
     virtual void run(Game& game) = 0;
 };

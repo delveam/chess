@@ -2,11 +2,11 @@
 #include <allegro5/allegro5.h>
 #include "game.hpp"
 
-Game::Game()
+dam::Game::Game()
 {
     loop = true;
 }
 
-Game::~Game()
+dam::Game::~Game()
 {
 }

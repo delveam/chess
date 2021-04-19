@@ -3,7 +3,7 @@
 #include <iostream>
 #include "allegro.hpp"
 
-void Allegro::run(Game& game)
+void Allegro::run(dam::Game& game)
 {
     if(!al_init()) {
         std::cout << "Couldn't initialize allegro.\n";

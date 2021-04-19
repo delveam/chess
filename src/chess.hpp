@@ -6,7 +6,7 @@
 #include "game.hpp"
 #include "smart_keyboard.hpp"
 
-class Chess : public Game {
+class Chess : public dam::Game {
 public:
     Chess();
     void initialize() override;

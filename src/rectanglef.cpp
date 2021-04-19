@@ -1,6 +1,6 @@
 #include "rectanglef.hpp"
 
-RectangleF::RectangleF(float x, float y, float width, float height)
+dam::RectangleF::RectangleF(float x, float y, float width, float height)
 {
     this->x = x;
     this->y = y;
