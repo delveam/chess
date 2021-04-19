@@ -14,10 +14,7 @@ bool dam::SmartKeyboard::pressing(int key)
 
 void dam::SmartKeyboard::update()
 {
-    // previous.state.swap(current.state);
-
-    // auto temp = std::make_unique<ALLEGRO_KEYBOARD_STATE>();
-    // al_get_keyboard_state(temp.get());
-
-    // current.state.swap(temp);
+    auto temp = dam::KeyboardState();
+    previous.state.swap(current.state);
+    current.state.swap(temp.state);
 }

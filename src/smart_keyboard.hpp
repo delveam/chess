@@ -12,10 +12,8 @@ public:
     bool pressed(int key);
     bool pressing(int key);
     void update();
+private:
     dam::KeyboardState previous;
     dam::KeyboardState current;
-private:
-    // dam::KeyboardState previous;
-    // dam::KeyboardState current;
 };
 #endif
