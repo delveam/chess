@@ -3,76 +3,40 @@
 #include <iostream>
 #include <memory>
 #include "chess.hpp"
-#include "matrix4f.hpp"
-#include "dam.hpp"
+#include "palette.hpp"
 
 Chess::Chess()
 {
 }
 
-void Chess::initialize(DamContext& context)
+void Chess::initialize()
 {
     font = al_create_builtin_font();
-    texture = context.load_texture<ALLEGRO_BITMAP*>("content/sprites/pawn.png");
-
-    // auto a = dam::Matrix4F::create_translation(5, 6, 7);
-    // auto b = dam::Matrix4F::create_scale(2, 2, 1);
-    // auto temp = dam::Matrix4F::multiply(a, b);
-    // temp.debug();
-
-    // keyboard = dam::SmartKeyboard();
+    texture = dam::load_texture("content/sprites/pawn.png");
+    keyboard = std::make_unique<dam::SmartKeyboard>();
 }
 
-void Chess::update(DamContext& context)
+void Chess::update()
 {
-    // keyboard.update();
+    keyboard->update();
 
-    // std::cout << keyboard.previous.is_key_down(ALLEGRO_KEY_W) << " ";
-    // std::cout << keyboard.current.is_key_down(ALLEGRO_KEY_W) << "\n";
-
-    // if (sk.pressed(ALLEGRO_KEY_W)) {
-    // 	std::cout << "YEET\n";
-    // }
-    // if (sk.pressing(ALLEGRO_KEY_T)) {
-    // 	std::cout << "BRUH\n";
-    // }
-
-    ALLEGRO_KEYBOARD_STATE temp;
-    al_get_keyboard_state(&temp);
-
-    auto state = context.get_keyboard_state_bruh<ALLEGRO_KEYBOARD_STATE*>(std::any(&temp));
-
-    if (al_key_down(&temp, ALLEGRO_KEY_ESCAPE)) {
+    if (keyboard->pressed(ALLEGRO_KEY_ESCAPE)) {
         loop = false;
     }
-
-    // auto state = dam::Keyboard::get_state();
-    // if (state.is_key_down(ALLEGRO_KEY_ESCAPE)) {
-    //     loop = false;
-    // }
 }
 
-void Chess::draw(DamContext& context)
+void Chess::draw()
 {
-    ALLEGRO_TRANSFORM transform;
-    al_identity_transform(&transform);
-    al_use_transform(&transform);
-    context.draw_rectangle(128, 128, 256, 300, al_map_rgb(255, 0, 0));
-
-    al_rotate_transform(&transform, 3.141519 / 8);
-    al_use_transform(&transform);
-    context.draw_text(32, 32, "yeet", font, al_map_rgb(255, 255, 255));
-
-    context.draw_texture(64, 64, texture);
-
-    dam::draw_rectangle(5, 5, 126, 123, al_map_rgb(0, 255, 0));
-
+    dam::clear(dam::palette::GREEN);
+    dam::draw_texture(64, 64, texture);
+    dam::draw_rectangle(5, 5, 126, 123, dam::Color(0xff0000, 0.5));
+    dam::draw_text(32, 32, "YEET", font, dam::palette::WHITE);
 }
 
-void Chess::destroy(DamContext& context)
+void Chess::destroy()
 {
-    al_destroy_font(font);
-    context.unload_texture(texture);
+    dam::unload_font(font);
+    dam::unload_texture(texture);
 }
 
 Chess::~Chess()

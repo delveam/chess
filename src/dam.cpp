@@ -1,5 +1,10 @@
 #include "dam.hpp"
 
+ALLEGRO_COLOR convert_dam_color(dam::Color color)
+{
+    return al_map_rgba(color.r * 255, color.g * 255, color.b * 255, color.a * 255);
+}
+
 dam::KeyboardState dam::Keyboard::get_state()
 {
     return dam::KeyboardState();
@@ -25,9 +30,16 @@ void dam::unload_font(ALLEGRO_FONT* font)
     al_destroy_font(font);
 }
 
-void dam::draw_rectangle(float x, float y, float width, float height, ALLEGRO_COLOR color)
+void dam::clear(dam::Color color)
 {
-    al_draw_filled_rectangle(x, y, x + width, y + height, color);
+    auto temp = convert_dam_color(color);
+    al_clear_to_color(temp);
+}
+
+void dam::draw_rectangle(float x, float y, float width, float height, dam::Color color)
+{
+    auto temp = convert_dam_color(color);
+    al_draw_filled_rectangle(x, y, x + width, y + height, temp);
 }
 
 void dam::draw_texture(float x, float y, ALLEGRO_BITMAP* texture)
@@ -35,7 +47,8 @@ void dam::draw_texture(float x, float y, ALLEGRO_BITMAP* texture)
     al_draw_bitmap(texture, x, y, 0);
 }
 
-void dam::draw_text(float x, float y, std::string text, ALLEGRO_FONT* font, ALLEGRO_COLOR color)
+void dam::draw_text(float x, float y, std::string text, ALLEGRO_FONT* font, dam::Color color)
 {
-    al_draw_text(font, color, x, y, 0, text.c_str());
+    auto temp = convert_dam_color(color);
+    al_draw_text(font, temp, x, y, 0, text.c_str());
 }
