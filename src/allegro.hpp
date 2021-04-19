@@ -4,6 +4,6 @@
 
 class Allegro : public dam::Backend {
 public:
-    void run(dam::Game &game) override;
+    void run(dam::App& app) override;
 };
 #endif

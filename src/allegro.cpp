@@ -3,7 +3,7 @@
 #include <iostream>
 #include "allegro.hpp"
 
-void Allegro::run(dam::Game& game)
+void Allegro::run(dam::App& app)
 {
     if(!al_init()) {
         std::cout << "Couldn't initialize allegro.\n";
@@ -46,7 +46,7 @@ void Allegro::run(dam::Game& game)
     bool should_close = false;
     bool redraw = true;
 
-    game.initialize();
+    app.initialize();
 
     al_start_timer(timer);
     while(!should_close) {
@@ -54,9 +54,9 @@ void Allegro::run(dam::Game& game)
 
         switch(event.type) {
         case ALLEGRO_EVENT_TIMER:
-            game.update();
+            app.update();
             redraw = true;
-            if (!game.loop) {
+            if (!app.loop) {
                 should_close = true;
             }
             break;
@@ -67,13 +67,13 @@ void Allegro::run(dam::Game& game)
         }
 
         if(redraw && al_is_event_queue_empty(queue)) {
-            game.draw();
+            app.draw();
             al_flip_display();
             redraw = false;
         }
     }
 
-    game.destroy();
+    app.destroy();
 
     al_destroy_display(disp);
     al_destroy_timer(timer);

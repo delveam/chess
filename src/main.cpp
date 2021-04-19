@@ -1,5 +1,5 @@
-#include "chess.hpp"
 #include "allegro.hpp"
+#include "chess.hpp"
 
 int main()
 {

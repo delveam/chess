@@ -2,11 +2,11 @@
 #define CHESS_HPP
 #include <allegro5/allegro_font.h>
 #include <iostream>
+#include "app.hpp"
 #include "dam.hpp"
-#include "game.hpp"
 #include "smart_keyboard.hpp"
 
-class Chess : public dam::Game {
+class Chess : public dam::App {
 public:
     Chess();
     void initialize() override;

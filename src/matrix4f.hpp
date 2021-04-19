@@ -1,6 +1,7 @@
 #ifndef MATRIX4_HPP
 #define MATRIX4_HPP
 #include <array>
+
 namespace dam {
 class Matrix4F;
 }
