@@ -6,6 +6,7 @@ class Color;
 
 class dam::Color {
 public:
+    Color();
     Color(unsigned int hexadecimal, float alpha=1);
     float r;
     float g;

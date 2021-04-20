@@ -6,6 +6,7 @@ class Vector2F;
 
 class dam::Vector2F {
 public:
+    Vector2F();
     Vector2F(float x, float y);
     float x;
     float y;
