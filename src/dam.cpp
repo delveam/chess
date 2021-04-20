@@ -42,6 +42,16 @@ void dam::draw_rectangle(float x, float y, float width, float height, dam::Color
     al_draw_filled_rectangle(x, y, x + width, y + height, temp);
 }
 
+void dam::draw_circle(float x, float y, float radius, dam::Color color) {
+    auto temp = convert_dam_color(color);
+    al_draw_filled_circle(x, y, radius, temp);
+}
+
+void dam::draw_line(float x1, float y1, float x2, float y2, float thickness, dam::Color color) {
+    auto temp = convert_dam_color(color);
+    al_draw_line(x1, y1, x2, y2, temp, thickness);
+}
+
 void dam::draw_texture(float x, float y, ALLEGRO_BITMAP* texture)
 {
     al_draw_bitmap(texture, x, y, 0);

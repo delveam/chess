@@ -27,6 +27,8 @@ void unload_font(Font* font);
 void clear(dam::Color color);
 
 void draw_rectangle(float x, float y, float width, float height, dam::Color color);
+void draw_circle(float x, float y, float radius, dam::Color color);
+void draw_line(float x1, float y1, float x2, float y2, float thickness, dam::Color color);
 void draw_texture(float x, float y, Bitmap* texture);
 void draw_text(float x, float y, std::string text, Font* font, dam::Color color);
 }
