@@ -4,7 +4,7 @@ namespace dam {
 class App;
 }
 
-class dam::App{
+class dam::App {
 public:
     App();
     bool loop;
