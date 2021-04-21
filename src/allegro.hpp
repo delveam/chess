@@ -1,6 +1,6 @@
 #ifndef ALLEGRO_HPP
 #define ALLEGRO_HPP
-#include "backend.hpp"
+#include "dam/backend.hpp"
 
 class Allegro : public dam::Backend {
 public:

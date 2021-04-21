@@ -1,16 +1,19 @@
 EXC = chess
 CC = g++
-FLAGS = -std=c++17
-DEBUG_FLAGS = -g -Wall -O0
-RELEASE_FLAGS = -Wall -O3
-
-SOURCES = $(wildcard src/*.cpp)
-HEADERS = $(shell find src/*.hpp)
-DEBUG_OBJECTS = $(patsubst src/%.cpp, build/debug/%.o, $(SOURCES))
-RELEASE_OBJECTS = $(patsubst src/%.cpp, build/release/%.o, $(SOURCES))
+FLAGS = -std=c++17 -Wall
+DEBUG_FLAGS = -g -O0
+RELEASE_FLAGS = -O3
 LIBRARIES = -lm $(shell pkg-config --cflags --libs allegro-5 allegro_primitives-5 allegro_font-5 allegro_audio-5 allegro_ttf-5 allegro_image-5 allegro_acodec-5 allegro_color-5)
 
+DAM_HEADERS = $(shell find ./src/dam -name "*.hpp")
+CHESS_HEADERS = $(shell find ./src -name "*.hpp")
+SOURCES = $(shell cd ./src; find . ./dam -name "*.cpp")
+DEBUG_OBJECTS = $(patsubst ./%.cpp, ./build/debug/%.o, $(SOURCES))
+RELEASE_OBJECTS = $(patsubst ./%.cpp, ./build/release/%.o, $(SOURCES))
+
 .PHONY: all clean debug dev format release
+
+export CC FLAGS DEBUG_FLAGS
 
 all: clean release
 
@@ -20,7 +23,13 @@ build:
 build/debug: | build
 	mkdir $@
 
+build/debug/dam: | build/debug
+	mkdir $@
+
 build/release: | build
+	mkdir $@
+
+build/release/dam: | build/release
 	mkdir $@
 
 bin:
@@ -32,7 +41,10 @@ bin/debug: | bin
 bin/release: | bin
 	mkdir $@
 
-build/debug/%.o: src/%.cpp $(HEADERS) | build/debug
+build/debug/dam/%.o: src/dam/%.cpp $(DAM_HEADERS) | build/debug/dam
+	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
+
+build/debug/%.o: src/%.cpp $(CHESS_HEADERS) | build/debug
 	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
 build/debug/$(EXC): $(DEBUG_OBJECTS) | build/debug
@@ -43,7 +55,10 @@ debug: build/debug/$(EXC) | bin/debug
 	cp -r ./content ./bin/debug
 	cp $< ./bin/debug
 
-build/release/%.o: src/%.cpp $(HEADERS) | build/release
+build/release/dam/%.o: src/dam/%.cpp $(DAM_HEADERS) | build/release/dam
+	$(CC) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
+
+build/release/%.o: src/%.cpp $(CHESS_HEADERS) | build/release
 	$(CC) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
 
 build/release/$(EXC): $(RELEASE_OBJECTS) | build/release
