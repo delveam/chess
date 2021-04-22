@@ -40,10 +40,21 @@ void Chess::update()
 
 void Chess::draw()
 {
-    dam::clear(dam::palette::GREEN);
-    dam::draw_texture(64, 64, texture);
-    dam::draw_rectangle(5, 5, 126, 123, dam::Color(0xff0000, 0.5));
-    dam::draw_text(32, 32, "YEET", font, dam::palette::WHITE);
+    dam::clear(dam::palette::BLACK);
+
+    auto board_size = 8;
+    auto size = 60;
+    auto offset = (640 - board_size * size) / 2;
+    for (int y = 0; y < 8; ++y) {
+        for (int x = 0; x < 8; ++x) {
+            auto color = dam::Color(0x769656);
+            if ((x + y) % 2 == 0) {
+                color = dam::Color(0xeeeed2);
+            }
+
+            dam::draw_rectangle(offset + x * size, y * size, size, size, color);
+        }
+    }
 }
 
 void Chess::destroy()
