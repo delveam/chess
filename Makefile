@@ -45,7 +45,7 @@ bin/release: | bin
 	mkdir $@
 
 dam_debug: | build/debug/dam
-	make -D DEBUG -f ./src/dam/dam.mk debug
+	make -f ./src/dam/dam.mk debug
 
 chess_debug: dam_debug | build/debug/chess
 	make -f ./src/chess/chess.mk debug
