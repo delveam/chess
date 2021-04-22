@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 #include "chess.hpp"
-#include "dam/palette.hpp"
+#include "../dam/palette.hpp"
 
 Chess::Chess()
 {

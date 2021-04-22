@@ -2,9 +2,9 @@
 #define CHESS_HPP
 #include <allegro5/allegro_font.h>
 #include <iostream>
-#include "dam/app.hpp"
-#include "dam/dam.hpp"
-#include "dam/smart_keyboard.hpp"
+#include "../dam/app.hpp"
+#include "../dam/dam.hpp"
+#include "../dam/smart_keyboard.hpp"
 
 class Chess : public dam::App {
 public:
