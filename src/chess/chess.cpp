@@ -27,6 +27,8 @@ void Chess::initialize()
     king_white = dam::load_texture("./content/sprites/king_white.png");
 
     keyboard = std::make_unique<dam::SmartKeyboard>();
+
+    // board = Board();
 }
 
 void Chess::update()
@@ -45,14 +47,49 @@ void Chess::draw()
     auto board_size = 8;
     auto size = 60;
     auto offset = (640 - board_size * size) / 2;
-    for (int y = 0; y < 8; ++y) {
-        for (int x = 0; x < 8; ++x) {
+    for (int y = 0; y < board_size; ++y) {
+        for (int x = 0; x < board_size; ++x) {
             auto color = dam::Color(0x769656);
             if ((x + y) % 2 == 0) {
                 color = dam::Color(0xeeeed2);
             }
 
             dam::draw_rectangle(offset + x * size, y * size, size, size, color);
+        }
+    }
+
+    for (int y = 0; y < board_size; ++y) {
+        for (int x = 0; x < board_size; ++x) {
+            auto index = y * board_size + x;
+            auto current = board.pieces[index];
+
+            ALLEGRO_BITMAP* texture = NULL;
+            switch (current.type) {
+            case utils::Pawn:
+                texture = current.team == utils::Player::White ? pawn_white : pawn_black;
+                break;
+            case utils::Knight:
+                texture = current.team == utils::Player::White ? knight_white : knight_black;
+                break;
+            case utils::Bishop:
+                texture = current.team == utils::Player::White ? bishop_white : bishop_black;
+                break;
+            case utils::Rook:
+                texture = current.team == utils::Player::White ? rook_white : rook_black;
+                break;
+            case utils::Queen:
+                texture = current.team == utils::Player::White ? queen_white : queen_black;
+                break;
+            case utils::King:
+                texture = current.team == utils::Player::White ? king_white : king_black;
+                break;
+            case utils::None:
+                break;
+            }
+
+            if (texture != NULL) {
+                dam::draw_texture(offset + x * size, y * size, texture);
+            }
         }
     }
 }

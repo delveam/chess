@@ -5,6 +5,7 @@
 #include "../dam/app.hpp"
 #include "../dam/dam.hpp"
 #include "../dam/smart_keyboard.hpp"
+#include "board.hpp"
 
 class Chess : public dam::App {
 public:
@@ -28,7 +29,10 @@ private:
     ALLEGRO_BITMAP* rook_white;
     ALLEGRO_BITMAP* queen_white;
     ALLEGRO_BITMAP* king_white;
+    Board board;
 
     std::unique_ptr<dam::SmartKeyboard> keyboard;
+
+
 };
 #endif
