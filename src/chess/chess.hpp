@@ -16,7 +16,19 @@ public:
     ~Chess();
 private:
     ALLEGRO_FONT* font;
-    ALLEGRO_BITMAP* texture;
+    ALLEGRO_BITMAP* pawn_black;
+    ALLEGRO_BITMAP* bishop_black;
+    ALLEGRO_BITMAP* knight_black;
+    ALLEGRO_BITMAP* rook_black;
+    ALLEGRO_BITMAP* queen_black;
+    ALLEGRO_BITMAP* king_black;
+    ALLEGRO_BITMAP* pawn_white;
+    ALLEGRO_BITMAP* bishop_white;
+    ALLEGRO_BITMAP* knight_white;
+    ALLEGRO_BITMAP* rook_white;
+    ALLEGRO_BITMAP* queen_white;
+    ALLEGRO_BITMAP* king_white;
+
     std::unique_ptr<dam::SmartKeyboard> keyboard;
 };
 #endif
