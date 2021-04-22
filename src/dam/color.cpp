@@ -10,9 +10,9 @@ dam::Color::Color()
 
 dam::Color::Color(unsigned int hexadecimal, float alpha)
 {
-    r = ((hexadecimal & 0xff0000) >> 16) / 255;
-    g = ((hexadecimal & 0xff00) >> 8) / 255;
-    b = (hexadecimal & 0xff) / 255;
+    r = (hexadecimal & 0xff0000) >> 16;
+    g = (hexadecimal & 0xff00) >> 8;
+    b = hexadecimal & 0xff;
     a = 1;
 
     multiply(alpha);

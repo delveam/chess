@@ -2,7 +2,7 @@
 
 ALLEGRO_COLOR convert_dam_color(dam::Color color)
 {
-    return al_map_rgba(color.r * 255, color.g * 255, color.b * 255, color.a * 255);
+    return al_map_rgba(color.r, color.g, color.b, color.a * 255);
 }
 
 dam::KeyboardState dam::Keyboard::get_state()

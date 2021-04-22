@@ -8,9 +8,9 @@ class dam::Color {
 public:
     Color();
     Color(unsigned int hexadecimal, float alpha=1);
-    float r;
-    float g;
-    float b;
+    unsigned int r;
+    unsigned int g;
+    unsigned int b;
     float a;
     void multiply(float value);
 };
