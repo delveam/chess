@@ -1,42 +1,104 @@
+#include <regex>
+#include <vector>
 #include "board.hpp"
+
+// ^((?:[pbnrqkPBNRQK1-8]+\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )Q?K?q?k? | - )((?:[a-h]{1}[36]{1})|-) (\d+) (\d+)$
+
+// Yoinked from: https://stackoverflow.com/a/46931770
+std::vector<std::string> split(std::string string, std::string delimiter)
+{
+    size_t pos_start = 0;
+    size_t pos_end = 0;
+    size_t delim_len = delimiter.length();
+
+    std::string token;
+    std::vector<std::string> result;
+
+    while ((pos_end = string.find(delimiter, pos_start)) != std::string::npos) {
+        token = string.substr(pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        result.push_back(token);
+    }
+
+    result.push_back(string.substr(pos_start));
+
+    return result;
+}
 
 Board::Board()
 {
     pieces.fill({ utils::ChessPiece::None, utils::Player::Black });
+}
 
-    auto i = -1;
-    pieces[++i] = { utils::ChessPiece::Rook, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Knight, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Bishop, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Queen, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::King, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Bishop, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Knight, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Rook, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::Black };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::Black };
+Board Board::load_from_fen(std::string fen)
+{
+    if (!std::regex_match(fen, std::regex("^((?:[pbnrqkPBNRQK1-8]+\\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )Q?K?q?k? | - )((?:[a-h]{1}[36]{1})|-) (\\d+) (\\d+)$"))) {
+        return Board::load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w QKqk - 0 1");
+    }
 
-    i = 47;
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Pawn, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Rook, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Knight, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Bishop, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Queen, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::King, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Bishop, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Knight, utils::Player::White };
-    pieces[++i] = { utils::ChessPiece::Rook, utils::Player::White };
+    auto board = Board();
+    auto sections = split(fen, " ");
+    // TODO: We still need to consider the other 5 sections!
+    auto rows = split(sections[0], "/");
+    auto index = 0;
+
+    for (auto row : rows) {
+        for (auto i = 0; i < (int)row.size(); ++i) {
+            auto character = row.substr(i, 1);
+
+            if (std::regex_match(character, std::regex("\\d"))) {
+                index += std::stoi(character);
+            }
+            else {
+                auto ascii = (int)character.c_str()[0];
+                Piece piece = Piece();
+                switch (ascii) {
+                // Black
+                case 112: // p
+                    piece = Piece(utils::ChessPiece::Pawn, utils::Player::Black);
+                    break;
+                case 110: // n
+                    piece = Piece(utils::ChessPiece::Knight, utils::Player::Black);
+                    break;
+                case 98: // b
+                    piece = Piece(utils::ChessPiece::Bishop, utils::Player::Black);
+                    break;
+                case 114: // r
+                    piece = Piece(utils::ChessPiece::Rook, utils::Player::Black);
+                    break;
+                case 113: // q
+                    piece = Piece(utils::ChessPiece::Queen, utils::Player::Black);
+                    break;
+                case 107: // k
+                    piece = Piece(utils::ChessPiece::King, utils::Player::Black);
+                    break;
+
+                // White
+                case 80: // P
+                    piece = Piece(utils::ChessPiece::Pawn, utils::Player::White);
+                    break;
+                case 78: // N
+                    piece = Piece(utils::ChessPiece::Knight, utils::Player::White);
+                    break;
+                case 66: // B
+                    piece = Piece(utils::ChessPiece::Bishop, utils::Player::White);
+                    break;
+                case 82: // R
+                    piece = Piece(utils::ChessPiece::Rook, utils::Player::White);
+                    break;
+                case 81: // Q
+                    piece = Piece(utils::ChessPiece::Queen, utils::Player::White);
+                    break;
+                case 75: // K
+                    piece = Piece(utils::ChessPiece::King, utils::Player::White);
+                    break;
+                }
+
+                board.pieces[index] = piece;
+                index++;
+            }
+        }
+    }
+
+    return board;
 }
