@@ -1,3 +1,7 @@
+#include <string>
+
+const std::string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 enum PieceType {
     None = 0,
     Pawn = 1,

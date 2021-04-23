@@ -33,7 +33,7 @@ Board::Board()
 Board Board::load_from_fen(std::string fen)
 {
     if (!std::regex_match(fen, std::regex("^((?:[pbnrqkPBNRQK1-8]+\\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\\d+) (\\d+)$"))) {
-        return Board::load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w QKqk - 0 1");
+        return Board::load_from_fen(STARTING_FEN);
     }
 
     auto board = Board();
