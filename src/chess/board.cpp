@@ -50,51 +50,7 @@ Board Board::load_from_fen(std::string fen)
                 index += std::stoi(character);
             }
             else {
-                auto ascii = (int)character.c_str()[0];
-                Piece piece = Piece();
-                switch (ascii) {
-                // Black
-                case 112: // p
-                    piece = Piece(PieceType::Pawn, Team::Black);
-                    break;
-                case 110: // n
-                    piece = Piece(PieceType::Knight, Team::Black);
-                    break;
-                case 98: // b
-                    piece = Piece(PieceType::Bishop, Team::Black);
-                    break;
-                case 114: // r
-                    piece = Piece(PieceType::Rook, Team::Black);
-                    break;
-                case 113: // q
-                    piece = Piece(PieceType::Queen, Team::Black);
-                    break;
-                case 107: // k
-                    piece = Piece(PieceType::King, Team::Black);
-                    break;
-
-                // White
-                case 80: // P
-                    piece = Piece(PieceType::Pawn, Team::White);
-                    break;
-                case 78: // N
-                    piece = Piece(PieceType::Knight, Team::White);
-                    break;
-                case 66: // B
-                    piece = Piece(PieceType::Bishop, Team::White);
-                    break;
-                case 82: // R
-                    piece = Piece(PieceType::Rook, Team::White);
-                    break;
-                case 81: // Q
-                    piece = Piece(PieceType::Queen, Team::White);
-                    break;
-                case 75: // K
-                    piece = Piece(PieceType::King, Team::White);
-                    break;
-                }
-
-                board.pieces[index] = piece;
+                board.pieces[index] = Piece(character.c_str()[0]);
                 index++;
             }
         }
