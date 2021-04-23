@@ -28,7 +28,7 @@ void Chess::initialize()
 
     keyboard = std::make_unique<dam::SmartKeyboard>();
 
-    board = Board::load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w QKqk - 0 1");
+    board = Board::load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
 
 void Chess::update()

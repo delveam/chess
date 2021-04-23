@@ -2,7 +2,7 @@
 #include <vector>
 #include "board.hpp"
 
-// ^((?:[pbnrqkPBNRQK1-8]+\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )Q?K?q?k? | - )((?:[a-h]{1}[36]{1})|-) (\d+) (\d+)$
+// ^((?:[pbnrqkPBNRQK1-8]+\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\d+) (\d+)$
 
 // Yoinked from: https://stackoverflow.com/a/46931770
 std::vector<std::string> split(std::string string, std::string delimiter)
@@ -32,7 +32,7 @@ Board::Board()
 
 Board Board::load_from_fen(std::string fen)
 {
-    if (!std::regex_match(fen, std::regex("^((?:[pbnrqkPBNRQK1-8]+\\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )Q?K?q?k? | - )((?:[a-h]{1}[36]{1})|-) (\\d+) (\\d+)$"))) {
+    if (!std::regex_match(fen, std::regex("^((?:[pbnrqkPBNRQK1-8]+\\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\\d+) (\\d+)$"))) {
         return Board::load_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w QKqk - 0 1");
     }
 
