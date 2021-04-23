@@ -27,7 +27,7 @@ std::vector<std::string> split(std::string string, std::string delimiter)
 
 Board::Board()
 {
-    pieces.fill({ utils::ChessPiece::None, utils::Player::Black });
+    pieces.fill(Piece());
 }
 
 Board Board::load_from_fen(std::string fen)
@@ -55,42 +55,42 @@ Board Board::load_from_fen(std::string fen)
                 switch (ascii) {
                 // Black
                 case 112: // p
-                    piece = Piece(utils::ChessPiece::Pawn, utils::Player::Black);
+                    piece = Piece(PieceType::Pawn, Team::Black);
                     break;
                 case 110: // n
-                    piece = Piece(utils::ChessPiece::Knight, utils::Player::Black);
+                    piece = Piece(PieceType::Knight, Team::Black);
                     break;
                 case 98: // b
-                    piece = Piece(utils::ChessPiece::Bishop, utils::Player::Black);
+                    piece = Piece(PieceType::Bishop, Team::Black);
                     break;
                 case 114: // r
-                    piece = Piece(utils::ChessPiece::Rook, utils::Player::Black);
+                    piece = Piece(PieceType::Rook, Team::Black);
                     break;
                 case 113: // q
-                    piece = Piece(utils::ChessPiece::Queen, utils::Player::Black);
+                    piece = Piece(PieceType::Queen, Team::Black);
                     break;
                 case 107: // k
-                    piece = Piece(utils::ChessPiece::King, utils::Player::Black);
+                    piece = Piece(PieceType::King, Team::Black);
                     break;
 
                 // White
                 case 80: // P
-                    piece = Piece(utils::ChessPiece::Pawn, utils::Player::White);
+                    piece = Piece(PieceType::Pawn, Team::White);
                     break;
                 case 78: // N
-                    piece = Piece(utils::ChessPiece::Knight, utils::Player::White);
+                    piece = Piece(PieceType::Knight, Team::White);
                     break;
                 case 66: // B
-                    piece = Piece(utils::ChessPiece::Bishop, utils::Player::White);
+                    piece = Piece(PieceType::Bishop, Team::White);
                     break;
                 case 82: // R
-                    piece = Piece(utils::ChessPiece::Rook, utils::Player::White);
+                    piece = Piece(PieceType::Rook, Team::White);
                     break;
                 case 81: // Q
-                    piece = Piece(utils::ChessPiece::Queen, utils::Player::White);
+                    piece = Piece(PieceType::Queen, Team::White);
                     break;
                 case 75: // K
-                    piece = Piece(utils::ChessPiece::King, utils::Player::White);
+                    piece = Piece(PieceType::King, Team::White);
                     break;
                 }
 

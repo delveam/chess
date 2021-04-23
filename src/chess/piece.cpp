@@ -2,11 +2,11 @@
 
 Piece::Piece()
 {
-    type = utils::ChessPiece::None;
-    team = utils::Player::White;
+    type = PieceType::None;
+    team = Team::White;
 }
 
-Piece::Piece(utils::ChessPiece type, utils::Player team)
+Piece::Piece(PieceType type, Team team)
 {
     this->type = type;
     this->team = team;

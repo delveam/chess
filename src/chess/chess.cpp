@@ -65,25 +65,25 @@ void Chess::draw()
 
             ALLEGRO_BITMAP* texture = NULL;
             switch (current.type) {
-            case utils::Pawn:
-                texture = current.team == utils::Player::White ? pawn_white : pawn_black;
+            case Pawn:
+                texture = current.team == Team::White ? pawn_white : pawn_black;
                 break;
-            case utils::Knight:
-                texture = current.team == utils::Player::White ? knight_white : knight_black;
+            case Knight:
+                texture = current.team == Team::White ? knight_white : knight_black;
                 break;
-            case utils::Bishop:
-                texture = current.team == utils::Player::White ? bishop_white : bishop_black;
+            case Bishop:
+                texture = current.team == Team::White ? bishop_white : bishop_black;
                 break;
-            case utils::Rook:
-                texture = current.team == utils::Player::White ? rook_white : rook_black;
+            case Rook:
+                texture = current.team == Team::White ? rook_white : rook_black;
                 break;
-            case utils::Queen:
-                texture = current.team == utils::Player::White ? queen_white : queen_black;
+            case Queen:
+                texture = current.team == Team::White ? queen_white : queen_black;
                 break;
-            case utils::King:
-                texture = current.team == utils::Player::White ? king_white : king_black;
+            case King:
+                texture = current.team == Team::White ? king_white : king_black;
                 break;
-            case utils::None:
+            case None:
                 break;
             }
 

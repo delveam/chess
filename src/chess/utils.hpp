@@ -1,5 +1,4 @@
-namespace utils {
-enum ChessPiece {
+enum PieceType {
     None = 0,
     Pawn = 1,
     Bishop = 2,
@@ -8,8 +7,8 @@ enum ChessPiece {
     Queen = 16,
     King = 32,
 };
-enum Player {
+
+enum Team {
     White = 0,
     Black = 1,
 };
-}
