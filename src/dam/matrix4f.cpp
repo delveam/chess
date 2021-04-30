@@ -28,7 +28,7 @@ dam::Matrix4F::Matrix4F(std::array<float, 16> data)
     rows = 4;
     columns = 4;
 
-    for (int i = 0; i < this->data.size(); ++i) {
+    for (int i = 0; i < (int)this->data.size(); ++i) {
         this->data[i] = data[i];
     }
 }
@@ -45,7 +45,7 @@ void dam::Matrix4F::set(unsigned int x, unsigned int y, float value)
 
 void dam::Matrix4F::set_data(std::array<float, 16> data)
 {
-    for (int i = 0; i < this->data.size(); ++i) {
+    for (int i = 0; i < (int)this->data.size(); ++i) {
         this->data[i] = data[i];
     }
 }
@@ -83,7 +83,7 @@ dam::Matrix4F dam::Matrix4F::add(dam::Matrix4F a, dam::Matrix4F b)
 {
     auto temp = a.data;
 
-    for (int i = 0; i < temp.size(); i++) {
+    for (int i = 0; i < (int)temp.size(); i++) {
         temp[i] += b.data[i];
     }
 
@@ -296,8 +296,8 @@ dam::Matrix4F dam::Matrix4F::create_scale(float x, float y, float z)
 
 void dam::Matrix4F::debug()
 {
-    for (int y = 0; y < columns; y++) {
-        for (int x = 0; x < rows; x++) {
+    for (int y = 0; y < (int)columns; y++) {
+        for (int x = 0; x < (int)rows; x++) {
             std::cout << get(x, y) << ", ";
         }
         std::cout << "\n";
