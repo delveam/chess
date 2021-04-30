@@ -1,16 +1,24 @@
-EXC = chess
-CC = g++
-FLAGS = -std=c++17 -Wall
-DEBUG_FLAGS = -g -O0
-RELEASE_FLAGS = -O3
-LIBRARIES = -lm $(shell pkg-config --cflags --libs allegro-5 allegro_primitives-5 allegro_font-5 allegro_audio-5 allegro_ttf-5 allegro_image-5 allegro_acodec-5 allegro_color-5)
+EXC := chess
+CC := g++
+FLAGS := -std=c++17 -Wall
+DEBUG_FLAGS := -g -O0
+RELEASE_FLAGS := -O3
+LIBRARIES := -lm $(shell pkg-config --cflags --libs allegro-5 allegro_primitives-5 allegro_font-5 allegro_audio-5 allegro_ttf-5 allegro_image-5 allegro_acodec-5 allegro_color-5)
 
-DEBUG_OBJECTS = $(shell find src/chess src/dam -name "*.cpp" | sed "s/^src/build\/debug/g;s/.cpp$//.o/g")
-RELEASE_OBJECTS = $(shell find src/chess src/dam -name "*.cpp" | sed "s/^src/build\/release/g;s/.cpp$//.o/g")
+DAM_SOURCES := $(shell find src/dam -name "*.cpp")
+DAM_HEADERS := $(shell find src/dam -name "*.hpp")
+DAM_DEBUG_OBJECTS := $(patsubst src/dam/%.cpp, build/debug/dam/%.o, $(DAM_SOURCES))
+DAM_RELEASE_OBJECTS := $(patsubst src/dam/%.cpp, build/release/dam/%.o, $(DAM_SOURCES))
 
-.PHONY: all clean debug dev format release dam_debug chess_debug
+CHESS_SOURCES := $(shell find src/chess -name "*.cpp")
+CHESS_HEADERS := $(shell find src/chess -name "*.hpp")
+CHESS_DEBUG_OBJECTS := $(patsubst src/chess/%.cpp, build/debug/chess/%.o, $(CHESS_SOURCES))
+CHESS_RELEASE_OBJECTS := $(patsubst src/chess/%.cpp, build/release/chess/%.o, $(CHESS_SOURCES))
 
-export CC FLAGS DEBUG_FLAGS RELEASE_FLAGS
+DEBUG_OBJECTS := $(DAM_DEBUG_OBJECTS) $(CHESS_DEBUG_OBJECTS)
+RELEASE_OBJECTS := $(DAM_RELEASE_OBJECTS) $(CHESS_RELEASE_OBJECTS)
+
+.PHONY: all clean debug dev format release
 
 all: clean release
 
@@ -23,7 +31,7 @@ build/debug: | build
 build/debug/dam: | build/debug
 	mkdir $@
 
-build/debug/chess : | build/debug
+build/debug/chess: | build/debug
 	mkdir $@
 
 build/release: | build
@@ -44,28 +52,28 @@ bin/debug: | bin
 bin/release: | bin
 	mkdir $@
 
-dam_debug: | build/debug/dam
-	make -f ./src/dam/dam.mk debug
+$(DAM_DEBUG_OBJECTS): build/debug/dam/%.o: src/dam/%.cpp $(DAM_HEADERS) | build/debug/dam
+	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
-chess_debug: dam_debug | build/debug/chess
-	make -f ./src/chess/chess.mk debug
+$(CHESS_DEBUG_OBJECTS): build/debug/chess/%.o: src/chess/%.cpp $(CHESS_HEADERS) | build/debug/chess
+	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
-dam_release: | build/release/dam
-	make -f ./src/dam/dam.mk release
-
-chess_release: dam_release | build/release/chess
-	make -f ./src/chess/chess.mk release
-
-build/debug/chess/$(EXC): chess_debug | build/debug/chess
-	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ $(DEBUG_OBJECTS) $(LIBRARIES)
+build/debug/chess/$(EXC): $(DEBUG_OBJECTS) | build/debug/chess
+	$(CC) $(FLAGS) $(DEBUG_FLAGS) -o $@ $^ $(LIBRARIES)
 
 debug: build/debug/chess/$(EXC) | bin/debug
 	rm -rf bin/debug/*
 	cp -r ./content ./bin/debug
 	cp $< ./bin/debug
 
-build/release/chess/$(EXC): dam_release chess_release | build/release/chess
-	$(CC) $(FLAGS) $(RELEASE_FLAGS) -o $@ $(RELEASE_OBJECTS) $(LIBRARIES)
+$(DAM_RELEASE_OBJECTS): build/release/dam/%.o: src/dam/%.cpp $(DAM_HEADERS) | build/release/dam
+	$(CC) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
+
+$(CHESS_RELEASE_OBJECTS): build/release/chess/%.o: src/chess/%.cpp $(CHESS_HEADERS) | build/release/chess
+	$(CC) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
+
+build/release/chess/$(EXC): $(RELEASE_OBJECTS) | build/release/chess
+	$(CC) $(FLAGS) $(RELEASE_FLAGS) -o $@ $^ $(LIBRARIES)
 
 release: build/release/chess/$(EXC) | bin/release
 	rm -rf bin/release/*
