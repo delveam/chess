@@ -49,11 +49,10 @@ void Chess::draw()
 {
     dam::clear(dam::palette::BLACK);
 
-    auto board_size = 8;
     auto size = 60;
-    auto offset = (640 - board_size * size) / 2;
-    for (int y = 0; y < board_size; ++y) {
-        for (int x = 0; x < board_size; ++x) {
+    auto offset = (640 - BOARD_WIDTH * size) / 2;
+    for (int y = 0; y < BOARD_HEIGHT; ++y) {
+        for (int x = 0; x < BOARD_WIDTH; ++x) {
             auto color = dam::Color(0x769656);
             if ((x + y) % 2 == 0) {
                 color = dam::Color(0xeeeed2);
@@ -63,9 +62,9 @@ void Chess::draw()
         }
     }
 
-    for (int y = 0; y < board_size; ++y) {
-        for (int x = 0; x < board_size; ++x) {
-            auto index = board_flipped ? (7 - y) * board_size + (7 - x) : y * board_size + x;
+    for (int y = 0; y < BOARD_HEIGHT; ++y) {
+        for (int x = 0; x < BOARD_WIDTH; ++x) {
+            auto index = board_flipped ? ((BOARD_HEIGHT - 1) - y) * BOARD_WIDTH + ((BOARD_WIDTH - 1) - x) : y * BOARD_WIDTH + x;
             auto current = board.pieces[index];
 
             ALLEGRO_BITMAP* texture = NULL;
