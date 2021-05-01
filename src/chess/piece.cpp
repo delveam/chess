@@ -74,3 +74,41 @@ Piece::Piece(char piece)
         break;
     }
 }
+
+std::string Piece::to_string()
+{
+    auto temp = '?';
+    switch(type) {
+    case Pawn:
+        temp = 'p';
+        break;
+    case Bishop:
+        temp = 'b';
+        break;
+    case Knight:
+        temp = 'n';
+        break;
+    case Rook:
+        temp = 'r';
+        break;
+    case Queen:
+        temp = 'q';
+        break;
+    case King:
+        temp = 'k';
+        break;
+    case None:
+        break;
+    }
+
+    if (team == Team::White) {
+        temp = toupper(temp);
+    }
+
+    std::string result = "";
+    if (temp != '?') {
+        result.push_back(temp);
+    }
+
+    return result;
+}
