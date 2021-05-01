@@ -29,6 +29,7 @@ void Chess::initialize()
     keyboard = std::make_unique<dam::SmartKeyboard>();
 
     board = Board::load_from_fen(STARTING_FEN);
+    board_flipped = false;
 }
 
 void Chess::update()
@@ -37,6 +38,10 @@ void Chess::update()
 
     if (keyboard->pressed(ALLEGRO_KEY_ESCAPE)) {
         loop = false;
+    }
+
+    if (keyboard->pressed(ALLEGRO_KEY_F)) {
+        board_flipped = !board_flipped;
     }
 }
 
@@ -60,7 +65,7 @@ void Chess::draw()
 
     for (int y = 0; y < board_size; ++y) {
         for (int x = 0; x < board_size; ++x) {
-            auto index = y * board_size + x;
+            auto index = board_flipped ? (7 - y) * board_size + (7 - x) : y * board_size + x;
             auto current = board.pieces[index];
 
             ALLEGRO_BITMAP* texture = NULL;

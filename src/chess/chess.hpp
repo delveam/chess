@@ -30,6 +30,7 @@ private:
     ALLEGRO_BITMAP* queen_white;
     ALLEGRO_BITMAP* king_white;
     Board board;
+    bool board_flipped;
 
     std::unique_ptr<dam::SmartKeyboard> keyboard;
 
