@@ -51,6 +51,8 @@ void Chess::draw()
 
     auto size = 60;
     auto offset = (640 - BOARD_WIDTH * size) / 2;
+
+    // Draw board.
     for (int y = 0; y < BOARD_HEIGHT; ++y) {
         for (int x = 0; x < BOARD_WIDTH; ++x) {
             auto color = dam::Color(0x769656);
@@ -62,6 +64,25 @@ void Chess::draw()
         }
     }
 
+    // Draw algebraic notations.
+    for (int x = 0; x < BOARD_WIDTH; ++x) {
+        auto color = x % 2 == 0 ? dam::Color(0xeeeed2) : dam::Color(0x769656);
+        std::string text = "";
+        auto temp = !board_flipped ? 'a' + x : 'a' + (BOARD_WIDTH - 1 - x);
+        text.push_back(temp);
+
+        dam::draw_text(offset + x * size + 4, (BOARD_HEIGHT - 1) * size + 48, text, font, color);
+    }
+    for (int y = 0; y < BOARD_HEIGHT; ++y) {
+        auto color = y % 2 == 0 ? dam::Color(0xeeeed2) : dam::Color(0x769656);
+        std::string text = "";
+        auto temp = !board_flipped ? '1' + (BOARD_HEIGHT - 1 - y) : '1' + y;
+        text.push_back(temp);
+
+        dam::draw_text(offset + (BOARD_WIDTH - 1) * size + 48, y * size + 4, text, font, color);
+    }
+
+    // Draw pieces.
     for (int y = 0; y < BOARD_HEIGHT; ++y) {
         for (int x = 0; x < BOARD_WIDTH; ++x) {
             auto index = board_flipped ? ((BOARD_HEIGHT - 1) - y) * BOARD_WIDTH + ((BOARD_WIDTH - 1) - x) : y * BOARD_WIDTH + x;
