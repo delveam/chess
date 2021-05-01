@@ -4,10 +4,15 @@
 #include <string>
 #include "piece.hpp"
 
+const int BOARD_WIDTH = 8;
+const int BOARD_HEIGHT = 8;
+
 class Board {
 public:
     Board();
-    std::array<Piece, 64> pieces;
+    std::array<Piece, BOARD_WIDTH * BOARD_HEIGHT> pieces;
+    Piece get(std::string coordinates);
+    Piece get(unsigned int x, unsigned int y);
     static Board load_from_fen(std::string fen);
 };
 

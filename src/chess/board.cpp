@@ -30,6 +30,22 @@ Board::Board()
     pieces.fill(Piece());
 }
 
+Piece Board::get(std::string coordinates)
+{
+    char temp = coordinates.substr(0, 1).c_str()[0];
+    temp = tolower(temp);
+
+    int column = 8 - ((int)'h' - (int)temp) - 1;
+    int row = 8 - std::stoi(coordinates.substr(1, 2));
+
+    return pieces.at(row * BOARD_WIDTH + column);
+}
+
+Piece Board::get(unsigned int x, unsigned int y)
+{
+    return pieces.at(y * BOARD_WIDTH + x);
+}
+
 Board Board::load_from_fen(std::string fen)
 {
     if (!std::regex_match(fen, std::regex("^((?:[pbnrqkPBNRQK1-8]+\\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\\d+) (\\d+)$"))) {
