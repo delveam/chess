@@ -1,5 +1,7 @@
 #ifndef APP_HPP
 #define APP_HPP
+#include "context.hpp"
+
 namespace dam {
 class App;
 }
@@ -8,9 +10,9 @@ class dam::App {
 public:
     App();
     bool loop;
-    virtual void initialize() = 0;
-    virtual void update() = 0;
-    virtual void draw() = 0;
-    virtual void destroy() = 0;
+    virtual void initialize(Context& ctx) = 0;
+    virtual void update(Context& ctx) = 0;
+    virtual void draw(Context& ctx) = 0;
+    virtual void destroy(Context& ctx) = 0;
 };
 #endif

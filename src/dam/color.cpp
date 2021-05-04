@@ -1,6 +1,6 @@
 #include "color.hpp"
 
-dam::Color::Color()
+dam::graphics::Color::Color()
 {
     r = 0;
     g = 0;
@@ -8,7 +8,7 @@ dam::Color::Color()
     a = 1;
 }
 
-dam::Color::Color(unsigned int hexadecimal, float alpha)
+dam::graphics::Color::Color(unsigned int hexadecimal, float alpha)
 {
     r = (hexadecimal & 0xff0000) >> 16;
     g = (hexadecimal & 0xff00) >> 8;
@@ -18,7 +18,7 @@ dam::Color::Color(unsigned int hexadecimal, float alpha)
     multiply(alpha);
 }
 
-void dam::Color::multiply(float value)
+void dam::graphics::Color::multiply(float value)
 {
     r = r * value;
     g = g * value;

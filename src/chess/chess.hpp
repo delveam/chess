@@ -3,37 +3,32 @@
 #include <allegro5/allegro_font.h>
 #include <iostream>
 #include "../dam/app.hpp"
-#include "../dam/dam.hpp"
-#include "../dam/smart_keyboard.hpp"
+#include "../dam/graphics.hpp"
 #include "board.hpp"
 
 class Chess : public dam::App {
 public:
     Chess();
-    void initialize() override;
-    void update() override;
-    void draw() override;
-    void destroy() override;
+    void initialize(dam::Context& ctx) override;
+    void update(dam::Context& ctx) override;
+    void draw(dam::Context& ctx) override;
+    void destroy(dam::Context& ctx) override;
     ~Chess();
 private:
-    ALLEGRO_FONT* font;
-    ALLEGRO_BITMAP* pawn_black;
-    ALLEGRO_BITMAP* bishop_black;
-    ALLEGRO_BITMAP* knight_black;
-    ALLEGRO_BITMAP* rook_black;
-    ALLEGRO_BITMAP* queen_black;
-    ALLEGRO_BITMAP* king_black;
-    ALLEGRO_BITMAP* pawn_white;
-    ALLEGRO_BITMAP* bishop_white;
-    ALLEGRO_BITMAP* knight_white;
-    ALLEGRO_BITMAP* rook_white;
-    ALLEGRO_BITMAP* queen_white;
-    ALLEGRO_BITMAP* king_white;
+    dam::graphics::Font* font;
+    dam::graphics::Texture* pawn_black;
+    dam::graphics::Texture* bishop_black;
+    dam::graphics::Texture* knight_black;
+    dam::graphics::Texture* rook_black;
+    dam::graphics::Texture* queen_black;
+    dam::graphics::Texture* king_black;
+    dam::graphics::Texture* pawn_white;
+    dam::graphics::Texture* bishop_white;
+    dam::graphics::Texture* knight_white;
+    dam::graphics::Texture* rook_white;
+    dam::graphics::Texture* queen_white;
+    dam::graphics::Texture* king_white;
     Board board;
     bool board_flipped;
-
-    std::unique_ptr<dam::SmartKeyboard> keyboard;
-
-
 };
 #endif

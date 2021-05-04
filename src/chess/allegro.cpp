@@ -46,7 +46,17 @@ void Allegro::run(dam::App& app)
     bool should_close = false;
     bool redraw = true;
 
-    app.initialize();
+    auto ctx = dam::Context();
+    ctx.display = disp;
+
+    ALLEGRO_MONITOR_INFO* monitor_info;
+    al_get_monitor_info(0, monitor_info);
+
+    ctx.display_width = monitor_info->x2 - monitor_info->x1;
+    ctx.display_height= monitor_info->y2 - monitor_info->y1;
+    ctx.keyboard = dam::input::SmartKeyboard();
+
+    app.initialize(ctx);
 
     al_start_timer(timer);
     while(!should_close) {
@@ -54,7 +64,8 @@ void Allegro::run(dam::App& app)
 
         switch(event.type) {
         case ALLEGRO_EVENT_TIMER:
-            app.update();
+            ctx.keyboard.update();
+            app.update(ctx);
             redraw = true;
             if (!app.loop) {
                 should_close = true;
@@ -67,13 +78,13 @@ void Allegro::run(dam::App& app)
         }
 
         if(redraw && al_is_event_queue_empty(queue)) {
-            app.draw();
+            app.draw(ctx);
             al_flip_display();
             redraw = false;
         }
     }
 
-    app.destroy();
+    app.destroy(ctx);
 
     al_destroy_display(disp);
     al_destroy_timer(timer);

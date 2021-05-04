@@ -1,17 +1,17 @@
 #include "keyboard_state.hpp"
 
-dam::KeyboardState::KeyboardState()
+dam::input::KeyboardState::KeyboardState()
 {
     state = std::make_unique<ALLEGRO_KEYBOARD_STATE>();
     al_get_keyboard_state(state.get());
 }
 
-bool dam::KeyboardState::is_key_down(int key)
+bool dam::input::KeyboardState::is_key_down(dam::input::Key key)
 {
     return al_key_down(state.get(), key);
 }
 
-bool dam::KeyboardState::is_key_up(int key)
+bool dam::input::KeyboardState::is_key_up(dam::input::Key key)
 {
     return !al_key_down(state.get(), key);
 }

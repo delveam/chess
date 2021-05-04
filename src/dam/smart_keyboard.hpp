@@ -3,17 +3,19 @@
 #include "keyboard_state.hpp"
 
 namespace dam {
+namespace input {
 class SmartKeyboard;
 }
+}
 
-class dam::SmartKeyboard {
+class dam::input::SmartKeyboard {
 public:
     SmartKeyboard();
-    bool pressed(int key);
-    bool pressing(int key);
+    bool pressed(dam::input::Key key);
+    bool pressing(dam::input::Key key);
     void update();
 private:
-    dam::KeyboardState previous;
-    dam::KeyboardState current;
+    dam::input::KeyboardState previous;
+    dam::input::KeyboardState current;
 };
 #endif

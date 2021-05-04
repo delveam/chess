@@ -1,10 +1,12 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 namespace dam {
+namespace graphics {
 class Color;
 }
+}
 
-class dam::Color {
+class dam::graphics::Color {
 public:
     Color();
     Color(unsigned int hexadecimal, float alpha=1);
