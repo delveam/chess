@@ -56,14 +56,13 @@ void Chess::draw(dam::Context& ctx)
 
     auto size = 60;
     auto offset = (640 - BOARD_WIDTH * size) / 2;
+    auto light_color = Color(0xeeeed2);
+    auto dark_color = Color(0x769656);
 
     // Draw board.
     for (int y = 0; y < BOARD_HEIGHT; ++y) {
         for (int x = 0; x < BOARD_WIDTH; ++x) {
-            auto color = Color(0x769656);
-            if ((x + y) % 2 == 0) {
-                color = Color(0xeeeed2);
-            }
+            auto color = (x + y) % 2 == 0 ? light_color : dark_color;
 
             auto params = DrawParams();
             params.set_positon(offset + x * size, y * size);
@@ -75,7 +74,7 @@ void Chess::draw(dam::Context& ctx)
 
     // Draw algebraic notations.
     for (int x = 0; x < BOARD_WIDTH; ++x) {
-        auto color = x % 2 == 0 ? Color(0xeeeed2) : Color(0x769656);
+        auto color = x % 2 == 0 ? light_color : dark_color;
         auto temp = !board_flipped ? 'a' + x : 'a' + (BOARD_WIDTH - 1 - x);
         std::string text = "";
         text.push_back(temp);
@@ -86,7 +85,7 @@ void Chess::draw(dam::Context& ctx)
         draw_text(ctx, text, font, params);
     }
     for (int y = 0; y < BOARD_HEIGHT; ++y) {
-        auto color = y % 2 == 0 ? Color(0xeeeed2) : Color(0x769656);
+        auto color = y % 2 == 0 ? light_color : dark_color;
         auto temp = !board_flipped ? '1' + (BOARD_HEIGHT - 1 - y) : '1' + y;
         std::string text = "";
         text.push_back(temp);
