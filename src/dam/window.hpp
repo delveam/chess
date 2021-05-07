@@ -1,5 +1,5 @@
-#ifndef WINDOW_HPP
-#define WINDOW_HPP
+#ifndef DAM_WINDOW_HPP
+#define DAM_WINDOW_HPP
 #include "context.hpp"
 
 namespace dam {

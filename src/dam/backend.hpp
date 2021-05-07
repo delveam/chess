@@ -1,5 +1,5 @@
-#ifndef BACKEND_HPP
-#define BACKEND_HPP
+#ifndef DAM_BACKEND_HPP
+#define DAM_BACKEND_HPP
 #include "app.hpp"
 
 namespace dam {

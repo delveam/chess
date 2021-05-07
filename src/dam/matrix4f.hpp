@@ -1,5 +1,5 @@
-#ifndef MATRIX4_HPP
-#define MATRIX4_HPP
+#ifndef DAM_MATRIX4_HPP
+#define DAM_MATRIX4_HPP
 #include <array>
 
 namespace dam {

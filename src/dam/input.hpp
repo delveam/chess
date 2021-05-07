@@ -1,5 +1,5 @@
-#ifndef INPUT_HPP
-#define INPUT_HPP
+#ifndef DAM_INPUT_HPP
+#define DAM_INPUT_HPP
 #include "context.hpp"
 #include "key.hpp"
 #include "keyboard_state.hpp"

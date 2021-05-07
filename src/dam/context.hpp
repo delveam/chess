@@ -1,5 +1,5 @@
-#ifndef CONTEXT_HPP
-#define CONTEXT_HPP
+#ifndef DAM_CONTEXT_HPP
+#define DAM_CONTEXT_HPP
 #include <allegro5/allegro5.h>
 #include <string>
 #include "smart_keyboard.hpp"

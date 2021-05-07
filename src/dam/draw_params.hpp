@@ -1,5 +1,5 @@
-#ifndef DRAW_PARAMS_HPP
-#define DRAW_PARAMS_HPP
+#ifndef DAM_DRAW_PARAMS_HPP
+#define DAM_DRAW_PARAMS_HPP
 #include <tuple>
 #include "color.hpp"
 #include "vector2f.hpp"

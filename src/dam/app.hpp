@@ -1,5 +1,5 @@
-#ifndef APP_HPP
-#define APP_HPP
+#ifndef DAM_APP_HPP
+#define DAM_APP_HPP
 #include "context.hpp"
 
 namespace dam {

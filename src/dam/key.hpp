@@ -1,5 +1,5 @@
-#ifndef KEY_HPP
-#define KEY_HPP
+#ifndef DAM_KEY_HPP
+#define DAM_KEY_HPP
 #include <allegro5/allegro.h>
 
 namespace dam {

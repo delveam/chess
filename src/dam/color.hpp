@@ -1,5 +1,5 @@
-#ifndef COLOR_HPP
-#define COLOR_HPP
+#ifndef DAM_COLOR_HPP
+#define DAM_COLOR_HPP
 namespace dam {
 namespace graphics {
 class Color;

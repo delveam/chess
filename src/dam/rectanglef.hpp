@@ -1,5 +1,5 @@
-#ifndef RECTANGLE_HPP
-#define RECTANGLE_HPP
+#ifndef DAM_RECTANGLE_HPP
+#define DAM_RECTANGLE_HPP
 namespace dam {
 class RectangleF;
 }

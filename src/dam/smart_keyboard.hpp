@@ -1,5 +1,5 @@
-#ifndef SMART_KEYBOARD_HPP
-#define SMART_KEYBOARD_HPP
+#ifndef DAM_SMART_KEYBOARD_HPP
+#define DAM_SMART_KEYBOARD_HPP
 #include "keyboard_state.hpp"
 
 namespace dam {

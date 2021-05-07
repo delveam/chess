@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_HPP
-#define GRAPHICS_HPP
+#ifndef DAM_GRAPHICS_HPP
+#define DAM_GRAPHICS_HPP
 #include <allegro5/allegro_font.h>
 #include "color.hpp"
 #include "context.hpp"

@@ -1,5 +1,5 @@
-#ifndef VECTOR2F_HPP
-#define VECTOR2F_HPP
+#ifndef DAM_VECTOR2F_HPP
+#define DAM_VECTOR2F_HPP
 namespace dam {
 class Vector2F;
 }

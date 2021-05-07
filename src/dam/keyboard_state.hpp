@@ -1,5 +1,5 @@
-#ifndef KEBOARD_STATE_HPP
-#define KEBOARD_STATE_HPP
+#ifndef DAM_KEBOARD_STATE_HPP
+#define DAM_KEBOARD_STATE_HPP
 #include <allegro5/allegro5.h>
 #include <memory>
 #include "key.hpp"

@@ -1,5 +1,5 @@
-#ifndef PALETTE_HPP
-#define PALETTE_HPP
+#ifndef DAM_PALETTE_HPP
+#define DAM_PALETTE_HPP
 #include "color.hpp"
 
 namespace dam {
