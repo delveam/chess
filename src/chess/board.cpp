@@ -40,6 +40,23 @@ Piece Board::get(unsigned int x, unsigned int y)
     return pieces.at(y * BOARD_WIDTH + x);
 }
 
+void Board::move_uci(std::string notation)
+{
+    // TODO: handle promotions (handle a fifth character).
+
+    auto start_index = Board::parse_coordinates(notation.substr(0, 2));
+    auto end_index = Board::parse_coordinates(notation.substr(2, 4));
+
+    if (start_index == -1 || end_index == -1) {
+        return;
+    }
+
+    auto previous = pieces.at(start_index);
+
+    pieces.at(start_index) = Piece();
+    pieces.at(end_index) = previous;
+}
+
 Board Board::load_from_fen(std::string fen)
 {
     if (!std::regex_match(fen, std::regex("^((?:[pbnrqkPBNRQK1-8]+\\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\\d+) (\\d+)$"))) {
