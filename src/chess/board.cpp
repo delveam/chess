@@ -32,13 +32,7 @@ Board::Board()
 
 Piece Board::get(std::string coordinates)
 {
-    char temp = coordinates.substr(0, 1).c_str()[0];
-    temp = tolower(temp);
-
-    int column = 8 - ((int)'h' - (int)temp) - 1;
-    int row = 8 - std::stoi(coordinates.substr(1, 2));
-
-    return pieces.at(row * BOARD_WIDTH + column);
+    return pieces.at(Board::parse_coordinates(coordinates));
 }
 
 Piece Board::get(unsigned int x, unsigned int y)
