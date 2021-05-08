@@ -14,6 +14,7 @@ public:
     Piece get(std::string coordinates);
     Piece get(unsigned int x, unsigned int y);
     static Board load_from_fen(std::string fen);
+    static int parse_coordinates(std::string coordinates);
 };
 
 #endif

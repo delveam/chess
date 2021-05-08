@@ -74,3 +74,18 @@ Board Board::load_from_fen(std::string fen)
 
     return board;
 }
+
+int Board::parse_coordinates(std::string coordinates)
+{
+    if (!std::regex_match(coordinates, std::regex("[a-h]{1}[1-8]{1}"))) {
+        return -1;
+    }
+
+    char temp = coordinates.substr(0, 1).c_str()[0];
+    temp = tolower(temp);
+
+    int column = BOARD_WIDTH - ((int)'h' - (int)temp) - 1;
+    int row = BOARD_HEIGHT - std::stoi(coordinates.substr(1, 2));
+
+    return row * BOARD_WIDTH + column;
+}
