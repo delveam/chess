@@ -27,7 +27,10 @@ void Allegro::run(dam::App& app)
         return;
     }
 
-    ALLEGRO_DISPLAY* disp = al_create_display(640, 480);
+    // TODO: We need a better way to set this...
+    auto default_window_width = 640;
+    auto default_window_height = 480;
+    ALLEGRO_DISPLAY* disp = al_create_display(default_window_width, default_window_height);
     if(!disp) {
         std::cout << "Couldn't initialize display.\n";
         return;
@@ -49,11 +52,20 @@ void Allegro::run(dam::App& app)
     auto ctx = dam::Context();
     ctx.display = disp;
 
-    ALLEGRO_MONITOR_INFO* monitor_info;
-    al_get_monitor_info(0, monitor_info);
+    if (al_get_num_video_adapters() > 0) {
+        ALLEGRO_MONITOR_INFO* monitor_info;
+        al_get_monitor_info(0, monitor_info);
+        ctx.display_width = monitor_info->x2 - monitor_info->x1;
+        ctx.display_height= monitor_info->y2 - monitor_info->y1;
+    }
+    else {
+        // It looks like we cannot determine the display's dimensions.
+        // Until we can figure out a workaround, just set the display's dimensions to
+        // the initial window's dimensions.
+        ctx.display_width = default_window_width;
+        ctx.display_height= default_window_height;
+    }
 
-    ctx.display_width = monitor_info->x2 - monitor_info->x1;
-    ctx.display_height= monitor_info->y2 - monitor_info->y1;
     ctx.keyboard = dam::input::SmartKeyboard();
 
     app.initialize(ctx);
