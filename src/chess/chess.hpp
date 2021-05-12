@@ -16,18 +16,7 @@ public:
     ~Chess();
 private:
     dam::graphics::Font* font;
-    dam::graphics::Texture* pawn_black;
-    dam::graphics::Texture* bishop_black;
-    dam::graphics::Texture* knight_black;
-    dam::graphics::Texture* rook_black;
-    dam::graphics::Texture* queen_black;
-    dam::graphics::Texture* king_black;
-    dam::graphics::Texture* pawn_white;
-    dam::graphics::Texture* bishop_white;
-    dam::graphics::Texture* knight_white;
-    dam::graphics::Texture* rook_white;
-    dam::graphics::Texture* queen_white;
-    dam::graphics::Texture* king_white;
+    dam::graphics::Texture* pieces;
     Board board;
     bool board_flipped;
 };
