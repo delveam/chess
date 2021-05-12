@@ -3,8 +3,11 @@
 dam::graphics::DrawParams::DrawParams()
 {
     position = Vector2F(0, 0);
-    color = Color(0xffffff);
-    dimension = std::make_tuple(0, 0);
+    center = Vector2F(0, 0);
+    scale = Vector2F(1, 1);
+    angle = 0;
+    tint = Color(0xffffff);
+    region = RectangleF(0, 0, 0, 0);
 }
 
 dam::graphics::DrawParams* dam::graphics::DrawParams::set_positon(float x, float y)
@@ -15,17 +18,38 @@ dam::graphics::DrawParams* dam::graphics::DrawParams::set_positon(float x, float
     return this;
 }
 
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_color(Color color)
+dam::graphics::DrawParams* dam::graphics::DrawParams::set_center(float x, float y)
 {
-    this->color = color;
+    center.x = x;
+    center.y = y;
 
     return this;
 }
 
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_dimension(float width, float height)
+dam::graphics::DrawParams* dam::graphics::DrawParams::set_scale(float x, float y)
 {
-    std::get<0>(dimension) = width;
-    std::get<1>(dimension) = height;
+    scale.x = x;
+    scale.y = y;
+
+    return this;
+}
+
+dam::graphics::DrawParams* dam::graphics::DrawParams::set_angle(float angle)
+{
+    this->angle = angle;
+    return this;
+}
+
+dam::graphics::DrawParams* dam::graphics::DrawParams::set_tint(Color tint)
+{
+    this->tint = tint;
+
+    return this;
+}
+
+dam::graphics::DrawParams* dam::graphics::DrawParams::set_region(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
+{
+    this->region = RectangleF(x, y, width, height);
 
     return this;
 }
