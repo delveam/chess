@@ -36,36 +36,55 @@ void dam::graphics::draw_rectangle(Context& ctx, DrawParams params)
 {
     auto x = params.position.x;
     auto y = params.position.y;
-    auto width = std::get<0>(params.dimension);
-    auto height = std::get<1>(params.dimension);
-    auto color = convert_dam_color(params.color);
+    auto width = params.scale.x;
+    auto height = params.scale.y;
+    auto tint = convert_dam_color(params.tint);
 
-    al_draw_filled_rectangle(x, y, x + width, y + height, color);
+    al_draw_filled_rectangle(x, y, x + width, y + height, tint);
 }
 
 void dam::graphics::draw_circle(Context& ctx, DrawParams params)
 {
     auto x = params.position.x;
     auto y = params.position.y;
-    auto width = std::get<0>(params.dimension);
-    auto color = convert_dam_color(params.color);
+    auto width = params.scale.x;
+    auto tint = convert_dam_color(params.tint);
 
-    al_draw_filled_circle(x, y, width * 0.5, color);
+    al_draw_filled_circle(x, y, width * 0.5, tint);
 }
 
 void dam::graphics::draw_texture(Context& ctx, Texture* texture, DrawParams params)
 {
+    auto subregion_x = params.region.x;
+    auto subregion_y = params.region.y;
+    auto subregion_width = params.region.width;
+    auto subregion_height = params.region.height;
+    auto tint = convert_dam_color(params.tint);
+    auto center_x = params.center.x;
+    auto center_y = params.center.y;
     auto x = params.position.x;
     auto y = params.position.y;
+    auto scale_x = params.scale.x;
+    auto scale_y = params.scale.y;
+    auto angle = params.angle;
 
-    al_draw_bitmap(texture, x, y, 0);
+    al_draw_tinted_scaled_rotated_bitmap_region(
+        texture,
+        subregion_x, subregion_y, subregion_width, subregion_height,
+        tint,
+        center_x, center_y,
+        x, y,
+        scale_x, scale_y,
+        angle,
+        0
+    );
 }
 
 void dam::graphics::draw_text(Context& ctx, std::string text, Font* font, DrawParams params)
 {
     auto x = params.position.x;
     auto y = params.position.y;
-    auto color = convert_dam_color(params.color);
+    auto tint = convert_dam_color(params.tint);
 
-    al_draw_text(font, color, x, y, 0, text.c_str());
+    al_draw_text(font, tint, x, y, 0, text.c_str());
 }
