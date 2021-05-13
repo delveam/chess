@@ -52,11 +52,10 @@ void Allegro::run(dam::App& app)
     auto ctx = dam::Context();
     ctx.display = disp;
 
-    if (al_get_num_video_adapters() > 0) {
-        ALLEGRO_MONITOR_INFO* monitor_info;
-        al_get_monitor_info(0, monitor_info);
+    ALLEGRO_MONITOR_INFO* monitor_info;
+    if (al_get_monitor_info(0, monitor_info)) {
         ctx.display_width = monitor_info->x2 - monitor_info->x1;
-        ctx.display_height= monitor_info->y2 - monitor_info->y1;
+        ctx.display_height = monitor_info->y2 - monitor_info->y1;
     }
     else {
         // It looks like we cannot determine the display's dimensions.
