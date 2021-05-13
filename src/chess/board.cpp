@@ -92,11 +92,11 @@ int Board::parse_coordinates(std::string coordinates)
         return -1;
     }
 
-    char temp = coordinates.substr(0, 1).c_str()[0];
+    auto temp = coordinates.substr(0, 1).c_str()[0];
     temp = tolower(temp);
 
-    int column = BOARD_WIDTH - ((int)'h' - (int)temp) - 1;
-    int row = BOARD_HEIGHT - std::stoi(coordinates.substr(1, 2));
+    auto column = BOARD_WIDTH - ((int)'h' - (int)temp) - 1;
+    auto row = BOARD_HEIGHT - std::stoi(coordinates.substr(1, 2));
 
     return row * BOARD_WIDTH + column;
 }

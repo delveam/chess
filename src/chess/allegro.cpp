@@ -59,8 +59,8 @@ void Allegro::run(dam::App& app)
     al_register_event_source(queue, al_get_timer_event_source(timer));
 
     ALLEGRO_EVENT event;
-    bool should_close = false;
-    bool redraw = true;
+    auto should_close = false;
+    auto redraw = true;
 
     auto ctx = dam::Context();
     ctx.display = disp;
