@@ -2,7 +2,7 @@
 
 const std::string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-enum PieceType {
+enum class PieceType {
     None = 0,
     Pawn = 1,
     Bishop = 2,
@@ -12,7 +12,7 @@ enum PieceType {
     King = 32,
 };
 
-enum Team {
+enum class Team {
     White = 0,
     Black = 1,
 };

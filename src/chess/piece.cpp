@@ -79,25 +79,25 @@ std::string Piece::to_string()
 {
     auto temp = '?';
     switch(type) {
-    case Pawn:
+    case PieceType::Pawn:
         temp = 'p';
         break;
-    case Bishop:
+    case PieceType::Bishop:
         temp = 'b';
         break;
-    case Knight:
+    case PieceType::Knight:
         temp = 'n';
         break;
-    case Rook:
+    case PieceType::Rook:
         temp = 'r';
         break;
-    case Queen:
+    case PieceType::Queen:
         temp = 'q';
         break;
-    case King:
+    case PieceType::King:
         temp = 'k';
         break;
-    case None:
+    case PieceType::None:
         break;
     }
 

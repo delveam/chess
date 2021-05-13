@@ -96,24 +96,24 @@ void Chess::draw(dam::Context& ctx)
 
             auto subregion_x = 0;
             switch (current.type) {
-            case Pawn:
+            case PieceType::Pawn:
                 break;
-            case Bishop:
+            case PieceType::Bishop:
                 subregion_x = 16;
                 break;
-            case Knight:
+            case PieceType::Knight:
                 subregion_x = 32;
                 break;
-            case Rook:
+            case PieceType::Rook:
                 subregion_x = 48;
                 break;
-            case Queen:
+            case PieceType::Queen:
                 subregion_x = 64;
                 break;
-            case King:
+            case PieceType::King:
                 subregion_x = 80;
                 break;
-            case None:
+            case PieceType::None:
                 break;
             }
 

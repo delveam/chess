@@ -4,7 +4,7 @@
 
 namespace dam {
 namespace input {
-enum Key {
+enum class Key {
     A = ALLEGRO_KEY_A,
     B = ALLEGRO_KEY_B,
     C = ALLEGRO_KEY_C,
