@@ -29,11 +29,11 @@ void Chess::update(dam::Context& ctx)
 {
     using namespace dam::input;
 
-    if (Keyboard::pressed(ctx, dam::input::Key::Escape)) {
+    if (Keyboard::pressed(ctx, Key::Escape)) {
         loop = false;
     }
 
-    if (Keyboard::pressed(ctx, dam::input::Key::F)) {
+    if (Keyboard::pressed(ctx, Key::F)) {
         board_flipped = !board_flipped;
     }
 }
