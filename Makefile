@@ -64,6 +64,7 @@ build/debug/chess/$(EXC): $(DEBUG_OBJECTS) | build/debug/chess
 debug: build/debug/chess/$(EXC) | bin/debug
 	rm -rf bin/debug/*
 	cp -r ./content ./bin/debug
+	mv ./bin/debug/content/config.cfg ./bin/debug
 	cp $< ./bin/debug
 
 $(DAM_RELEASE_OBJECTS): build/release/dam/%.o: src/dam/%.cpp $(DAM_HEADERS) | build/release/dam
@@ -78,6 +79,7 @@ build/release/chess/$(EXC): $(RELEASE_OBJECTS) | build/release/chess
 release: build/release/chess/$(EXC) | bin/release
 	rm -rf bin/release/*
 	cp -r ./content ./bin/release
+	mv ./bin/release/content/config.cfg ./bin/release
 	cp $< ./bin/release
 
 dev: debug

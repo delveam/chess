@@ -27,9 +27,22 @@ void Allegro::run(dam::App& app)
         return;
     }
 
-    // TODO: We need a better way to set this...
     auto default_window_width = 640;
-    auto default_window_height = 480;
+    auto default_window_height = 360;
+
+    ALLEGRO_CONFIG* config = al_load_config_file("config.cfg");
+    if (config != NULL) {
+        auto window_width = al_get_config_value(config, "", "window_width");
+        if (window_width != NULL) {
+            default_window_width = std::stoi(window_width);
+        }
+
+        auto window_height = al_get_config_value(config, "", "window_height");
+        if (window_width != NULL) {
+            default_window_height = std::stoi(window_height);
+        }
+    }
+
     ALLEGRO_DISPLAY* disp = al_create_display(default_window_width, default_window_height);
     if(!disp) {
         std::cout << "Couldn't initialize display.\n";
