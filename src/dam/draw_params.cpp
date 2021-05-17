@@ -9,7 +9,7 @@ dam::graphics::DrawParams::DrawParams()
     tint = Color(0xffffff);
 }
 
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_positon(float x, float y)
+dam::graphics::DrawParams* dam::graphics::DrawParams::set_position(float x, float y)
 {
     position.x = x;
     position.y = y;

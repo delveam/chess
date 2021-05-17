@@ -55,7 +55,7 @@ void Chess::draw(dam::Context& ctx)
             auto color = (x + y) % 2 == 0 ? light_color : dark_color;
 
             auto params = DrawParams();
-            params.set_positon(offset + x * size, y * size);
+            params.set_position(offset + x * size, y * size);
             params.set_scale(size, size);
             params.set_tint(color);
             draw_rectangle(ctx, params);
@@ -70,7 +70,7 @@ void Chess::draw(dam::Context& ctx)
         text.push_back(temp);
 
         auto params = DrawParams();
-        params.set_positon(offset + x * size + size * 0.08, (BOARD_HEIGHT - 1) * size + size * 0.75);
+        params.set_position(offset + x * size + size * 0.08, (BOARD_HEIGHT - 1) * size + size * 0.75);
         params.set_tint(color);
         draw_text(ctx, text, font, params);
     }
@@ -81,7 +81,7 @@ void Chess::draw(dam::Context& ctx)
         text.push_back(temp);
 
         auto params = DrawParams();
-        params.set_positon(offset + (BOARD_WIDTH - 1) * size + size * 0.75, y * size + size * 0.08);
+        params.set_position(offset + (BOARD_WIDTH - 1) * size + size * 0.75, y * size + size * 0.08);
         params.set_tint(color);
         draw_text(ctx, text, font, params);
     }
