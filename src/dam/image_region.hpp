@@ -1,5 +1,5 @@
-#ifndef DAM_IMAGE_REGION
-#define DAM_IMAGE_REGION
+#ifndef DAM_IMAGE_REGION_HPP
+#define DAM_IMAGE_REGION_HPP
 namespace dam {
 namespace graphics {
 class ImageRegion;
