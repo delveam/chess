@@ -96,6 +96,7 @@ void Allegro::run(dam::App& app)
     }
 
     ctx.keyboard = dam::input::SmartKeyboard();
+    ctx.mouse = dam::input::SmartMouse();
 
     app.initialize(ctx);
 
@@ -106,6 +107,7 @@ void Allegro::run(dam::App& app)
         switch(event.type) {
         case ALLEGRO_EVENT_TIMER:
             ctx.keyboard.update();
+            ctx.mouse.update();
             app.update(ctx);
             redraw = true;
             if (!app.loop) {

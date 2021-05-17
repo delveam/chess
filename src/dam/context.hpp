@@ -3,6 +3,7 @@
 #include <allegro5/allegro5.h>
 #include <string>
 #include "smart_keyboard.hpp"
+#include "smart_mouse.hpp"
 
 namespace dam {
 class Context;
@@ -19,5 +20,6 @@ public:
     unsigned int display_width;
     unsigned int display_height;
     dam::input::SmartKeyboard keyboard;
+    dam::input::SmartMouse mouse;
 };
 #endif
