@@ -66,7 +66,7 @@ void dam::graphics::draw_texture(Context& ctx, Texture* texture, ImageRegion reg
     auto y = params.position.y;
     auto scale_x = params.scale.x;
     auto scale_y = params.scale.y;
-    auto angle = params.angle;
+    auto rotation = params.rotation;
 
     al_draw_tinted_scaled_rotated_bitmap_region(
         texture,
@@ -75,7 +75,7 @@ void dam::graphics::draw_texture(Context& ctx, Texture* texture, ImageRegion reg
         center_x, center_y,
         x, y,
         scale_x, scale_y,
-        angle,
+        rotation,
         0
     );
 }

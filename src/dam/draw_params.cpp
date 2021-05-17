@@ -5,7 +5,7 @@ dam::graphics::DrawParams::DrawParams()
     position = Vector2F(0, 0);
     center = Vector2F(0, 0);
     scale = Vector2F(1, 1);
-    angle = 0;
+    rotation = 0;
     tint = Color(0xffffff);
 }
 
@@ -33,9 +33,9 @@ dam::graphics::DrawParams* dam::graphics::DrawParams::set_scale(float x, float y
     return this;
 }
 
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_angle(float angle)
+dam::graphics::DrawParams* dam::graphics::DrawParams::set_rotation(float rotation)
 {
-    this->angle = angle;
+    this->rotation = rotation;
     return this;
 }
 
