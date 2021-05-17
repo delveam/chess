@@ -19,7 +19,7 @@ CHESS_RELEASE_OBJECTS := $(patsubst src/chess/%.cpp, build/release/chess/%.o, $(
 DEBUG_OBJECTS := $(DAM_DEBUG_OBJECTS) $(CHESS_DEBUG_OBJECTS)
 RELEASE_OBJECTS := $(DAM_RELEASE_OBJECTS) $(CHESS_RELEASE_OBJECTS)
 
-CONTENT_SOURCES := $(shell find content -type f)
+CONTENT_SOURCES := $(shell find content)
 
 TERM_GREEN := \033[0;32m
 TERM_BLUE := \033[0;34m
