@@ -16,16 +16,14 @@ public:
     Vector2F position;
     Vector2F center;
     Vector2F scale;
-    float angle;
+    float angle; // TODO: Rename to rotation
     Color tint;
-    RectangleF region;
 
     DrawParams* set_positon(float x, float y);
     DrawParams* set_center(float x, float y);
     DrawParams* set_scale(float x, float y);
     DrawParams* set_angle(float angle);
     DrawParams* set_tint(Color tint);
-    DrawParams* set_region(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 };
 
 #endif

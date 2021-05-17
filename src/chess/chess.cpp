@@ -123,12 +123,13 @@ void Chess::draw(dam::Context& ctx)
                 params.position.y = y * size;
                 params.scale.x = scale;
                 params.scale.y = scale;
-                params.region.x = subregion_x;
-                params.region.y = current.team == Team::White ? 0 : 16;
-                params.region.width = 16;
-                params.region.height = 16;
+                auto region = ImageRegion();
+                region.x = subregion_x;
+                region.y = current.team == Team::White ? 0 : 16;
+                region.width = 16;
+                region.height = 16;
 
-                draw_texture(ctx, pieces, params);
+                draw_texture(ctx, pieces, region, params);
             }
         }
     }

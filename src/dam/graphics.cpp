@@ -53,12 +53,12 @@ void dam::graphics::draw_circle(Context& ctx, DrawParams params)
     al_draw_filled_circle(x, y, width * 0.5, tint);
 }
 
-void dam::graphics::draw_texture(Context& ctx, Texture* texture, DrawParams params)
+void dam::graphics::draw_texture(Context& ctx, Texture* texture, ImageRegion region, DrawParams params)
 {
-    auto subregion_x = params.region.x;
-    auto subregion_y = params.region.y;
-    auto subregion_width = params.region.width;
-    auto subregion_height = params.region.height;
+    auto subregion_x = region.x;
+    auto subregion_y = region.y;
+    auto subregion_width = region.width;
+    auto subregion_height = region.height;
     auto tint = convert_dam_color(params.tint);
     auto center_x = params.center.x;
     auto center_y = params.center.y;

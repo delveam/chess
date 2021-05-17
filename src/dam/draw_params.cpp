@@ -7,7 +7,6 @@ dam::graphics::DrawParams::DrawParams()
     scale = Vector2F(1, 1);
     angle = 0;
     tint = Color(0xffffff);
-    region = RectangleF(0, 0, 0, 0);
 }
 
 dam::graphics::DrawParams* dam::graphics::DrawParams::set_positon(float x, float y)
@@ -43,13 +42,6 @@ dam::graphics::DrawParams* dam::graphics::DrawParams::set_angle(float angle)
 dam::graphics::DrawParams* dam::graphics::DrawParams::set_tint(Color tint)
 {
     this->tint = tint;
-
-    return this;
-}
-
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_region(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
-{
-    this->region = RectangleF(x, y, width, height);
 
     return this;
 }

@@ -4,6 +4,7 @@
 #include "color.hpp"
 #include "context.hpp"
 #include "draw_params.hpp"
+#include "image_region.hpp"
 
 namespace dam {
 namespace graphics {
@@ -18,7 +19,7 @@ void unload_font(Font* font);
 void clear(Color color);
 void draw_rectangle(Context& ctx, DrawParams params);
 void draw_circle(Context& ctx, DrawParams params);
-void draw_texture(Context& ctx, Texture* texture, DrawParams params);
+void draw_texture(Context& ctx, Texture* texture, ImageRegion region, DrawParams params);
 void draw_text(Context& ctx, std::string text, Font* font, DrawParams params);
 }
 }
