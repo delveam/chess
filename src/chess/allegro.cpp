@@ -1,5 +1,7 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include <iostream>
 #include "allegro.hpp"
 
@@ -7,6 +9,16 @@ void Allegro::run(dam::App& app)
 {
     if(!al_init()) {
         std::cout << "Couldn't initialize allegro.\n";
+        return;
+    }
+
+    if(!al_init_font_addon()) {
+        std::cout << "Couldn't initialize font addon.\n";
+        return;
+    }
+
+    if(!al_init_ttf_addon()) {
+        std::cout << "Couldn't initialize ttf font addon.\n";
         return;
     }
 
