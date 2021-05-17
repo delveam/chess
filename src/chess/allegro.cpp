@@ -27,6 +27,11 @@ void Allegro::run(dam::App& app)
         return;
     }
 
+    if(!al_install_mouse()) {
+        std::cout << "Couldn't initialize mouse.\n";
+        return;
+    }
+
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     if(!timer) {
         std::cout << "Couldn't initialize timer.\n";
