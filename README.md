@@ -9,5 +9,5 @@ Make sure to have Allegro's build [dependencies](https://github.com/liballeg/all
 ## Installation
 
 1. run `make`
-  - chess will be packaged to `./bin/release`.
-	- `cd` into `bin/release` and run `./chess` to run the game!
+	  - chess will be packaged to `./bin/release`.
+		- `cd` into `bin/release` and run `./chess` to run the game!
