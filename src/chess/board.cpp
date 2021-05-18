@@ -52,6 +52,9 @@ void Board::move_uci(std::string notation)
     }
 
     auto previous = pieces.at(start_index);
+    if (previous.type == PieceType::None) {
+        return;
+    }
 
     pieces.at(start_index) = Piece();
     pieces.at(end_index) = previous;
