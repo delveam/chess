@@ -17,7 +17,11 @@ public:
 private:
     dam::graphics::Font* font;
     dam::graphics::Texture* pieces;
+    int square_size;
+    dam::Vector2F mouse_offset;
     Board board;
     bool board_flipped;
+    bool selected;
+    std::string initial_selection;
 };
 #endif
