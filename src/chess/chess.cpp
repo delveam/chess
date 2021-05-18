@@ -23,7 +23,7 @@ void Chess::initialize(dam::Context& ctx)
     // TODO: Handle window resize?
     // TODO: Handle condition when the board is too big (check the width not height in this case).
     square_size = dam::window::get_height(ctx) / BOARD_HEIGHT;
-    mouse_offset = dam::Vector2F((dam::window::get_width(ctx) - (square_size * BOARD_WIDTH)) / 2, 0);
+    board_offset = dam::Vector2F((dam::window::get_width(ctx) - (square_size * BOARD_WIDTH)) / 2, 0);
 
     board = Board::load_from_fen(STARTING_FEN);
     board_flipped = false;
@@ -47,10 +47,11 @@ void Chess::update(dam::Context& ctx)
         initial_selection = "";
     }
 
+    // TODO: We need to handle when the board is flipped!
     if (!selected && Mouse::pressed(ctx, MouseButton::Left)) {
         auto position = Mouse::get_position(ctx);
-        auto x = (int)((position.x - mouse_offset.x) / square_size);
-        auto y = (int)((position.y - mouse_offset.y) / square_size);
+        auto x = (int)((position.x - board_offset.x) / square_size);
+        auto y = (int)((position.y - board_offset.y) / square_size);
         if (board.get(x, y).type != PieceType::None) {
             selected = true;
             initial_selection = "";
@@ -61,8 +62,8 @@ void Chess::update(dam::Context& ctx)
     else if (selected && Mouse::pressed(ctx, MouseButton::Left)) {
         selected = false;
         auto position = Mouse::get_position(ctx);
-        auto x = (int)((position.x - mouse_offset.x) / square_size);
-        auto y = (int)((position.y - mouse_offset.y) / square_size);
+        auto x = (int)((position.x - board_offset.x) / square_size);
+        auto y = (int)((position.y - board_offset.y) / square_size);
         std::string second = "";
         second.push_back('a' + x);
         second.push_back('0' + BOARD_HEIGHT - y);
@@ -85,7 +86,7 @@ void Chess::draw(dam::Context& ctx)
             auto color = (x + y) % 2 == 0 ? light_color : dark_color;
 
             auto params = DrawParams();
-            params.set_position(mouse_offset.x + x * square_size, y * square_size);
+            params.set_position(board_offset.x + x * square_size, y * square_size);
             params.set_scale(square_size, square_size);
             params.set_tint(color);
             draw_rectangle(ctx, params);
@@ -100,7 +101,7 @@ void Chess::draw(dam::Context& ctx)
         text.push_back(temp);
 
         auto params = DrawParams();
-        params.set_position(mouse_offset.x + x * square_size + square_size * 0.08, (BOARD_HEIGHT - 1) * square_size + square_size * 0.75);
+        params.set_position(board_offset.x + x * square_size + square_size * 0.08, (BOARD_HEIGHT - 1) * square_size + square_size * 0.75);
         params.set_tint(color);
         draw_text(ctx, text, font, params);
     }
@@ -111,7 +112,7 @@ void Chess::draw(dam::Context& ctx)
         text.push_back(temp);
 
         auto params = DrawParams();
-        params.set_position(mouse_offset.x + (BOARD_WIDTH - 1) * square_size + square_size * 0.75, y * square_size + square_size * 0.08);
+        params.set_position(board_offset.x + (BOARD_WIDTH - 1) * square_size + square_size * 0.75, y * square_size + square_size * 0.08);
         params.set_tint(color);
         draw_text(ctx, text, font, params);
     }
@@ -123,9 +124,9 @@ void Chess::draw(dam::Context& ctx)
         auto x = first_char - 'a';
         auto y = BOARD_HEIGHT - std::stoi(second_char);
         x *= square_size;
-        x += mouse_offset.x;
+        x += board_offset.x;
         y *= square_size;
-        y += mouse_offset.y;
+        y += board_offset.y;
         params.set_position(x, y);
         params.set_scale(square_size, square_size);
         params.set_tint(Color(0x0000ff, 0.2));
@@ -166,7 +167,7 @@ void Chess::draw(dam::Context& ctx)
 
             if (current.type != PieceType::None) {
                 auto params = DrawParams();
-                params.position.x = mouse_offset.x + x * square_size;
+                params.position.x = board_offset.x + x * square_size;
                 params.position.y = y * square_size;
                 params.scale.x = scale;
                 params.scale.y = scale;

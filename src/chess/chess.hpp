@@ -18,7 +18,7 @@ private:
     dam::graphics::Font* font;
     dam::graphics::Texture* pieces;
     int square_size;
-    dam::Vector2F mouse_offset;
+    dam::Vector2F board_offset;
     Board board;
     bool board_flipped;
     bool selected;
