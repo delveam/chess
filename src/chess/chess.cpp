@@ -96,10 +96,10 @@ void Chess::draw(dam::Context& ctx)
         for (int x = 0; x < BOARD_WIDTH; ++x) {
             auto color = (x + y) % 2 == 0 ? light_color : dark_color;
 
-            auto params = DrawParams();
-            params.set_position(board_offset.x + x * square_size, y * square_size);
-            params.set_scale(square_size, square_size);
-            params.set_tint(color);
+            auto params = DrawParams()
+                          .set_position(board_offset.x + x * square_size, y * square_size)
+                          .set_scale(square_size, square_size)
+                          .set_tint(color);
             draw_rectangle(ctx, params);
         }
     }
@@ -111,9 +111,9 @@ void Chess::draw(dam::Context& ctx)
         std::string text = "";
         text.push_back(temp);
 
-        auto params = DrawParams();
-        params.set_position(board_offset.x + x * square_size + square_size * 0.08, (BOARD_HEIGHT - 1) * square_size + square_size * 0.75);
-        params.set_tint(color);
+        auto params = DrawParams()
+                      .set_position(board_offset.x + x * square_size + square_size * 0.08, (BOARD_HEIGHT - 1) * square_size + square_size * 0.75)
+                      .set_tint(color);
         draw_text(ctx, text, font, params);
     }
     for (int y = 0; y < BOARD_HEIGHT; ++y) {
@@ -122,14 +122,13 @@ void Chess::draw(dam::Context& ctx)
         std::string text = "";
         text.push_back(temp);
 
-        auto params = DrawParams();
-        params.set_position(board_offset.x + (BOARD_WIDTH - 1) * square_size + square_size * 0.75, y * square_size + square_size * 0.08);
-        params.set_tint(color);
+        auto params = DrawParams()
+                      .set_position(board_offset.x + (BOARD_WIDTH - 1) * square_size + square_size * 0.75, y * square_size + square_size * 0.08)
+                      .set_tint(color);
         draw_text(ctx, text, font, params);
     }
 
     if (selected) {
-        auto params = DrawParams();
         auto first_char = initial_selection.substr(0, 1)[0];
         auto second_char = initial_selection.substr(1, 2);
         auto x = first_char - 'a';
@@ -138,9 +137,11 @@ void Chess::draw(dam::Context& ctx)
         x += board_offset.x;
         y *= square_size;
         y += board_offset.y;
-        params.set_position(x, y);
-        params.set_scale(square_size, square_size);
-        params.set_tint(Color(0x0000ff, 0.2));
+
+        auto params = DrawParams()
+                      .set_position(x, y)
+                      .set_scale(square_size, square_size)
+                      .set_tint(Color(0x0000ff, 0.2));
 
         draw_rectangle(ctx, params);
     }
@@ -177,11 +178,9 @@ void Chess::draw(dam::Context& ctx)
             }
 
             if (current.type != PieceType::None) {
-                auto params = DrawParams();
-                params.position.x = board_offset.x + x * square_size;
-                params.position.y = y * square_size;
-                params.scale.x = scale;
-                params.scale.y = scale;
+                auto params = DrawParams()
+                              .set_position(board_offset.x + x * square_size, y * square_size)
+                              .set_scale(scale, scale);
                 auto region = ImageRegion();
                 region.x = subregion_x;
                 region.y = current.team == Team::White ? 0 : 16;
