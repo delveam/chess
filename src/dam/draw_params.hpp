@@ -19,11 +19,11 @@ public:
     float rotation;
     Color tint;
 
-    DrawParams* set_position(float x, float y);
-    DrawParams* set_center(float x, float y);
-    DrawParams* set_scale(float x, float y);
-    DrawParams* set_rotation(float rotation);
-    DrawParams* set_tint(Color tint);
+    DrawParams& set_position(float x, float y);
+    DrawParams& set_center(float x, float y);
+    DrawParams& set_scale(float x, float y);
+    DrawParams& set_rotation(float rotation);
+    DrawParams& set_tint(Color tint);
 };
 
 #endif

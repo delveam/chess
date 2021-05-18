@@ -9,39 +9,40 @@ dam::graphics::DrawParams::DrawParams()
     tint = Color(0xffffff);
 }
 
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_position(float x, float y)
+dam::graphics::DrawParams& dam::graphics::DrawParams::set_position(float x, float y)
 {
     position.x = x;
     position.y = y;
 
-    return this;
+    return *this;
 }
 
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_center(float x, float y)
+dam::graphics::DrawParams& dam::graphics::DrawParams::set_center(float x, float y)
 {
     center.x = x;
     center.y = y;
 
-    return this;
+    return *this;
 }
 
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_scale(float x, float y)
+dam::graphics::DrawParams& dam::graphics::DrawParams::set_scale(float x, float y)
 {
     scale.x = x;
     scale.y = y;
 
-    return this;
+    return *this;
 }
 
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_rotation(float rotation)
+dam::graphics::DrawParams& dam::graphics::DrawParams::set_rotation(float rotation)
 {
     this->rotation = rotation;
-    return this;
+
+    return *this;
 }
 
-dam::graphics::DrawParams* dam::graphics::DrawParams::set_tint(Color tint)
+dam::graphics::DrawParams& dam::graphics::DrawParams::set_tint(Color tint)
 {
     this->tint = tint;
 
-    return this;
+    return *this;
 }
