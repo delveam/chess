@@ -79,6 +79,7 @@ bin/debug/$(EXC): build/debug/chess/$(EXC) $(CONTENT_SOURCES) | bin/debug
 	@echo -e "$(TERM_YELLOW)Packaging$(TERM_NC) $(TERM_PURPLE)$(EXC) (Debug)$(TERM_NC)"
 	rm -rf bin/debug/*
 	cp -r content bin/debug
+	mv bin/debug/content/LICENSE bin/debug
 	mv bin/debug/content/config.cfg bin/debug
 	cp $< bin/debug
 	mkdir bin/debug/deps
@@ -104,6 +105,7 @@ bin/release/$(EXC): build/release/chess/$(EXC) $(CONTENT_SOURCES) | bin/release
 	@echo -e "$(TERM_YELLOW)Packaging$(TERM_NC) $(TERM_PURPLE)$(EXC) (Release)$(TERM_NC)"
 	rm -rf bin/release/*
 	cp -r content bin/release
+	mv bin/release/content/LICENSE bin/release
 	mv bin/release/content/config.cfg bin/release
 	cp $< bin/release
 	mkdir bin/release/deps
