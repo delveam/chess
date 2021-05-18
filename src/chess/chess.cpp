@@ -48,13 +48,15 @@ void Chess::update(dam::Context& ctx)
     }
 
     if (!selected && Mouse::pressed(ctx, MouseButton::Left)) {
-        selected = true;
         auto position = Mouse::get_position(ctx);
         auto x = (int)((position.x - mouse_offset.x) / square_size);
         auto y = (int)((position.y - mouse_offset.y) / square_size);
-        initial_selection = "";
-        initial_selection.push_back('a' + x);
-        initial_selection.push_back('8' - y);
+        if (board.get(x, y).type != PieceType::None) {
+            selected = true;
+            initial_selection = "";
+            initial_selection.push_back('a' + x);
+            initial_selection.push_back('0' + BOARD_HEIGHT - y);
+        }
     }
     else if (selected && Mouse::pressed(ctx, MouseButton::Left)) {
         selected = false;
@@ -63,7 +65,7 @@ void Chess::update(dam::Context& ctx)
         auto y = (int)((position.y - mouse_offset.y) / square_size);
         std::string second = "";
         second.push_back('a' + x);
-        second.push_back('8' - y);
+        second.push_back('0' + BOARD_HEIGHT - y);
         board.move_uci(initial_selection + second);
     }
 }
