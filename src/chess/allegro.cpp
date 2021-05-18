@@ -5,7 +5,7 @@
 #include <iostream>
 #include "allegro.hpp"
 
-void Allegro::run(dam::App& app)
+void Allegro::run(dam::AppConfig& config, dam::App& app)
 {
     if(!al_init()) {
         std::cout << "Couldn't initialize allegro.\n";
@@ -52,40 +52,45 @@ void Allegro::run(dam::App& app)
     auto default_window_width = 640;
     auto default_window_height = 360;
 
-    ALLEGRO_CONFIG* config = al_load_config_file("config.cfg");
-    if (config != NULL) {
-        auto window_width = al_get_config_value(config, "", "window_width");
+    ALLEGRO_CONFIG* user_config = al_load_config_file("config.cfg");
+    if (user_config != NULL) {
+        auto window_width = al_get_config_value(user_config, "", "window_width");
         if (window_width != NULL) {
             default_window_width = std::stoi(window_width);
         }
 
-        auto window_height = al_get_config_value(config, "", "window_height");
+        auto window_height = al_get_config_value(user_config, "", "window_height");
         if (window_width != NULL) {
             default_window_height = std::stoi(window_height);
         }
     }
 
-    ALLEGRO_DISPLAY* disp = al_create_display(default_window_width, default_window_height);
-    if(!disp) {
+    auto display_flags = 0;
+    display_flags = config.resizable_window ? display_flags | ALLEGRO_RESIZABLE : display_flags;
+    al_set_new_display_flags(display_flags);
+    ALLEGRO_DISPLAY* display = al_create_display(default_window_width, default_window_height);
+    if(!display) {
         std::cout << "Couldn't initialize display.\n";
         return;
     }
 
-    if (!al_init_image_addon()) {
-        std::cout << "Couldn't initialize image addon.\n";
-        return;
+    al_set_window_title(display, config.title.c_str());
+
+    if (!config.mouse_visibility) {
+        al_hide_mouse_cursor(display);
     }
 
     al_register_event_source(queue, al_get_keyboard_event_source());
-    al_register_event_source(queue, al_get_display_event_source(disp));
+    al_register_event_source(queue, al_get_display_event_source(display));
     al_register_event_source(queue, al_get_timer_event_source(timer));
 
     ALLEGRO_EVENT event;
     auto should_close = false;
     auto redraw = true;
 
+    // TODO: Some AppConfig options should be transfered to Context (e.g. vsync, mouse_visiblity, etc.)
     auto ctx = dam::Context();
-    ctx.display = disp;
+    ctx.display = display;
 
     ALLEGRO_MONITOR_INFO monitor_info;
     if (al_get_monitor_info(0, &monitor_info)) {
@@ -105,7 +110,9 @@ void Allegro::run(dam::App& app)
 
     app.initialize(ctx);
 
+    auto previous_time = al_get_time();
     al_start_timer(timer);
+
     while(!should_close) {
         al_wait_for_event(queue, &event);
 
@@ -139,8 +146,8 @@ void Allegro::run(dam::App& app)
 
     app.destroy(ctx);
 
-    al_destroy_config(config);
-    al_destroy_display(disp);
+    al_destroy_config(user_config);
+    al_destroy_display(display);
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
 }

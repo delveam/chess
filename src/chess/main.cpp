@@ -3,9 +3,13 @@
 
 int main()
 {
-    Chess chess = Chess();
-    Allegro allegro = Allegro();
-    allegro.run(chess);
+    auto config = dam::AppConfig()
+                  .set_title("Chess");
+
+    auto backend = Allegro();
+    auto app = Chess();
+
+    backend.run(config, app);
 
     return 0;
 }
