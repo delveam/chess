@@ -12,6 +12,11 @@ void Allegro::run(dam::App& app)
         return;
     }
 
+    if (!al_init_image_addon()) {
+        std::cout << "Couldn't initialize image addon.\n";
+        return;
+    }
+
     if(!al_init_font_addon()) {
         std::cout << "Couldn't initialize font addon.\n";
         return;
