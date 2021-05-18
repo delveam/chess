@@ -27,6 +27,7 @@ void Chess::initialize(dam::Context& ctx)
 
     board = Board::load_from_fen(STARTING_FEN);
     board_flipped = false;
+    selected = false;
 }
 
 void Chess::update(dam::Context& ctx)
@@ -106,6 +107,23 @@ void Chess::draw(dam::Context& ctx)
         params.set_position(mouse_offset.x + (BOARD_WIDTH - 1) * square_size + square_size * 0.75, y * square_size + square_size * 0.08);
         params.set_tint(color);
         draw_text(ctx, text, font, params);
+    }
+
+    if (selected) {
+        auto params = DrawParams();
+        auto first_char = initial_selection.substr(0, 1)[0];
+        auto second_char = initial_selection.substr(1, 2);
+        auto x = first_char - 'a';
+        auto y = BOARD_HEIGHT - std::stoi(second_char);
+        x *= square_size;
+        x += mouse_offset.x;
+        y *= square_size;
+        y += mouse_offset.y;
+        params.set_position(x, y);
+        params.set_scale(square_size, square_size);
+        params.set_tint(Color(0x0000ff, 0.2));
+
+        draw_rectangle(ctx, params);
     }
 
     al_set_target_backbuffer(ctx.display);
