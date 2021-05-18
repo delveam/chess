@@ -16,7 +16,7 @@ void Chess::initialize(dam::Context& ctx)
 {
     using namespace dam::graphics;
 
-    font = al_create_builtin_font();
+    font = load_font("./content/fonts/FiraCode-SemiBold.ttf", 16);
 
     pieces = load_texture("./content/sprites/pieces.png");
 
