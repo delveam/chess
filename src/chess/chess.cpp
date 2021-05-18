@@ -20,7 +20,6 @@ void Chess::initialize(dam::Context& ctx)
 
     pieces = load_texture("./content/sprites/pieces.png");
 
-    // TODO: Handle window resize?
     // TODO: Handle condition when the board is too big (check the width not height in this case).
     square_size = dam::window::get_height(ctx) / BOARD_HEIGHT;
     board_offset = dam::Vector2F((dam::window::get_width(ctx) - (square_size * BOARD_WIDTH)) / 2, 0);
@@ -68,6 +67,18 @@ void Chess::update(dam::Context& ctx)
         second.push_back('a' + x);
         second.push_back('0' + BOARD_HEIGHT - y);
         board.move_uci(initial_selection + second);
+    }
+}
+
+void Chess::event(dam::Context& ctx, dam::EventType event)
+{
+    switch (event) {
+    case dam::EventType::WindowResize:
+        square_size = dam::window::get_height(ctx) / BOARD_HEIGHT;
+        board_offset = dam::Vector2F((dam::window::get_width(ctx) - (square_size * BOARD_WIDTH)) / 2, 0);
+        break;
+    default:
+        break;
     }
 }
 

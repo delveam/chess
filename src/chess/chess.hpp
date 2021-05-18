@@ -11,6 +11,7 @@ public:
     Chess();
     void initialize(dam::Context& ctx) override;
     void update(dam::Context& ctx) override;
+    void event(dam::Context& ctx, dam::EventType event) override;
     void draw(dam::Context& ctx) override;
     void destroy(dam::Context& ctx) override;
     ~Chess();

@@ -123,6 +123,11 @@ void Allegro::run(dam::App& app)
         case ALLEGRO_EVENT_DISPLAY_CLOSE:
             should_close = true;
             break;
+
+        case ALLEGRO_EVENT_DISPLAY_RESIZE:
+            app.event(ctx, dam::EventType::WindowResize);
+            al_acknowledge_resize(display);
+            break;
         }
 
         if(redraw && al_is_event_queue_empty(queue)) {
