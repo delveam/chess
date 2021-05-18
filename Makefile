@@ -79,12 +79,11 @@ bin/debug/$(EXC): build/debug/chess/$(EXC) $(CONTENT_SOURCES) | bin/debug
 	@echo -e "$(TERM_YELLOW)Packaging$(TERM_NC) $(TERM_PURPLE)$(EXC) (Debug)$(TERM_NC)"
 	rm -rf bin/debug/*
 	cp -r content bin/debug
-	mv bin/debug/content/LICENSE bin/debug
-	mv bin/debug/content/config.cfg bin/debug
 	cp $< bin/debug
 	mkdir bin/debug/deps
 	mkdir bin/debug/deps/allegro5
 	find build/deps/allegro5/lib -name "liballegro*" -exec cp {} bin/debug/deps/allegro5 \;
+	find bin/debug/content -maxdepth 1 -type f -exec mv {} bin/debug \;
 
 debug: bin/debug/$(EXC)
 	@echo Done
@@ -105,12 +104,11 @@ bin/release/$(EXC): build/release/chess/$(EXC) $(CONTENT_SOURCES) | bin/release
 	@echo -e "$(TERM_YELLOW)Packaging$(TERM_NC) $(TERM_PURPLE)$(EXC) (Release)$(TERM_NC)"
 	rm -rf bin/release/*
 	cp -r content bin/release
-	mv bin/release/content/LICENSE bin/release
-	mv bin/release/content/config.cfg bin/release
 	cp $< bin/release
 	mkdir bin/release/deps
 	mkdir bin/release/deps/allegro5
 	find build/deps/allegro5/lib -name "liballegro*" -exec cp {} bin/release/deps/allegro5 \;
+	find bin/release/content -maxdepth 1 -type f -exec mv {} bin/release \;
 
 release: bin/release/$(EXC)
 	@echo Done
