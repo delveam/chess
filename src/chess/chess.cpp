@@ -42,6 +42,11 @@ void Chess::update(dam::Context& ctx)
         board_flipped = !board_flipped;
     }
 
+    if (selected && Mouse::pressed(ctx, MouseButton::Right)) {
+        selected = false;
+        initial_selection = "";
+    }
+
     if (!selected && Mouse::pressed(ctx, MouseButton::Left)) {
         selected = true;
         auto position = Mouse::get_position(ctx);
