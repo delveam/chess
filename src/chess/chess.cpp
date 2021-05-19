@@ -46,11 +46,14 @@ void Chess::update(dam::Context& ctx)
         initial_selection = "";
     }
 
-    // TODO: We need to handle when the board is flipped!
     if (!selected && Mouse::pressed(ctx, MouseButton::Left)) {
         auto position = Mouse::get_position(ctx);
         auto x = (int)((position.x - board_offset.x) / square_size);
         auto y = (int)((position.y - board_offset.y) / square_size);
+        if (board_flipped) {
+            x = BOARD_WIDTH - x - 1;
+            y = BOARD_HEIGHT - y - 1;
+        }
         if (board.get(x, y).type != PieceType::None) {
             selected = true;
             initial_selection = "";
@@ -63,10 +66,15 @@ void Chess::update(dam::Context& ctx)
         auto position = Mouse::get_position(ctx);
         auto x = (int)((position.x - board_offset.x) / square_size);
         auto y = (int)((position.y - board_offset.y) / square_size);
+        if (board_flipped) {
+            x = BOARD_WIDTH - x - 1;
+            y = BOARD_HEIGHT - y - 1;
+        }
         std::string second = "";
         second.push_back('a' + x);
         second.push_back('0' + BOARD_HEIGHT - y);
         board.move_uci(initial_selection + second);
+        initial_selection = "";
     }
 }
 
@@ -133,6 +141,10 @@ void Chess::draw(dam::Context& ctx)
         auto second_char = initial_selection.substr(1, 2);
         auto x = first_char - 'a';
         auto y = BOARD_HEIGHT - std::stoi(second_char);
+        if (board_flipped) {
+            x = BOARD_WIDTH - x - 1;
+            y = BOARD_HEIGHT - y - 1;
+        }
         x *= square_size;
         x += board_offset.x;
         y *= square_size;
