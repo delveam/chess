@@ -12,4 +12,4 @@ Make sure you have all of Allegro's build [dependencies](https://github.com/liba
 make
 ```
 
-chess will be packaged to `./bin/release`. `cd` into `bin/release` and run `./chess` to run the game!
+chess will be packaged to `./bin/release`. `cd` into `./bin/release` and run `./chess` to run the game!
