@@ -1,6 +1,7 @@
 #include <regex>
 #include <vector>
 #include "board.hpp"
+#include "coordinates.hpp"
 
 // ^((?:[pbnrqkPBNRQK1-8]+\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\d+) (\d+)$
 
@@ -30,13 +31,12 @@ Board::Board()
     pieces.fill(Piece());
 }
 
-Piece Board::get(std::string coordinates)
+std::optional<Piece> Board::get(unsigned int x, unsigned int y)
 {
-    return pieces.at(Board::parse_coordinates(coordinates));
-}
+    if (x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT) {
+        return std::nullopt;
+    }
 
-Piece Board::get(unsigned int x, unsigned int y)
-{
     return pieces.at(y * BOARD_WIDTH + x);
 }
 
@@ -44,12 +44,15 @@ void Board::move_uci(std::string notation)
 {
     // TODO: handle promotions (handle a fifth character).
 
-    auto start_index = Board::parse_coordinates(notation.substr(0, 2));
-    auto end_index = Board::parse_coordinates(notation.substr(2, 4));
+    auto start_coords = Coordinates::from_string(notation.substr(0, 2));
+    auto end_coords = Coordinates::from_string(notation.substr(2, 4));
 
-    if (start_index == -1 || end_index == -1) {
+    if (!start_coords.has_value() || !end_coords.has_value()) {
         return;
     }
+
+    auto start_index = start_coords.value().y * BOARD_WIDTH + start_coords.value().x;
+    auto end_index = end_coords.value().y * BOARD_WIDTH + end_coords.value().x;
 
     auto previous = pieces.at(start_index);
     if (previous.type == PieceType::None) {
@@ -87,19 +90,4 @@ Board Board::load_from_fen(std::string fen)
     }
 
     return board;
-}
-
-int Board::parse_coordinates(std::string coordinates)
-{
-    if (!std::regex_match(coordinates, std::regex("[a-h]{1}[1-8]{1}"))) {
-        return -1;
-    }
-
-    auto temp = coordinates.substr(0, 1).c_str()[0];
-    temp = tolower(temp);
-
-    auto column = BOARD_WIDTH - ((int)'h' - (int)temp) - 1;
-    auto row = BOARD_HEIGHT - std::stoi(coordinates.substr(1, 2));
-
-    return row * BOARD_WIDTH + column;
 }

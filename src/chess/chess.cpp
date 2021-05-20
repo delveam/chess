@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include "chess.hpp"
+#include "coordinates.hpp"
 #include "../dam/graphics.hpp"
 #include "../dam/input.hpp"
 #include "../dam/palette.hpp"
@@ -53,31 +54,42 @@ void Chess::update(dam::Context& ctx)
         auto position = Mouse::get_position(ctx);
         auto x = (int)((position.x - board_offset.x) / square_size);
         auto y = (int)((position.y - board_offset.y) / square_size);
+
         if (board_flipped) {
             x = BOARD_WIDTH - x - 1;
             y = BOARD_HEIGHT - y - 1;
         }
-        if (board.get(x, y).type != PieceType::None) {
+
+        auto target = board.get(x, y);
+
+        if (target.has_value() && target.value().type != PieceType::None) {
             selected = true;
-            initial_selection = "";
-            initial_selection.push_back('a' + x);
-            initial_selection.push_back('0' + BOARD_HEIGHT - y);
+
+            auto coords = Coordinates::create(x, y).value();
+            auto coords_as_string = Coordinates::to_string(coords);
+
+            initial_selection = coords_as_string;
         }
     }
     else if (selected && Mouse::pressed(ctx, MouseButton::Left)) {
-        selected = false;
         auto position = Mouse::get_position(ctx);
         auto x = (int)((position.x - board_offset.x) / square_size);
         auto y = (int)((position.y - board_offset.y) / square_size);
+
         if (board_flipped) {
             x = BOARD_WIDTH - x - 1;
             y = BOARD_HEIGHT - y - 1;
         }
-        std::string second = "";
-        second.push_back('a' + x);
-        second.push_back('0' + BOARD_HEIGHT - y);
-        board.move_uci(initial_selection + second);
-        initial_selection = "";
+
+        auto coords = Coordinates::create(x, y);
+
+        if (coords.has_value()) {
+            auto coords_as_string = Coordinates::to_string(coords.value());
+
+            board.move_uci(initial_selection + coords_as_string);
+            selected = false;
+            initial_selection = "";
+        }
     }
 }
 
@@ -145,10 +157,12 @@ void Chess::draw(dam::Context& ctx)
         auto second_char = initial_selection.substr(1, 2);
         auto x = first_char - 'a';
         auto y = BOARD_HEIGHT - std::stoi(second_char);
+
         if (board_flipped) {
             x = BOARD_WIDTH - x - 1;
             y = BOARD_HEIGHT - y - 1;
         }
+
         x *= square_size;
         x += board_offset.x;
         y *= square_size;
