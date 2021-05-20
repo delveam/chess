@@ -1,5 +1,8 @@
 #include <string>
 
+const int BOARD_WIDTH = 8;
+const int BOARD_HEIGHT = 8;
+
 const std::string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 enum class PieceType {
