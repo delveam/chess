@@ -19,10 +19,13 @@ void Chess::initialize(dam::Context& ctx)
     font = load_font("./content/fonts/FiraCode-SemiBold.ttf", 16);
 
     pieces = load_texture("./content/sprites/pieces.png");
+    sprite_size = 16;
 
     // TODO: Handle condition when the board is too big (check the width not height in this case).
     square_size = dam::window::get_height(ctx) / BOARD_HEIGHT;
     board_offset = dam::Vector2F((dam::window::get_width(ctx) - (square_size * BOARD_WIDTH)) / 2, 0);
+
+    sprite_scale = (float)square_size / sprite_size;
 
     board = Board::load_from_fen(STARTING_FEN);
     board_flipped = false;
@@ -84,6 +87,7 @@ void Chess::event(dam::Context& ctx, dam::EventType event)
     case dam::EventType::WindowResize:
         square_size = dam::window::get_height(ctx) / BOARD_HEIGHT;
         board_offset = dam::Vector2F((dam::window::get_width(ctx) - (square_size * BOARD_WIDTH)) / 2, 0);
+        sprite_scale = (float)square_size / sprite_size;
         break;
     default:
         break;
@@ -160,7 +164,6 @@ void Chess::draw(dam::Context& ctx)
 
     al_set_target_backbuffer(ctx.display);
     // Draw pieces.
-    auto scale = square_size / 16.0;
     for (int y = 0; y < BOARD_HEIGHT; ++y) {
         for (int x = 0; x < BOARD_WIDTH; ++x) {
             auto index = board_flipped ? ((BOARD_HEIGHT - 1) - y) * BOARD_WIDTH + ((BOARD_WIDTH - 1) - x) : y * BOARD_WIDTH + x;
@@ -171,19 +174,19 @@ void Chess::draw(dam::Context& ctx)
             case PieceType::Pawn:
                 break;
             case PieceType::Bishop:
-                subregion_x = 16;
+                subregion_x = sprite_size;
                 break;
             case PieceType::Knight:
-                subregion_x = 32;
+                subregion_x = sprite_size * 2;
                 break;
             case PieceType::Rook:
-                subregion_x = 48;
+                subregion_x = sprite_size * 3;
                 break;
             case PieceType::Queen:
-                subregion_x = 64;
+                subregion_x = sprite_size * 4;
                 break;
             case PieceType::King:
-                subregion_x = 80;
+                subregion_x = sprite_size * 5;
                 break;
             case PieceType::None:
                 break;
@@ -192,12 +195,12 @@ void Chess::draw(dam::Context& ctx)
             if (current.type != PieceType::None) {
                 auto params = DrawParams()
                               .set_position(board_offset.x + x * square_size, y * square_size)
-                              .set_scale(scale, scale);
+                              .set_scale(sprite_scale, sprite_scale);
                 auto region = ImageRegion();
                 region.x = subregion_x;
-                region.y = current.team == Team::White ? 0 : 16;
-                region.width = 16;
-                region.height = 16;
+                region.y = current.team == Team::White ? 0 : sprite_size;
+                region.width = sprite_size;
+                region.height = sprite_size;
 
                 draw_texture(ctx, pieces, region, params);
             }
