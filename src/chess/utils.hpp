@@ -7,15 +7,16 @@ const std::string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w 
 
 enum class PieceType {
     None = 0,
-    Pawn = 1,
-    Bishop = 2,
-    Knight = 4,
-    Rook = 8,
-    Queen = 16,
-    King = 32,
+    Pawn = 4,
+    Bishop = 8,
+    Knight = 16,
+    Rook = 32,
+    Queen = 64,
+    King = 128,
 };
 
 enum class Team {
-    White = 0,
-    Black = 1,
+    None = 0,
+    White = 1,
+    Black = 2,
 };
