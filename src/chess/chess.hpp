@@ -26,5 +26,7 @@ private:
     bool board_flipped;
     bool selected;
     std::string initial_selection;
+
+    void handle_resize(dam::Context& ctx);
 };
 #endif
