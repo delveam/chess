@@ -7,9 +7,6 @@
 
 namespace dam {
 class Context;
-
-const float PI = ALLEGRO_PI;
-const float TAU = ALLEGRO_PI * 2;
 }
 
 class dam::Context {
