@@ -4,7 +4,7 @@
 Piece::Piece()
 {
     type = PieceType::None;
-    team = Team::White;
+    team = Team::None;
 }
 
 Piece::Piece(PieceType type, Team team)
@@ -68,11 +68,9 @@ Piece::Piece(char piece)
         team = Team::Black;
         break;
 
-
     default:
         type = PieceType::None;
-        team = Team::White;
-        break;
+        team = Team::None;
     }
 }
 
