@@ -1,3 +1,4 @@
+#include <optional>
 #include "piece.hpp"
 
 Piece::Piece()
@@ -77,7 +78,7 @@ Piece::Piece(char piece)
 
 std::string Piece::to_string()
 {
-    auto temp = '?';
+    auto temp = std::make_optional<char>();
     switch(type) {
     case PieceType::Pawn:
         temp = 'p';
@@ -101,13 +102,13 @@ std::string Piece::to_string()
         break;
     }
 
-    if (team == Team::White) {
-        temp = toupper(temp);
+    if (temp.has_value() && team == Team::White) {
+        temp = toupper(temp.value());
     }
 
     std::string result = "";
-    if (temp != '?') {
-        result.push_back(temp);
+    if (temp.has_value()) {
+        result.push_back(temp.value());
     }
 
     return result;
