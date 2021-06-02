@@ -2,9 +2,9 @@
 #define CHESS_HPP
 #include <allegro5/allegro_font.h>
 #include <iostream>
+#include "board.hpp"
 #include "../dam/app.hpp"
 #include "../dam/graphics.hpp"
-#include "board.hpp"
 
 class Chess : public dam::App {
 public:
