@@ -37,12 +37,6 @@ void Allegro::run(dam::AppConfig& config, dam::App& app)
         return;
     }
 
-    ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
-    if(!timer) {
-        std::cout << "Couldn't initialize timer.\n";
-        return;
-    }
-
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     if(!queue) {
         std::cout << "Couldn't initialize queue.\n";
@@ -85,11 +79,9 @@ void Allegro::run(dam::AppConfig& config, dam::App& app)
 
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(display));
-    al_register_event_source(queue, al_get_timer_event_source(timer));
 
     ALLEGRO_EVENT event;
     auto should_close = false;
-    auto redraw = true;
 
     // TODO: Some AppConfig options should be transfered to Context (e.g. vsync, mouse_visiblity, etc.)
     auto ctx = dam::Context();
@@ -113,44 +105,53 @@ void Allegro::run(dam::AppConfig& config, dam::App& app)
 
     app.initialize(ctx);
 
+    // TODO: This might be a little egregious for chess? I don't know...
+    auto target = 1.0 / 120.0;
+    auto accumulator = 0.0;
+
     auto previous_time = al_get_time();
-    al_start_timer(timer);
 
-    while(!should_close) {
-        al_wait_for_event(queue, &event);
+    while (!should_close) {
+        while(al_get_next_event(queue, &event)) {
+            switch(event.type) {
+            case ALLEGRO_EVENT_DISPLAY_CLOSE:
+                // TODO: Should we also send this event to the app?
+                should_close = true;
+                break;
 
-        switch(event.type) {
-        case ALLEGRO_EVENT_TIMER:
+            case ALLEGRO_EVENT_DISPLAY_RESIZE:
+                app.event(ctx, dam::EventType::WindowResize);
+                al_acknowledge_resize(display);
+                break;
+            }
+        }
+
+        auto current_time = al_get_time();
+        auto delta_time = current_time - previous_time;
+        previous_time = current_time;
+
+        accumulator += delta_time;
+
+        while (accumulator >= target) {
             ctx.keyboard.update();
             ctx.mouse.update();
             app.update(ctx);
-            redraw = true;
             if (!app.loop) {
                 should_close = true;
+                break;
             }
-            break;
 
-        case ALLEGRO_EVENT_DISPLAY_CLOSE:
-            should_close = true;
-            break;
-
-        case ALLEGRO_EVENT_DISPLAY_RESIZE:
-            app.event(ctx, dam::EventType::WindowResize);
-            al_acknowledge_resize(display);
-            break;
+            accumulator -= target;
         }
 
-        if(redraw && al_is_event_queue_empty(queue)) {
-            app.draw(ctx);
-            al_flip_display();
-            redraw = false;
-        }
+        app.draw(ctx);
+
+        al_flip_display();
     }
 
     app.destroy(ctx);
 
     al_destroy_config(user_config);
     al_destroy_display(display);
-    al_destroy_timer(timer);
     al_destroy_event_queue(queue);
 }
