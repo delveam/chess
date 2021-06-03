@@ -74,6 +74,9 @@ void Allegro::run(dam::AppConfig& config, dam::App& app)
         return;
     }
 
+    // NOTE: Without the following line of code the app may not be centered correctly upon startup.
+    al_acknowledge_resize(display);
+
     al_set_window_title(display, config.title.c_str());
 
     if (!config.mouse_visibility) {
