@@ -29,6 +29,11 @@ std::vector<std::string> split(std::string string, std::string delimiter)
 Board::Board()
 {
     pieces.fill(Piece());
+    next = Team::None;
+    castling_rights = CastlingRights::None;
+    en_passant_target = std::make_optional<std::string>();
+    half_moves = 0;
+    full_moves = 1;
 }
 
 std::optional<Piece> Board::get(unsigned int x, unsigned int y)
@@ -71,7 +76,7 @@ Board Board::load_from_fen(std::string fen)
 
     auto board = Board();
     auto sections = split(fen, " ");
-    // TODO: We still need to consider the other 5 sections!
+
     auto rows = split(sections[0], "/");
     auto index = 0;
 
@@ -88,6 +93,36 @@ Board Board::load_from_fen(std::string fen)
             }
         }
     }
+
+    board.next = sections[1] == "w" ? Team::White : Team::Black;
+
+    auto castling_rights = 0;
+    for (int i = 0; i < sections[2].length(); ++i) {
+        auto current = sections[2].substr(i, i + 1).c_str()[0];
+        switch (current) {
+        case 'K':
+            castling_rights |= static_cast<unsigned int>(CastlingRights::WhiteKingSide);
+            break;
+        case 'Q':
+            castling_rights |= static_cast<unsigned int>(CastlingRights::WhiteQueenSide);
+            break;
+        case 'k':
+            castling_rights |= static_cast<unsigned int>(CastlingRights::BlackKingSide);
+            break;
+        case 'q':
+            castling_rights |= static_cast<unsigned int>(CastlingRights::BlackQueenSide);
+            break;
+        }
+    }
+    board.castling_rights = static_cast<CastlingRights>(castling_rights);
+
+    if (sections[3] != "-") {
+        board.en_passant_target = sections[3];
+    }
+
+    board.half_moves = std::stoi(sections[4]);
+
+    board.full_moves = std::stoi(sections[5]);
 
     return board;
 }
