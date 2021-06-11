@@ -29,7 +29,7 @@ std::vector<std::string> split(std::string string, std::string delimiter)
 Board::Board()
 {
     pieces.fill(Piece());
-    next = Team::None;
+    next_team = Team::None;
     castling_rights = CastlingRights::None;
     en_passant_target = std::nullopt;
     half_moves = 0;
@@ -94,7 +94,7 @@ Board Board::load_from_fen(std::string fen)
         }
     }
 
-    board.next = sections[1] == "w" ? Team::White : Team::Black;
+    board.next_team = sections[1] == "w" ? Team::White : Team::Black;
 
     auto castling_rights = 0;
     for (int i = 0; i < (int)sections[2].length(); ++i) {

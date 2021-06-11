@@ -9,7 +9,7 @@ class Board {
 public:
     Board();
     std::array<Piece, BOARD_WIDTH * BOARD_HEIGHT> pieces;
-    Team next;
+    Team next_team;
     CastlingRights castling_rights;
     std::optional<std::string> en_passant_target;
     unsigned int half_moves;
