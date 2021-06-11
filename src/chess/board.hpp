@@ -18,7 +18,7 @@ public:
     std::optional<Piece> get(unsigned int x, unsigned int y);
     void move_uci(std::string notation);
     static Board load_from_fen(std::string fen);
-    // TODO(thismarvin): static std::string into_fen(Board board);
+    static std::optional<std::string> into_fen(Board board);
 };
 
 #endif

@@ -45,6 +45,7 @@ std::optional<Piece> Board::get(unsigned int x, unsigned int y)
     return pieces.at(y * BOARD_WIDTH + x);
 }
 
+// QUESTION(austin0209): Should this return a new Board? Moreover, should board be immutable?
 void Board::move_uci(std::string notation)
 {
     // TODO: handle promotions (handle a fifth character).
@@ -64,8 +65,23 @@ void Board::move_uci(std::string notation)
         return;
     }
 
+    auto was_capture = pieces.at(end_index).type != PieceType::None;
+
     pieces.at(start_index) = Piece();
     pieces.at(end_index) = previous;
+
+    if (next_team == Team::Black) {
+        ++full_moves;
+    }
+
+    next_team = next_team == Team::White ? Team::Black : Team::White;
+
+    // TODO(thismarvin): castling_rights (depends on move validation system).
+    // TODO(thismarvin): en_passant_target (also depends on move validation system).
+
+    if (was_capture || previous.type == PieceType::Pawn) {
+        ++half_moves;
+    }
 }
 
 Board Board::load_from_fen(std::string fen)
@@ -125,4 +141,86 @@ Board Board::load_from_fen(std::string fen)
     board.full_moves = std::stoi(sections[5]);
 
     return board;
+}
+
+std::optional<std::string> Board::into_fen(Board board)
+{
+    std::string fen = "";
+
+    for (auto y = 0; y < BOARD_HEIGHT; ++y) {
+        for (auto x = 0; x < BOARD_WIDTH; ++x) {
+            auto piece = board.get(x,y);
+
+            if (piece->type == PieceType::None) {
+                auto total_empty = 1;
+                while (true) {
+                    auto next_piece = board.get(x + 1, y);
+                    if (next_piece.has_value() && next_piece->type == PieceType::None) {
+                        ++total_empty;
+                        ++x;
+                    }
+                    else {
+                        fen += std::to_string(total_empty);
+                        break;
+                    }
+                }
+            }
+            else {
+                fen += piece->to_string();
+            }
+
+        }
+        if (y < BOARD_HEIGHT - 1) {
+            fen+="/";
+        }
+    }
+
+    fen += " ";
+    switch (board.next_team) {
+    case Team::White:
+        fen += "w";
+        break;
+    case Team::Black:
+        fen += "b";
+        break;
+    case Team::None:
+        return std::nullopt;
+    }
+
+    fen += " ";
+    auto can_castle = false;
+    if (static_cast<int>(board.castling_rights) & static_cast<int>(CastlingRights::WhiteKingSide)) {
+        fen += "K";
+        can_castle = true;
+    }
+    if (static_cast<int>(board.castling_rights) & static_cast<int>(CastlingRights::WhiteQueenSide)) {
+        fen += "Q";
+        can_castle = true;
+    }
+    if (static_cast<int>(board.castling_rights) & static_cast<int>(CastlingRights::BlackKingSide)) {
+        fen += "k";
+        can_castle = true;
+    }
+    if (static_cast<int>(board.castling_rights) & static_cast<int>(CastlingRights::BlackQueenSide)) {
+        fen += "q";
+        can_castle = true;
+    }
+
+    if (!can_castle) {
+        fen += "-";
+    }
+
+    fen += " ";
+    if (board.en_passant_target.has_value()) {
+        fen += board.en_passant_target.value();
+    }
+    else {
+        fen += "-";
+    }
+
+    fen += " " + std::to_string(board.half_moves);
+
+    fen += " " + std::to_string(board.full_moves);
+
+    return fen;
 }
