@@ -76,7 +76,7 @@ Piece::Piece(char piece)
 
 std::string Piece::to_string()
 {
-    auto temp = std::make_optional<char>();
+    std::optional<char> temp = std::nullopt;
     switch(type) {
     case PieceType::Pawn:
         temp = 'p';

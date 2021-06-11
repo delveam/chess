@@ -31,7 +31,7 @@ Board::Board()
     pieces.fill(Piece());
     next = Team::None;
     castling_rights = CastlingRights::None;
-    en_passant_target = std::make_optional<std::string>();
+    en_passant_target = std::nullopt;
     half_moves = 0;
     full_moves = 1;
 }
