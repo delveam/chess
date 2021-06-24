@@ -116,7 +116,7 @@ release: bin/release/$(EXC)
 dev: bin/debug/$(EXC)
 	cd bin/debug; ./$(EXC)
 
-format: $(shell find src)
+format:
 	astyle --style=stroustrup -n --recursive src/*.cpp,*.hpp
 
 clean:
