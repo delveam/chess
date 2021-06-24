@@ -5,11 +5,11 @@
 namespace dam {
 namespace graphics {
 namespace palette {
-const Color WHITE = Color(0xffffff);
-const Color BLACK = Color(0x000000);
-const Color RED = Color(0xff0000);
-const Color GREEN = Color(0x00ff00);
-const Color BLUE = Color(0x0000ff);
+const Color white = Color(0xffffff);
+const Color black = Color(0x000000);
+const Color red = Color(0xff0000);
+const Color green = Color(0x00ff00);
+const Color blue = Color(0x0000ff);
 }
 }
 }

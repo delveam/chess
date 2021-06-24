@@ -124,7 +124,7 @@ void Chess::draw(dam::Context& ctx)
 {
     using namespace dam::graphics;
 
-    clear(palette::BLACK);
+    clear(palette::black);
 
     auto light_color = Color(0xeeeed2);
     auto dark_color = Color(0x769656);

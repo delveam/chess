@@ -3,7 +3,7 @@
 #include <allegro5/allegro5.h>
 
 namespace dam {
-const float PI = ALLEGRO_PI;
-const float TAU = ALLEGRO_PI * 2;
+constexpr float pi = ALLEGRO_PI;
+constexpr float tau = ALLEGRO_PI * 2;
 }
 #endif
