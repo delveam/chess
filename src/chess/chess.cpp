@@ -38,7 +38,10 @@ void Chess::initialize(dam::Context& ctx)
 
     handle_resize(ctx);
 
-    board = Board::load_from_fen(STARTING_FEN);
+    auto temp = Board::load_from_fen(STARTING_FEN);
+    if (temp.has_value()) {
+        board = temp.value();
+    }
     board_flipped = false;
     selected = false;
 }
@@ -96,7 +99,10 @@ void Chess::update(dam::Context& ctx)
         if (coords.has_value()) {
             auto coords_as_string = Coordinates::to_string(coords.value());
 
-            board.move_uci(initial_selection + coords_as_string);
+            auto result = board.move_uci(initial_selection + coords_as_string);
+            if (result.has_value()) {
+                board = result.value();
+            }
             selected = false;
             initial_selection = "";
         }
@@ -228,7 +234,6 @@ void Chess::draw(dam::Context& ctx)
             }
         }
     }
-
 }
 
 void Chess::destroy(dam::Context& ctx)

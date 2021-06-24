@@ -36,6 +36,16 @@ Board::Board()
     full_moves = 1;
 }
 
+Board::Board(BoardArray pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves)
+{
+    this->pieces = pieces;
+    this->next_team = next_team;
+    this->castling_rights = castling_rights;
+    this->en_passant_target = en_passant_target;
+    this->half_moves = half_moves;
+    this->full_moves = full_moves;
+}
+
 std::optional<Piece> Board::get(unsigned int x, unsigned int y)
 {
     if (x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT) {
@@ -45,8 +55,7 @@ std::optional<Piece> Board::get(unsigned int x, unsigned int y)
     return pieces.at(y * BOARD_WIDTH + x);
 }
 
-// QUESTION(austin0209): Should this return a new Board? Moreover, should board be immutable?
-void Board::move_uci(std::string notation)
+std::optional<Board> Board::move_uci(std::string notation)
 {
     // TODO: handle promotions (handle a fifth character).
 
@@ -54,7 +63,7 @@ void Board::move_uci(std::string notation)
     auto end_coords = Coordinates::from_string(notation.substr(2, 4));
 
     if (!start_coords.has_value() || !end_coords.has_value()) {
-        return;
+        return std::nullopt;
     }
 
     auto start_index = start_coords.value().y * BOARD_WIDTH + start_coords.value().x;
@@ -62,19 +71,25 @@ void Board::move_uci(std::string notation)
 
     auto previous = pieces.at(start_index);
     if (previous.type == PieceType::None) {
-        return;
+        return std::nullopt;
     }
+
+    // TODO(thismarvin): Implement Move Validation right here!
 
     auto was_capture = pieces.at(end_index).type != PieceType::None;
 
-    pieces.at(start_index) = Piece();
-    pieces.at(end_index) = previous;
+    // Setup next Board.
+    std::array<Piece, BOARD_WIDTH * BOARD_HEIGHT> pieces;
+    auto next_team = this->next_team == Team::White ? Team::Black : Team::White;
+    auto castling_rights = this->castling_rights;
+    auto en_passant_target = this->en_passant_target;
+    auto half_moves = this->half_moves;
+    auto full_moves = this->full_moves;
 
-    if (next_team == Team::Black) {
-        ++full_moves;
+    // Copy the current board.
+    for (int i = 0; i < (int)this->pieces.size(); ++i) {
+        pieces.at(i) = this->pieces[i];
     }
-
-    next_team = next_team == Team::White ? Team::Black : Team::White;
 
     // TODO(thismarvin): castling_rights (depends on move validation system).
     // TODO(thismarvin): en_passant_target (also depends on move validation system).
@@ -82,19 +97,30 @@ void Board::move_uci(std::string notation)
     if (was_capture || previous.type == PieceType::Pawn) {
         ++half_moves;
     }
-}
 
-Board Board::load_from_fen(std::string fen)
-{
-    if (!std::regex_match(fen, std::regex("^((?:[pbnrqkPBNRQK1-8]+\\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\\d+) (\\d+)$"))) {
-        return Board::load_from_fen(STARTING_FEN);
+    if (next_team == Team::Black) {
+        ++full_moves;
     }
 
-    auto board = Board();
+    // Move the piece.
+    pieces.at(start_index) = Piece();
+    pieces.at(end_index) = previous;
+
+    return Board(pieces, next_team, castling_rights, en_passant_target, half_moves, full_moves);
+}
+
+std::optional<Board> Board::load_from_fen(std::string fen)
+{
+    if (!std::regex_match(fen, std::regex("^((?:[pbnrqkPBNRQK1-8]+\\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\\d+) (\\d+)$"))) {
+        return std::nullopt;
+    }
+
     auto sections = split(fen, " ");
 
     auto rows = split(sections[0], "/");
     auto index = 0;
+
+    BoardArray pieces;
 
     for (auto row : rows) {
         for (auto i = 0; i < (int)row.size(); ++i) {
@@ -104,43 +130,44 @@ Board Board::load_from_fen(std::string fen)
                 index += std::stoi(character);
             }
             else {
-                board.pieces[index] = Piece(character.c_str()[0]);
+                pieces.at(index) = Piece(character.c_str()[0]);
                 index++;
             }
         }
     }
 
-    board.next_team = sections[1] == "w" ? Team::White : Team::Black;
+    auto next_team = sections[1] == "w" ? Team::White : Team::Black;
 
-    auto castling_rights = 0;
+    auto castling_rights_uint = 0;
     for (int i = 0; i < (int)sections[2].length(); ++i) {
         auto current = sections[2].substr(i, i + 1).c_str()[0];
         switch (current) {
         case 'K':
-            castling_rights |= static_cast<unsigned int>(CastlingRights::WhiteKingSide);
+            castling_rights_uint |= static_cast<unsigned int>(CastlingRights::WhiteKingSide);
             break;
         case 'Q':
-            castling_rights |= static_cast<unsigned int>(CastlingRights::WhiteQueenSide);
+            castling_rights_uint |= static_cast<unsigned int>(CastlingRights::WhiteQueenSide);
             break;
         case 'k':
-            castling_rights |= static_cast<unsigned int>(CastlingRights::BlackKingSide);
+            castling_rights_uint |= static_cast<unsigned int>(CastlingRights::BlackKingSide);
             break;
         case 'q':
-            castling_rights |= static_cast<unsigned int>(CastlingRights::BlackQueenSide);
+            castling_rights_uint |= static_cast<unsigned int>(CastlingRights::BlackQueenSide);
             break;
         }
     }
-    board.castling_rights = static_cast<CastlingRights>(castling_rights);
+    auto castling_rights = static_cast<CastlingRights>(castling_rights_uint);
 
+    std::optional<std::string> en_passant_target = std::nullopt;
     if (sections[3] != "-") {
-        board.en_passant_target = sections[3];
+        en_passant_target = sections[3];
     }
 
-    board.half_moves = std::stoi(sections[4]);
+    auto half_moves = std::stoi(sections[4]);
 
-    board.full_moves = std::stoi(sections[5]);
+    auto full_moves = std::stoi(sections[5]);
 
-    return board;
+    return Board(pieces, next_team, castling_rights, en_passant_target, half_moves, full_moves);
 }
 
 std::optional<std::string> Board::into_fen(Board board)
