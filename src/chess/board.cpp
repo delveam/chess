@@ -48,11 +48,11 @@ Board::Board(BoardArray pieces, Team next_team, CastlingRights castling_rights, 
 
 std::optional<Piece> Board::get(unsigned int x, unsigned int y)
 {
-    if (x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT) {
+    if (x < 0 || x >= constants::board_width || y < 0 || y >= constants::board_height) {
         return std::nullopt;
     }
 
-    return pieces.at(y * BOARD_WIDTH + x);
+    return pieces.at(y * constants::board_width + x);
 }
 
 std::optional<Board> Board::move_uci(std::string notation)
@@ -66,8 +66,8 @@ std::optional<Board> Board::move_uci(std::string notation)
         return std::nullopt;
     }
 
-    auto start_index = start_coords.value().y * BOARD_WIDTH + start_coords.value().x;
-    auto end_index = end_coords.value().y * BOARD_WIDTH + end_coords.value().x;
+    auto start_index = start_coords.value().y * constants::board_width + start_coords.value().x;
+    auto end_index = end_coords.value().y * constants::board_width + end_coords.value().x;
 
     auto previous = pieces.at(start_index);
     if (previous.type == PieceType::None) {
@@ -79,7 +79,7 @@ std::optional<Board> Board::move_uci(std::string notation)
     auto was_capture = pieces.at(end_index).type != PieceType::None;
 
     // Setup next Board.
-    std::array<Piece, BOARD_WIDTH * BOARD_HEIGHT> pieces;
+    std::array<Piece, constants::board_width * constants::board_height> pieces;
     auto next_team = this->next_team == Team::White ? Team::Black : Team::White;
     auto castling_rights = this->castling_rights;
     auto en_passant_target = this->en_passant_target;
@@ -174,8 +174,8 @@ std::optional<std::string> Board::into_fen(Board board)
 {
     std::string fen = "";
 
-    for (auto y = 0; y < BOARD_HEIGHT; ++y) {
-        for (auto x = 0; x < BOARD_WIDTH; ++x) {
+    for (auto y = 0; y < constants::board_height; ++y) {
+        for (auto x = 0; x < constants::board_width; ++x) {
             auto piece = board.get(x,y);
 
             if (piece->type == PieceType::None) {
@@ -197,7 +197,7 @@ std::optional<std::string> Board::into_fen(Board board)
             }
 
         }
-        if (y < BOARD_HEIGHT - 1) {
+        if (y < constants::board_height - 1) {
             fen+="/";
         }
     }

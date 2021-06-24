@@ -5,7 +5,7 @@
 #include <string>
 #include "piece.hpp"
 
-typedef std::array<Piece, BOARD_WIDTH * BOARD_HEIGHT> BoardArray;
+typedef std::array<Piece, constants::board_width * constants::board_height> BoardArray;
 
 class Board {
 public:

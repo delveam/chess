@@ -15,13 +15,13 @@ Chess::Chess()
 
 void Chess::handle_resize(dam::Context& ctx)
 {
-    square_size = dam::window::get_height(ctx) / BOARD_HEIGHT;
-    if (square_size * BOARD_WIDTH > (int)dam::window::get_width(ctx)) {
-        square_size = dam::window::get_width(ctx) / BOARD_WIDTH;
+    square_size = dam::window::get_height(ctx) / constants::board_height;
+    if (square_size * constants::board_width > (int)dam::window::get_width(ctx)) {
+        square_size = dam::window::get_width(ctx) / constants::board_width;
     }
     board_offset = dam::Vector2F(
-                       (dam::window::get_width(ctx) - (square_size * BOARD_WIDTH)) / 2,
-                       (dam::window::get_height(ctx) - (square_size * BOARD_HEIGHT)) / 2
+                       (dam::window::get_width(ctx) - (square_size * constants::board_width)) / 2,
+                       (dam::window::get_height(ctx) - (square_size * constants::board_height)) / 2
                    );
 
     sprite_scale = (float)square_size / sprite_size;
@@ -38,7 +38,7 @@ void Chess::initialize(dam::Context& ctx)
 
     handle_resize(ctx);
 
-    auto temp = Board::load_from_fen(STARTING_FEN);
+    auto temp = Board::load_from_fen(constants::starting_fen);
     if (temp.has_value()) {
         board = temp.value();
     }
@@ -69,8 +69,8 @@ void Chess::update(dam::Context& ctx)
         auto y = (int)((position.y - board_offset.y) / square_size);
 
         if (board_flipped) {
-            x = BOARD_WIDTH - x - 1;
-            y = BOARD_HEIGHT - y - 1;
+            x = constants::board_width - x - 1;
+            y = constants::board_height - y - 1;
         }
 
         auto target = board.get(x, y);
@@ -90,8 +90,8 @@ void Chess::update(dam::Context& ctx)
         auto y = (int)((position.y - board_offset.y) / square_size);
 
         if (board_flipped) {
-            x = BOARD_WIDTH - x - 1;
-            y = BOARD_HEIGHT - y - 1;
+            x = constants::board_width - x - 1;
+            y = constants::board_height - y - 1;
         }
 
         auto coords = Coordinates::create(x, y);
@@ -130,8 +130,8 @@ void Chess::draw(dam::Context& ctx)
     auto dark_color = Color(0x769656);
 
     // Draw board.
-    for (int y = 0; y < BOARD_HEIGHT; ++y) {
-        for (int x = 0; x < BOARD_WIDTH; ++x) {
+    for (int y = 0; y < constants::board_height; ++y) {
+        for (int x = 0; x < constants::board_width; ++x) {
             auto color = (x + y) % 2 == 0 ? light_color : dark_color;
 
             auto params = DrawParams()
@@ -143,25 +143,25 @@ void Chess::draw(dam::Context& ctx)
     }
 
     // Draw algebraic notations.
-    for (int x = 0; x < BOARD_WIDTH; ++x) {
+    for (int x = 0; x < constants::board_width; ++x) {
         auto color = x % 2 == 0 ? light_color : dark_color;
-        auto temp = !board_flipped ? 'a' + x : 'a' + (BOARD_WIDTH - 1 - x);
+        auto temp = !board_flipped ? 'a' + x : 'a' + (constants::board_width - 1 - x);
         std::string text = "";
         text.push_back(temp);
 
         auto params = DrawParams()
-                      .set_position(board_offset.x + x * square_size + square_size * 0.08, board_offset.y + (BOARD_HEIGHT - 1) * square_size + square_size * 0.75)
+                      .set_position(board_offset.x + x * square_size + square_size * 0.08, board_offset.y + (constants::board_height - 1) * square_size + square_size * 0.75)
                       .set_tint(color);
         draw_text(ctx, text, font, params);
     }
-    for (int y = 0; y < BOARD_HEIGHT; ++y) {
+    for (int y = 0; y < constants::board_height; ++y) {
         auto color = y % 2 == 0 ? light_color : dark_color;
-        auto temp = !board_flipped ? '1' + (BOARD_HEIGHT - 1 - y) : '1' + y;
+        auto temp = !board_flipped ? '1' + (constants::board_height - 1 - y) : '1' + y;
         std::string text = "";
         text.push_back(temp);
 
         auto params = DrawParams()
-                      .set_position(board_offset.x + (BOARD_WIDTH - 1) * square_size + square_size * 0.75, board_offset.y + y * square_size + square_size * 0.08)
+                      .set_position(board_offset.x + (constants::board_width - 1) * square_size + square_size * 0.75, board_offset.y + y * square_size + square_size * 0.08)
                       .set_tint(color);
         draw_text(ctx, text, font, params);
     }
@@ -170,11 +170,11 @@ void Chess::draw(dam::Context& ctx)
         auto first_char = initial_selection.substr(0, 1)[0];
         auto second_char = initial_selection.substr(1, 2);
         auto x = first_char - 'a';
-        auto y = BOARD_HEIGHT - std::stoi(second_char);
+        auto y = constants::board_height - std::stoi(second_char);
 
         if (board_flipped) {
-            x = BOARD_WIDTH - x - 1;
-            y = BOARD_HEIGHT - y - 1;
+            x = constants::board_width - x - 1;
+            y = constants::board_height - y - 1;
         }
 
         x *= square_size;
@@ -192,9 +192,9 @@ void Chess::draw(dam::Context& ctx)
 
     al_set_target_backbuffer(ctx.display);
     // Draw pieces.
-    for (int y = 0; y < BOARD_HEIGHT; ++y) {
-        for (int x = 0; x < BOARD_WIDTH; ++x) {
-            auto index = board_flipped ? ((BOARD_HEIGHT - 1) - y) * BOARD_WIDTH + ((BOARD_WIDTH - 1) - x) : y * BOARD_WIDTH + x;
+    for (int y = 0; y < constants::board_height; ++y) {
+        for (int x = 0; x < constants::board_width; ++x) {
+            auto index = board_flipped ? ((constants::board_height - 1) - y) * constants::board_width + ((constants::board_width - 1) - x) : y * constants::board_width + x;
             auto current = board.pieces[index];
 
             auto subregion_x = 0;
