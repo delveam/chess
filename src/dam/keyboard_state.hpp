@@ -19,5 +19,4 @@ public:
     bool is_key_down(dam::input::Key key) const;
     bool is_key_up(dam::input::Key key) const;
 };
-
 #endif

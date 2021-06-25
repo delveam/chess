@@ -22,5 +22,4 @@ public:
     Vector2F get_position() const;
     int get_scroll_wheel_value() const;
 };
-
 #endif

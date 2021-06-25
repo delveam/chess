@@ -21,5 +21,4 @@ int get_scroll_stride(Context& ctx);
 }
 }
 }
-
 #endif

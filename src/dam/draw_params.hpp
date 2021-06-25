@@ -26,5 +26,4 @@ public:
     DrawParams& set_rotation(float rotation);
     DrawParams& set_tint(Color tint);
 };
-
 #endif

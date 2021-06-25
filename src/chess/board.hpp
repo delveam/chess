@@ -51,5 +51,4 @@ private:
     unsigned int m_half_moves;
     unsigned int m_full_moves;
 };
-
 #endif
