@@ -28,22 +28,22 @@ std::vector<std::string> split(std::string string, std::string delimiter)
 
 Board::Board()
 {
-    pieces.fill(Piece());
-    next_team = Team::None;
-    castling_rights = CastlingRights::None;
-    en_passant_target = std::nullopt;
-    half_moves = 0;
-    full_moves = 1;
+    m_pieces.fill(Piece());
+    m_next_team = Team::None;
+    m_castling_rights = CastlingRights::None;
+    m_en_passant_target = std::nullopt;
+    m_half_moves = 0;
+    m_full_moves = 1;
 }
 
 Board::Board(BoardArray pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves)
 {
-    this->pieces = pieces;
-    this->next_team = next_team;
-    this->castling_rights = castling_rights;
-    this->en_passant_target = en_passant_target;
-    this->half_moves = half_moves;
-    this->full_moves = full_moves;
+    m_pieces = pieces;
+    m_next_team = next_team;
+    m_castling_rights = castling_rights;
+    m_en_passant_target = en_passant_target;
+    m_half_moves = half_moves;
+    m_full_moves = full_moves;
 }
 
 std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
@@ -52,10 +52,10 @@ std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
         return std::nullopt;
     }
 
-    return pieces.at(y * constants::board_width + x);
+    return m_pieces.at(y * constants::board_width + x);
 }
 
-std::optional<Board> Board::move_uci(std::string notation)
+std::optional<Board> Board::move_uci(std::string notation) const
 {
     // TODO: handle promotions (handle a fifth character).
 
@@ -69,26 +69,26 @@ std::optional<Board> Board::move_uci(std::string notation)
     auto start_index = start_coords.value().y * constants::board_width + start_coords.value().x;
     auto end_index = end_coords.value().y * constants::board_width + end_coords.value().x;
 
-    auto previous = pieces.at(start_index);
+    auto previous = m_pieces.at(start_index);
     if (previous.type() == PieceType::None) {
         return std::nullopt;
     }
 
     // TODO(thismarvin): Implement Move Validation right here!
 
-    auto was_capture = pieces.at(end_index).type() != PieceType::None;
+    auto was_capture = m_pieces.at(end_index).type() != PieceType::None;
 
     // Setup next Board.
     BoardArray pieces;
-    auto next_team = this->next_team == Team::White ? Team::Black : Team::White;
-    auto castling_rights = this->castling_rights;
-    auto en_passant_target = this->en_passant_target;
-    auto half_moves = this->half_moves;
-    auto full_moves = this->full_moves;
+    auto next_team = m_next_team == Team::White ? Team::Black : Team::White;
+    auto castling_rights = m_castling_rights;
+    auto en_passant_target = m_en_passant_target;
+    auto half_moves = m_half_moves;
+    auto full_moves = m_full_moves;
 
     // Copy the current board.
-    for (int i = 0; i < (int)this->pieces.size(); ++i) {
-        pieces.at(i) = this->pieces[i];
+    for (int i = 0; i < (int)m_pieces.size(); ++i) {
+        pieces.at(i) = m_pieces[i];
     }
 
     // TODO(thismarvin): castling_rights (depends on move validation system).
@@ -203,7 +203,7 @@ std::optional<std::string> Board::into_fen(Board board)
     }
 
     fen += " ";
-    switch (board.next_team) {
+    switch (board.m_next_team) {
     case Team::White:
         fen += "w";
         break;
@@ -216,19 +216,19 @@ std::optional<std::string> Board::into_fen(Board board)
 
     fen += " ";
     auto can_castle = false;
-    if (static_cast<int>(board.castling_rights) & static_cast<int>(CastlingRights::WhiteKingSide)) {
+    if (static_cast<int>(board.m_castling_rights) & static_cast<int>(CastlingRights::WhiteKingSide)) {
         fen += "K";
         can_castle = true;
     }
-    if (static_cast<int>(board.castling_rights) & static_cast<int>(CastlingRights::WhiteQueenSide)) {
+    if (static_cast<int>(board.m_castling_rights) & static_cast<int>(CastlingRights::WhiteQueenSide)) {
         fen += "Q";
         can_castle = true;
     }
-    if (static_cast<int>(board.castling_rights) & static_cast<int>(CastlingRights::BlackKingSide)) {
+    if (static_cast<int>(board.m_castling_rights) & static_cast<int>(CastlingRights::BlackKingSide)) {
         fen += "k";
         can_castle = true;
     }
-    if (static_cast<int>(board.castling_rights) & static_cast<int>(CastlingRights::BlackQueenSide)) {
+    if (static_cast<int>(board.m_castling_rights) & static_cast<int>(CastlingRights::BlackQueenSide)) {
         fen += "q";
         can_castle = true;
     }
@@ -238,16 +238,16 @@ std::optional<std::string> Board::into_fen(Board board)
     }
 
     fen += " ";
-    if (board.en_passant_target.has_value()) {
-        fen += board.en_passant_target.value();
+    if (board.m_en_passant_target.has_value()) {
+        fen += board.m_en_passant_target.value();
     }
     else {
         fen += "-";
     }
 
-    fen += " " + std::to_string(board.half_moves);
+    fen += " " + std::to_string(board.m_half_moves);
 
-    fen += " " + std::to_string(board.full_moves);
+    fen += " " + std::to_string(board.m_full_moves);
 
     return fen;
 }

@@ -195,7 +195,7 @@ void Chess::draw(dam::Context& ctx)
     for (int y = 0; y < constants::board_height; ++y) {
         for (int x = 0; x < constants::board_width; ++x) {
             auto index = board_flipped ? ((constants::board_height - 1) - y) * constants::board_width + ((constants::board_width - 1) - x) : y * constants::board_width + x;
-            auto current = board.pieces[index];
+            auto current = board.pieces()[index];
 
             auto subregion_x = 0;
             switch (current.type()) {
