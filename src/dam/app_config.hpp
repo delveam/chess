@@ -9,6 +9,7 @@ class AppConfig;
 class dam::AppConfig {
 public:
     AppConfig();
+
     std::string title;
     // bool vsync;
     bool resizable_window;

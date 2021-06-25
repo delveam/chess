@@ -11,6 +11,7 @@ class SmartMouse;
 class dam::input::SmartMouse {
 public:
     SmartMouse();
+
     bool pressed(dam::input::MouseButton button) const;
     bool pressing(dam::input::MouseButton button) const;
     Vector2F get_position() const;

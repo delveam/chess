@@ -10,9 +10,11 @@ class dam::Matrix4F {
 public:
     Matrix4F();
     Matrix4F(std::array<float, 16>);
+
     unsigned int rows;
     unsigned int columns;
     std::array<float, 16> data;
+
     float get(unsigned int x, unsigned int y) const;
     void set(unsigned int x, unsigned int y, float value);
     void set_data(std::array<float, 16>);

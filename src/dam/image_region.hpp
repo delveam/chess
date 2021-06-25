@@ -10,6 +10,7 @@ class dam::graphics::ImageRegion {
 public:
     ImageRegion();
     ImageRegion(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+
     unsigned int x;
     unsigned int y;
     unsigned int width;

@@ -8,6 +8,7 @@ class dam::RectangleF {
 public:
     RectangleF();
     RectangleF(float x, float y, float width, float height);
+
     float x;
     float y;
     float width;

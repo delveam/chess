@@ -9,6 +9,7 @@
 class Chess : public dam::App {
 public:
     Chess();
+
     void initialize(dam::Context& ctx) override;
     void update(dam::Context& ctx) override;
     void event(dam::Context& ctx, dam::EventType event) override;

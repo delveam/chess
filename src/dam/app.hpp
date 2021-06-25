@@ -11,7 +11,9 @@ class App;
 class dam::App {
 public:
     App();
+
     bool loop;
+
     virtual void initialize(Context& ctx) = 0;
     virtual void update(Context& ctx) = 0;
     virtual void event(Context& ctx, EventType event) = 0;

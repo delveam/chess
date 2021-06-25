@@ -13,6 +13,7 @@ class DrawParams;
 class dam::graphics::DrawParams {
 public:
     DrawParams();
+
     Vector2F position;
     Vector2F center;
     Vector2F scale;
