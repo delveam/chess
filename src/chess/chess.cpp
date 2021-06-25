@@ -75,7 +75,7 @@ void Chess::update(dam::Context& ctx)
 
         auto target = board.get(x, y);
 
-        if (target.has_value() && target.value().type != PieceType::None) {
+        if (target.has_value() && target.value().type() != PieceType::None) {
             selected = true;
 
             auto coords = Coordinates::create(x, y).value();
@@ -198,7 +198,7 @@ void Chess::draw(dam::Context& ctx)
             auto current = board.pieces[index];
 
             auto subregion_x = 0;
-            switch (current.type) {
+            switch (current.type()) {
             case PieceType::Pawn:
                 break;
             case PieceType::Bishop:
@@ -220,13 +220,13 @@ void Chess::draw(dam::Context& ctx)
                 break;
             }
 
-            if (current.type != PieceType::None) {
+            if (current.type() != PieceType::None) {
                 auto params = DrawParams()
                               .set_position(board_offset.x + x * square_size, board_offset.y + y * square_size)
                               .set_scale(sprite_scale, sprite_scale);
                 auto region = ImageRegion();
                 region.x = subregion_x;
-                region.y = current.team == Team::White ? 0 : sprite_size;
+                region.y = current.team() == Team::White ? 0 : sprite_size;
                 region.width = sprite_size;
                 region.height = sprite_size;
 

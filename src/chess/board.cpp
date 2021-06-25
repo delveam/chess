@@ -70,13 +70,13 @@ std::optional<Board> Board::move_uci(std::string notation)
     auto end_index = end_coords.value().y * constants::board_width + end_coords.value().x;
 
     auto previous = pieces.at(start_index);
-    if (previous.type == PieceType::None) {
+    if (previous.type() == PieceType::None) {
         return std::nullopt;
     }
 
     // TODO(thismarvin): Implement Move Validation right here!
 
-    auto was_capture = pieces.at(end_index).type != PieceType::None;
+    auto was_capture = pieces.at(end_index).type() != PieceType::None;
 
     // Setup next Board.
     BoardArray pieces;
@@ -94,7 +94,7 @@ std::optional<Board> Board::move_uci(std::string notation)
     // TODO(thismarvin): castling_rights (depends on move validation system).
     // TODO(thismarvin): en_passant_target (also depends on move validation system).
 
-    if (was_capture || previous.type == PieceType::Pawn) {
+    if (was_capture || previous.type() == PieceType::Pawn) {
         ++half_moves;
     }
 
@@ -178,11 +178,11 @@ std::optional<std::string> Board::into_fen(Board board)
         for (auto x = 0; x < constants::board_width; ++x) {
             auto piece = board.get(x,y);
 
-            if (piece->type == PieceType::None) {
+            if (piece->type() == PieceType::None) {
                 auto total_empty = 1;
                 while (true) {
                     auto next_piece = board.get(x + 1, y);
-                    if (next_piece.has_value() && next_piece->type == PieceType::None) {
+                    if (next_piece.has_value() && next_piece->type() == PieceType::None) {
                         ++total_empty;
                         ++x;
                     }

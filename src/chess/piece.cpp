@@ -1,83 +1,72 @@
 #include <optional>
 #include "piece.hpp"
 
-Piece::Piece()
-{
-    type = PieceType::None;
-    team = Team::None;
-}
-
-Piece::Piece(PieceType type, Team team)
-{
-    this->type = type;
-    this->team = team;
-}
-
 Piece::Piece(char piece)
 {
     switch (piece) {
     // White
     case 'P':
-        type = PieceType::Pawn;
-        team = Team::White;
+        m_type = PieceType::Pawn;
+        m_team = Team::White;
         break;
     case 'N':
-        type = PieceType::Knight;
-        team = Team::White;
+        m_type = PieceType::Knight;
+        m_team = Team::White;
         break;
     case 'B':
-        type = PieceType::Bishop;
-        team = Team::White;
+        m_type = PieceType::Bishop;
+        m_team = Team::White;
         break;
     case 'R':
-        type = PieceType::Rook;
-        team = Team::White;
+        m_type = PieceType::Rook;
+        m_team = Team::White;
         break;
     case 'Q':
-        type = PieceType::Queen;
-        team = Team::White;
+        m_type = PieceType::Queen;
+        m_team = Team::White;
         break;
     case 'K':
-        type = PieceType::King;
-        team = Team::White;
+        m_type = PieceType::King;
+        m_team = Team::White;
         break;
 
     // Black
     case 'p':
-        type = PieceType::Pawn;
-        team = Team::Black;
+        m_type = PieceType::Pawn;
+        m_team = Team::Black;
         break;
     case 'n':
-        type = PieceType::Knight;
-        team = Team::Black;
+        m_type = PieceType::Knight;
+        m_team = Team::Black;
         break;
     case 'b':
-        type = PieceType::Bishop;
-        team = Team::Black;
+        m_type = PieceType::Bishop;
+        m_team = Team::Black;
         break;
     case 'r':
-        type = PieceType::Rook;
-        team = Team::Black;
+        m_type = PieceType::Rook;
+        m_team = Team::Black;
         break;
     case 'q':
-        type = PieceType::Queen;
-        team = Team::Black;
+        m_type = PieceType::Queen;
+        m_team = Team::Black;
         break;
     case 'k':
-        type = PieceType::King;
-        team = Team::Black;
+        m_type = PieceType::King;
+        m_team = Team::Black;
         break;
 
     default:
-        type = PieceType::None;
-        team = Team::None;
+        m_type = PieceType::None;
+        m_team = Team::None;
     }
 }
 
 std::string Piece::to_string() const
 {
     std::optional<char> temp = std::nullopt;
-    switch(type) {
+
+    switch(m_type) {
     case PieceType::Pawn:
         temp = 'p';
         break;
@@ -100,7 +89,7 @@ std::string Piece::to_string() const
         break;
     }
 
-    if (temp.has_value() && team == Team::White) {
+    if (temp.has_value() && m_team == Team::White) {
         temp = toupper(temp.value());
     }
 
