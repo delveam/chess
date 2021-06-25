@@ -60,7 +60,7 @@ void Allegro::run(dam::AppConfig& config, dam::App& app)
     }
 
     auto display_flags = 0;
-    display_flags = config.resizable_window ? display_flags | ALLEGRO_RESIZABLE : display_flags;
+    display_flags = config.resizable_window() ? display_flags | ALLEGRO_RESIZABLE : display_flags;
     al_set_new_display_flags(display_flags);
     ALLEGRO_DISPLAY* display = al_create_display(default_window_width, default_window_height);
     if(!display) {
@@ -71,9 +71,9 @@ void Allegro::run(dam::AppConfig& config, dam::App& app)
     // NOTE: Without the following line of code the app may not be centered correctly upon startup.
     al_acknowledge_resize(display);
 
-    al_set_window_title(display, config.title.c_str());
+    al_set_window_title(display, config.title().c_str());
 
-    if (!config.mouse_visibility) {
+    if (!config.mouse_visibility()) {
         al_hide_mouse_cursor(display);
     }
 

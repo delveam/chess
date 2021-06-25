@@ -2,36 +2,28 @@
 
 dam::AppConfig::AppConfig()
 {
-    title = "My App";
-    // vsync = false;
-    resizable_window = false;
-    mouse_visibility = true;
+    m_title = "My App";
+    m_resizable_window = false;
+    m_mouse_visibility = true;
 }
 
 dam::AppConfig& dam::AppConfig::set_title(std::string title)
 {
-    this->title = title;
+    m_title = title;
 
     return *this;
 }
 
-// dam::AppConfig& dam::AppConfig::enable_vsync()
-// {
-//     vsync = true;
-
-//     return *this;
-// }
-
 dam::AppConfig& dam::AppConfig::enable_resizable_window()
 {
-    resizable_window = true;
+    m_resizable_window = true;
 
     return *this;
 }
 
 dam::AppConfig& dam::AppConfig::disable_mouse_visibility()
 {
-    mouse_visibility = false;
+    m_mouse_visibility = false;
 
     return *this;
 }
