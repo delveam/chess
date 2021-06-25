@@ -66,8 +66,8 @@ std::optional<Board> Board::move_uci(std::string notation) const
         return std::nullopt;
     }
 
-    auto start_index = start_coords.value().y * constants::board_width + start_coords.value().x;
-    auto end_index = end_coords.value().y * constants::board_width + end_coords.value().x;
+    auto start_index = start_coords.value().y() * constants::board_width + start_coords.value().x();
+    auto end_index = end_coords.value().y() * constants::board_width + end_coords.value().x();
 
     auto previous = m_pieces.at(start_index);
     if (previous.type() == PieceType::None) {

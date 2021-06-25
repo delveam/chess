@@ -16,8 +16,8 @@ std::optional<Coordinates> Coordinates::create(unsigned int x, unsigned int y)
 std::string Coordinates::to_string(Coordinates coordinates)
 {
     std::string result = "";
-    result.push_back('a' + coordinates.x);
-    result.push_back('0' + constants::board_height - coordinates.y);
+    result.push_back('a' + coordinates.m_x);
+    result.push_back('0' + constants::board_height - coordinates.m_y);
 
     return result;
 }
