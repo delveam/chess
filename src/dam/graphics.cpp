@@ -3,7 +3,7 @@
 
 ALLEGRO_COLOR convert_dam_color(dam::graphics::Color color)
 {
-    return al_map_rgba(color.r, color.g, color.b, color.a * 255);
+    return al_map_rgba(color.r(), color.g(), color.b(), (int)(color.a() * 255));
 }
 
 dam::graphics::Texture* dam::graphics::load_texture(std::string path)
