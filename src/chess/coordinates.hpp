@@ -5,8 +5,14 @@
 
 class Coordinates {
 public:
-    const unsigned int& x() const { return m_x; }
-    const unsigned int& y() const { return m_y; }
+    const unsigned int& x() const
+    {
+        return m_x;
+    }
+    const unsigned int& y() const
+    {
+        return m_y;
+    }
 
     static std::optional<Coordinates> create(unsigned int x, unsigned int y);
     static std::string to_string(Coordinates coordinates);
