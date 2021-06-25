@@ -79,7 +79,7 @@ std::optional<Board> Board::move_uci(std::string notation)
     auto was_capture = pieces.at(end_index).type != PieceType::None;
 
     // Setup next Board.
-    std::array<Piece, constants::board_width * constants::board_height> pieces;
+    BoardArray pieces;
     auto next_team = this->next_team == Team::White ? Team::Black : Team::White;
     auto castling_rights = this->castling_rights;
     auto en_passant_target = this->en_passant_target;

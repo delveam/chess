@@ -5,6 +5,7 @@
 #include <string>
 #include "piece.hpp"
 
+// REMARK(thismarvin): I am not sure if this is a good idea, but it certainly saves on typing!
 typedef std::array<Piece, constants::board_width * constants::board_height> BoardArray;
 
 class Board {
