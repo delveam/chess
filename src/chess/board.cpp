@@ -46,7 +46,7 @@ Board::Board(BoardArray pieces, Team next_team, CastlingRights castling_rights, 
     this->full_moves = full_moves;
 }
 
-std::optional<Piece> Board::get(unsigned int x, unsigned int y)
+std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
 {
     if (x < 0 || x >= constants::board_width || y < 0 || y >= constants::board_height) {
         return std::nullopt;

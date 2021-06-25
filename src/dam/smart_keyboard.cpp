@@ -2,12 +2,12 @@
 
 dam::input::SmartKeyboard::SmartKeyboard() {}
 
-bool dam::input::SmartKeyboard::pressed(dam::input::Key key)
+bool dam::input::SmartKeyboard::pressed(dam::input::Key key) const
 {
     return (current.is_key_down(key) && !previous.is_key_down(key));
 }
 
-bool dam::input::SmartKeyboard::pressing(dam::input::Key key)
+bool dam::input::SmartKeyboard::pressing(dam::input::Key key) const
 {
     return current.is_key_down(key);
 }

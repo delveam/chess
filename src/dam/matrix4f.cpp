@@ -33,7 +33,7 @@ dam::Matrix4F::Matrix4F(std::array<float, 16> data)
     }
 }
 
-float dam::Matrix4F::get(unsigned int x, unsigned int y)
+float dam::Matrix4F::get(unsigned int x, unsigned int y) const
 {
     return data[y * columns + x];
 }

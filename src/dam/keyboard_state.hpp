@@ -14,8 +14,8 @@ class dam::input::KeyboardState {
 public:
     KeyboardState();
     std::unique_ptr<ALLEGRO_KEYBOARD_STATE> state;
-    bool is_key_down(dam::input::Key key);
-    bool is_key_up(dam::input::Key key);
+    bool is_key_down(dam::input::Key key) const;
+    bool is_key_up(dam::input::Key key) const;
 };
 
 #endif

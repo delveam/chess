@@ -19,7 +19,7 @@ public:
     unsigned int half_moves;
     unsigned int full_moves;
 
-    std::optional<Piece> get(unsigned int x, unsigned int y);
+    std::optional<Piece> get(unsigned int x, unsigned int y) const;
     std::optional<Board> move_uci(std::string notation);
     static std::optional<Board> load_from_fen(std::string fen);
     static std::optional<std::string> into_fen(Board board);

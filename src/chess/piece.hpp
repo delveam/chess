@@ -8,8 +8,8 @@ public:
     Piece();
     Piece(PieceType type, Team team);
     Piece(char piece);
-    std::string to_string();
     PieceType type;
     Team team;
+    std::string to_string() const;
 };
 #endif

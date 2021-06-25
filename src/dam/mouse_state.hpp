@@ -15,10 +15,10 @@ class dam::input::MouseState {
 public:
     MouseState();
     std::unique_ptr<ALLEGRO_MOUSE_STATE> state;
-    bool is_button_down(dam::input::MouseButton button);
-    bool is_button_up(dam::input::MouseButton button);
-    Vector2F get_position();
-    int get_scroll_wheel_value();
+    bool is_button_down(dam::input::MouseButton button) const;
+    bool is_button_up(dam::input::MouseButton button) const;
+    Vector2F get_position() const;
+    int get_scroll_wheel_value() const;
 };
 
 #endif

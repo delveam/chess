@@ -74,7 +74,7 @@ Piece::Piece(char piece)
     }
 }
 
-std::string Piece::to_string()
+std::string Piece::to_string() const
 {
     std::optional<char> temp = std::nullopt;
     switch(type) {
