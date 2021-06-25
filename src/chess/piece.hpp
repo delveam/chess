@@ -9,11 +9,11 @@ public:
     Piece(PieceType type, Team team): m_type(type), m_team(team) {}
     Piece(char piece);
 
-    const PieceType& type() const
+    const PieceType type() const
     {
         return m_type;
     }
-    const Team& team() const
+    const Team team() const
     {
         return m_team;
     }

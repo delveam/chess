@@ -17,23 +17,23 @@ public:
     {
         return m_pieces;
     }
-    const Team& next_team() const
+    const Team next_team() const
     {
         return m_next_team;
     }
-    const CastlingRights& castling_rights() const
+    const CastlingRights castling_rights() const
     {
         return m_castling_rights;
     }
-    const std::optional<std::string>& en_passant_target() const
+    const std::optional<std::string> en_passant_target() const
     {
         return m_en_passant_target;
     }
-    const unsigned int& half_moves() const
+    const unsigned int half_moves() const
     {
         return m_half_moves;
     }
-    const unsigned int& full_moves() const
+    const unsigned int full_moves() const
     {
         return m_full_moves;
     }

@@ -5,11 +5,11 @@
 
 class Coordinates {
 public:
-    const unsigned int& x() const
+    const unsigned int x() const
     {
         return m_x;
     }
-    const unsigned int& y() const
+    const unsigned int y() const
     {
         return m_y;
     }
