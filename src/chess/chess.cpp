@@ -243,7 +243,3 @@ void Chess::destroy(dam::Context& ctx)
     unload_font(font);
     unload_texture(pieces);
 }
-
-Chess::~Chess()
-{
-}

@@ -14,7 +14,6 @@ public:
     void event(dam::Context& ctx, dam::EventType event) override;
     void draw(dam::Context& ctx) override;
     void destroy(dam::Context& ctx) override;
-    ~Chess();
 private:
     dam::graphics::Font* font;
     dam::graphics::Texture* pieces;
