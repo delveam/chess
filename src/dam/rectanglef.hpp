@@ -6,7 +6,7 @@ class RectangleF;
 
 class dam::RectangleF {
 public:
-    RectangleF();
+    RectangleF() = default;
     RectangleF(float x, float y, float width, float height) :
         m_x(x),
         m_y(y),

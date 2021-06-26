@@ -10,9 +10,9 @@ class App;
 
 class dam::App {
 public:
-    App();
+    App() = default;
 
-    bool loop;
+    bool loop { true };
 
     virtual void initialize(Context& ctx) = 0;
     virtual void update(Context& ctx) = 0;

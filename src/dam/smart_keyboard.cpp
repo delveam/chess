@@ -1,20 +1,18 @@
 #include "smart_keyboard.hpp"
 
-dam::input::SmartKeyboard::SmartKeyboard() {}
-
 bool dam::input::SmartKeyboard::pressed(dam::input::Key key) const
 {
-    return (current.is_key_down(key) && !previous.is_key_down(key));
+    return (m_current.is_key_down(key) && !m_previous.is_key_down(key));
 }
 
 bool dam::input::SmartKeyboard::pressing(dam::input::Key key) const
 {
-    return current.is_key_down(key);
+    return m_current.is_key_down(key);
 }
 
 void dam::input::SmartKeyboard::update()
 {
     auto temp = dam::input::KeyboardState();
-    previous.state.swap(current.state);
-    current.state.swap(temp.state);
+    m_previous.state.swap(m_current.state);
+    m_current.state.swap(temp.state);
 }

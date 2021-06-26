@@ -1,35 +1,33 @@
 #include "smart_mouse.hpp"
 
-dam::input::SmartMouse::SmartMouse() {}
-
 bool dam::input::SmartMouse::pressed(dam::input::MouseButton button) const
 {
-    return (current.is_button_down(button) && !previous.is_button_down(button));
+    return (m_current.is_button_down(button) && !m_previous.is_button_down(button));
 }
 
 bool dam::input::SmartMouse::pressing(dam::input::MouseButton button) const
 {
-    return current.is_button_down(button);
+    return m_current.is_button_down(button);
 }
 
 dam::Vector2F dam::input::SmartMouse::get_position() const
 {
-    return current.get_position();
+    return m_current.get_position();
 }
 
 int dam::input::SmartMouse::get_scroll_wheel_value() const
 {
-    return current.get_scroll_wheel_value();
+    return m_current.get_scroll_wheel_value();
 }
 
 int dam::input::SmartMouse::get_scroll_stride() const
 {
-    return current.get_scroll_wheel_value() - previous.get_scroll_wheel_value();
+    return m_current.get_scroll_wheel_value() - m_previous.get_scroll_wheel_value();
 }
 
 void dam::input::SmartMouse::update()
 {
     auto temp = dam::input::MouseState();
-    previous.state.swap(current.state);
-    current.state.swap(temp.state);
+    m_previous.state.swap(m_current.state);
+    m_current.state.swap(temp.state);
 }

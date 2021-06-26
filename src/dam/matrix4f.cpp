@@ -15,24 +15,6 @@ std::array<float, 16> get_identity_data()
     return temp;
 }
 
-// TODO: check for exceptions? (e.g. size)
-
-dam::Matrix4F::Matrix4F()
-{
-    m_rows = 4;
-    m_columns = 4;
-}
-
-dam::Matrix4F::Matrix4F(std::array<float, 16> data)
-{
-    m_rows = 4;
-    m_columns = 4;
-
-    for (int i = 0; i < (int)m_data.size(); ++i) {
-        m_data[i] = data[i];
-    }
-}
-
 float dam::Matrix4F::get(unsigned int x, unsigned int y) const
 {
     return m_data[y * m_columns + x];

@@ -8,8 +8,11 @@ class Matrix4F;
 
 class dam::Matrix4F {
 public:
-    Matrix4F();
-    Matrix4F(std::array<float, 16>);
+    Matrix4F() = default;
+    Matrix4F(std::array<float, 16> data) :
+        m_data(data)
+    {
+    }
 
     unsigned int rows() const
     {
@@ -44,8 +47,8 @@ public:
     static Matrix4F create_translation(float x, float y, float z);
     static Matrix4F create_scale(float x, float y, float z);
 private:
-    unsigned int m_rows;
-    unsigned int m_columns;
+    const unsigned int m_rows { 4 };
+    const unsigned int m_columns { 4 };
     std::array<float, 16> m_data;
 };
 #endif

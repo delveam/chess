@@ -8,7 +8,7 @@ class AppConfig;
 
 class dam::AppConfig {
 public:
-    AppConfig();
+    AppConfig() = default;
 
     std::string title() const
     {
@@ -27,8 +27,8 @@ public:
     AppConfig& enable_resizable_window();
     AppConfig& disable_mouse_visibility();
 private:
-    std::string m_title;
-    bool m_resizable_window;
-    bool m_mouse_visibility;
+    std::string m_title { "My App" };
+    bool m_resizable_window { false };
+    bool m_mouse_visibility { true };
 };
 #endif

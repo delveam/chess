@@ -8,7 +8,8 @@ class Color;
 
 class dam::graphics::Color {
 public:
-    Color(): m_r(0), m_g(0), m_b(0), m_a(1) {}
+    Color() = default;
+    // FIXME(thismarvin): Should Color just have a single `uint hex` property so we can use a member initialization list here?
     Color(unsigned int hexadecimal, float alpha=1);
 
     unsigned int r() const
@@ -30,9 +31,9 @@ public:
 
     void multiply(float value);
 private:
-    unsigned int m_r;
-    unsigned int m_g;
-    unsigned int m_b;
-    float m_a;
+    unsigned int m_r { 0 };
+    unsigned int m_g { 0 };
+    unsigned int m_b { 0 };
+    float m_a { 1 };
 };
 #endif

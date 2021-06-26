@@ -10,7 +10,7 @@ class SmartMouse;
 
 class dam::input::SmartMouse {
 public:
-    SmartMouse();
+    SmartMouse() = default;
 
     bool pressed(dam::input::MouseButton button) const;
     bool pressing(dam::input::MouseButton button) const;
@@ -19,7 +19,7 @@ public:
     int get_scroll_stride() const;
     void update();
 private:
-    dam::input::MouseState previous;
-    dam::input::MouseState current;
+    dam::input::MouseState m_previous;
+    dam::input::MouseState m_current;
 };
 #endif

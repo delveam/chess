@@ -13,7 +13,11 @@ class MouseState;
 
 class dam::input::MouseState {
 public:
-    MouseState();
+    MouseState() :
+        state(std::make_unique<ALLEGRO_MOUSE_STATE>())
+    {
+        al_get_mouse_state(state.get());
+    }
 
     std::unique_ptr<ALLEGRO_MOUSE_STATE> state;
 

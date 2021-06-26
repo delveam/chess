@@ -8,7 +8,7 @@ class ImageRegion;
 
 class dam::graphics::ImageRegion {
 public:
-    ImageRegion();
+    ImageRegion() = default;
     ImageRegion(unsigned int x, unsigned int y, unsigned int width, unsigned int height) :
         m_x(x),
         m_y(y),

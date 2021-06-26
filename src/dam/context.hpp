@@ -12,7 +12,7 @@ class Context;
 class dam::Context {
 // TODO: I want this to be "internal"... but I do not think that is possible within cpp.
 public:
-    Context();
+    Context() = default;
 
     ALLEGRO_DISPLAY* display;
     unsigned int display_width;

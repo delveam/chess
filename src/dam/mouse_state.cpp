@@ -1,11 +1,5 @@
 #include "mouse_state.hpp"
 
-dam::input::MouseState::MouseState()
-{
-    state = std::make_unique<ALLEGRO_MOUSE_STATE>();
-    al_get_mouse_state(state.get());
-}
-
 bool dam::input::MouseState::is_button_down(dam::input::MouseButton button) const
 {
     return state.get()->buttons & static_cast<int>(button);

@@ -10,13 +10,13 @@ class SmartKeyboard;
 
 class dam::input::SmartKeyboard {
 public:
-    SmartKeyboard();
+    SmartKeyboard() = default;
 
     bool pressed(dam::input::Key key) const;
     bool pressing(dam::input::Key key) const;
     void update();
 private:
-    dam::input::KeyboardState previous;
-    dam::input::KeyboardState current;
+    dam::input::KeyboardState m_previous;
+    dam::input::KeyboardState m_current;
 };
 #endif
