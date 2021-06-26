@@ -11,9 +11,18 @@ public:
     Matrix4F();
     Matrix4F(std::array<float, 16>);
 
-    unsigned int rows;
-    unsigned int columns;
-    std::array<float, 16> data;
+    unsigned int rows() const
+    {
+        return m_rows;
+    }
+    unsigned int columns() const
+    {
+        return m_columns;
+    }
+    const std::array<float, 16>& data() const
+    {
+        return m_data;
+    }
 
     float get(unsigned int x, unsigned int y) const;
     void set(unsigned int x, unsigned int y, float value);
@@ -34,5 +43,9 @@ public:
     static Matrix4F create_rotation_z(float angle);
     static Matrix4F create_translation(float x, float y, float z);
     static Matrix4F create_scale(float x, float y, float z);
+private:
+    unsigned int m_rows;
+    unsigned int m_columns;
+    std::array<float, 16> m_data;
 };
 #endif
