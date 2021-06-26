@@ -34,21 +34,21 @@ void dam::graphics::clear(Color color)
 
 void dam::graphics::draw_rectangle(Context& ctx, DrawParams params)
 {
-    auto x = params.position.x;
-    auto y = params.position.y;
-    auto width = params.scale.x;
-    auto height = params.scale.y;
-    auto tint = convert_dam_color(params.tint);
+    auto x = params.position().x();
+    auto y = params.position().y();
+    auto width = params.scale().x();
+    auto height = params.scale().y();
+    auto tint = convert_dam_color(params.tint());
 
     al_draw_filled_rectangle(x, y, x + width, y + height, tint);
 }
 
 void dam::graphics::draw_circle(Context& ctx, DrawParams params)
 {
-    auto x = params.position.x;
-    auto y = params.position.y;
-    auto width = params.scale.x;
-    auto tint = convert_dam_color(params.tint);
+    auto x = params.position().x();
+    auto y = params.position().y();
+    auto width = params.scale().x();
+    auto tint = convert_dam_color(params.tint());
 
     al_draw_filled_circle(x, y, width * 0.5, tint);
 }
@@ -59,14 +59,14 @@ void dam::graphics::draw_texture(Context& ctx, Texture* texture, ImageRegion reg
     auto subregion_y = region.y();
     auto subregion_width = region.width();
     auto subregion_height = region.height();
-    auto tint = convert_dam_color(params.tint);
-    auto center_x = params.center.x;
-    auto center_y = params.center.y;
-    auto x = params.position.x;
-    auto y = params.position.y;
-    auto scale_x = params.scale.x;
-    auto scale_y = params.scale.y;
-    auto rotation = params.rotation;
+    auto tint = convert_dam_color(params.tint());
+    auto center_x = params.center().x();
+    auto center_y = params.center().y();
+    auto x = params.position().x();
+    auto y = params.position().y();
+    auto scale_x = params.scale().x();
+    auto scale_y = params.scale().y();
+    auto rotation = params.rotation();
 
     al_draw_tinted_scaled_rotated_bitmap_region(
         texture,
@@ -82,9 +82,9 @@ void dam::graphics::draw_texture(Context& ctx, Texture* texture, ImageRegion reg
 
 void dam::graphics::draw_text(Context& ctx, std::string text, Font* font, DrawParams params)
 {
-    auto x = params.position.x;
-    auto y = params.position.y;
-    auto tint = convert_dam_color(params.tint);
+    auto x = params.position().x();
+    auto y = params.position().y();
+    auto tint = convert_dam_color(params.tint());
 
     al_draw_text(font, tint, x, y, 0, text.c_str());
 }

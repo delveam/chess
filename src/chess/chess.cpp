@@ -65,8 +65,8 @@ void Chess::update(dam::Context& ctx)
 
     if (!selected && Mouse::pressed(ctx, MouseButton::Left)) {
         auto position = Mouse::get_position(ctx);
-        auto x = (int)((position.x - board_offset.x) / square_size);
-        auto y = (int)((position.y - board_offset.y) / square_size);
+        auto x = (int)((position.x() - board_offset.x()) / square_size);
+        auto y = (int)((position.y() - board_offset.y()) / square_size);
 
         if (board_flipped) {
             x = constants::board_width - x - 1;
@@ -86,8 +86,8 @@ void Chess::update(dam::Context& ctx)
     }
     else if (selected && Mouse::pressed(ctx, MouseButton::Left)) {
         auto position = Mouse::get_position(ctx);
-        auto x = (int)((position.x - board_offset.x) / square_size);
-        auto y = (int)((position.y - board_offset.y) / square_size);
+        auto x = (int)((position.x() - board_offset.x()) / square_size);
+        auto y = (int)((position.y() - board_offset.y()) / square_size);
 
         if (board_flipped) {
             x = constants::board_width - x - 1;
@@ -135,7 +135,7 @@ void Chess::draw(dam::Context& ctx)
             auto color = (x + y) % 2 == 0 ? light_color : dark_color;
 
             auto params = DrawParams()
-                          .set_position(board_offset.x + x * square_size, board_offset.y + y * square_size)
+                          .set_position(board_offset.x() + x * square_size, board_offset.y() + y * square_size)
                           .set_scale(square_size, square_size)
                           .set_tint(color);
             draw_rectangle(ctx, params);
@@ -150,7 +150,7 @@ void Chess::draw(dam::Context& ctx)
         text.push_back(temp);
 
         auto params = DrawParams()
-                      .set_position(board_offset.x + x * square_size + square_size * 0.08, board_offset.y + (constants::board_height - 1) * square_size + square_size * 0.75)
+                      .set_position(board_offset.x() + x * square_size + square_size * 0.08, board_offset.y() + (constants::board_height - 1) * square_size + square_size * 0.75)
                       .set_tint(color);
         draw_text(ctx, text, font, params);
     }
@@ -161,7 +161,7 @@ void Chess::draw(dam::Context& ctx)
         text.push_back(temp);
 
         auto params = DrawParams()
-                      .set_position(board_offset.x + (constants::board_width - 1) * square_size + square_size * 0.75, board_offset.y + y * square_size + square_size * 0.08)
+                      .set_position(board_offset.x() + (constants::board_width - 1) * square_size + square_size * 0.75, board_offset.y() + y * square_size + square_size * 0.08)
                       .set_tint(color);
         draw_text(ctx, text, font, params);
     }
@@ -178,9 +178,9 @@ void Chess::draw(dam::Context& ctx)
         }
 
         x *= square_size;
-        x += board_offset.x;
+        x += board_offset.x();
         y *= square_size;
-        y += board_offset.y;
+        y += board_offset.y();
 
         auto params = DrawParams()
                       .set_position(x, y)
@@ -222,7 +222,7 @@ void Chess::draw(dam::Context& ctx)
 
             if (current.type() != PieceType::None) {
                 auto params = DrawParams()
-                              .set_position(board_offset.x + x * square_size, board_offset.y + y * square_size)
+                              .set_position(board_offset.x() + x * square_size, board_offset.y() + y * square_size)
                               .set_scale(sprite_scale, sprite_scale);
                 auto region = ImageRegion(
                                   subregion_x,
