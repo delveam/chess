@@ -67,7 +67,7 @@ $(DAM_DEBUG_OBJECTS): build/debug/dam/%.o: src/dam/%.cpp $(DAM_HEADERS) build/de
 	@echo -e "$(TERM_GREEN)Building$(TERM_NC) $(TERM_BLUE)$@$(TERM_NC)"
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
-$(CHESS_DEBUG_OBJECTS): build/debug/chess/%.o: src/chess/%.cpp $(CHESS_HEADERS) build/deps/allegro5/include/allegro5/allegro5.h | build/debug/chess
+$(CHESS_DEBUG_OBJECTS): build/debug/chess/%.o: src/chess/%.cpp $(DAM_HEADERS) $(CHESS_HEADERS) build/deps/allegro5/include/allegro5/allegro5.h | build/debug/chess
 	@echo -e "$(TERM_GREEN)Building$(TERM_NC) $(TERM_BLUE)$@$(TERM_NC)"
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(DEBUG_FLAGS) -o $@ -c $<
 
@@ -92,7 +92,7 @@ $(DAM_RELEASE_OBJECTS): build/release/dam/%.o: src/dam/%.cpp $(DAM_HEADERS) buil
 	@echo -e "$(TERM_GREEN)Building$(TERM_NC) $(TERM_BLUE)$@$(TERM_NC)"
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
 
-$(CHESS_RELEASE_OBJECTS): build/release/chess/%.o: src/chess/%.cpp $(CHESS_HEADERS) build/deps/allegro5/include/allegro5/allegro5.h | build/release/chess
+$(CHESS_RELEASE_OBJECTS): build/release/chess/%.o: src/chess/%.cpp $(DAM_HEADERS) $(CHESS_HEADERS) build/deps/allegro5/include/allegro5/allegro5.h | build/release/chess
 	@echo -e "$(TERM_GREEN)Building$(TERM_NC) $(TERM_BLUE)$@$(TERM_NC)"
 	$(CC) $(INCLUDE_FLAGS) $(FLAGS) $(RELEASE_FLAGS) -o $@ -c $<
 
