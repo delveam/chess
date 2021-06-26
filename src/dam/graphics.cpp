@@ -55,10 +55,10 @@ void dam::graphics::draw_circle(Context& ctx, DrawParams params)
 
 void dam::graphics::draw_texture(Context& ctx, Texture* texture, ImageRegion region, DrawParams params)
 {
-    auto subregion_x = region.x;
-    auto subregion_y = region.y;
-    auto subregion_width = region.width;
-    auto subregion_height = region.height;
+    auto subregion_x = region.x();
+    auto subregion_y = region.y();
+    auto subregion_width = region.width();
+    auto subregion_height = region.height();
     auto tint = convert_dam_color(params.tint);
     auto center_x = params.center.x;
     auto center_y = params.center.y;

@@ -224,11 +224,12 @@ void Chess::draw(dam::Context& ctx)
                 auto params = DrawParams()
                               .set_position(board_offset.x + x * square_size, board_offset.y + y * square_size)
                               .set_scale(sprite_scale, sprite_scale);
-                auto region = ImageRegion();
-                region.x = subregion_x;
-                region.y = current.team() == Team::White ? 0 : sprite_size;
-                region.width = sprite_size;
-                region.height = sprite_size;
+                auto region = ImageRegion(
+                                  subregion_x,
+                                  current.team() == Team::White ? 0 : sprite_size,
+                                  sprite_size,
+                                  sprite_size
+                              );
 
                 draw_texture(ctx, pieces, region, params);
             }
