@@ -10,30 +10,38 @@ typedef std::array<Piece, constants::board_width * constants::board_height> Boar
 
 class Board {
 public:
-    Board();
-    Board(BoardArray pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves);
+    Board() = default;
+    Board(BoardArray pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves) :
+        m_pieces(pieces),
+        m_next_team(next_team),
+        m_castling_rights(castling_rights),
+        m_en_passant_target(en_passant_target),
+        m_half_moves(half_moves),
+        m_full_moves(full_moves)
+    {
+    }
 
     const BoardArray& pieces() const
     {
         return m_pieces;
     }
-    const Team next_team() const
+    Team next_team() const
     {
         return m_next_team;
     }
-    const CastlingRights castling_rights() const
+    CastlingRights castling_rights() const
     {
         return m_castling_rights;
     }
-    const std::optional<std::string> en_passant_target() const
+    std::optional<std::string> en_passant_target() const
     {
         return m_en_passant_target;
     }
-    const unsigned int half_moves() const
+    unsigned int half_moves() const
     {
         return m_half_moves;
     }
-    const unsigned int full_moves() const
+    unsigned int full_moves() const
     {
         return m_full_moves;
     }
@@ -45,10 +53,10 @@ public:
     static std::optional<std::string> into_fen(Board board);
 private:
     BoardArray m_pieces;
-    Team m_next_team;
-    CastlingRights m_castling_rights;
-    std::optional<std::string> m_en_passant_target;
-    unsigned int m_half_moves;
-    unsigned int m_full_moves;
+    Team m_next_team { Team::None };
+    CastlingRights m_castling_rights { CastlingRights::None };
+    std::optional<std::string> m_en_passant_target { std::nullopt };
+    unsigned int m_half_moves { 0 };
+    unsigned int m_full_moves { 1 };
 };
 #endif

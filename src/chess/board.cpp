@@ -26,26 +26,6 @@ std::vector<std::string> split(std::string string, std::string delimiter)
     return result;
 }
 
-Board::Board()
-{
-    m_pieces.fill(Piece());
-    m_next_team = Team::None;
-    m_castling_rights = CastlingRights::None;
-    m_en_passant_target = std::nullopt;
-    m_half_moves = 0;
-    m_full_moves = 1;
-}
-
-Board::Board(BoardArray pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves)
-{
-    m_pieces = pieces;
-    m_next_team = next_team;
-    m_castling_rights = castling_rights;
-    m_en_passant_target = en_passant_target;
-    m_half_moves = half_moves;
-    m_full_moves = full_moves;
-}
-
 std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
 {
     if (x < 0 || x >= constants::board_width || y < 0 || y >= constants::board_height) {

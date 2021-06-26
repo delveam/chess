@@ -9,10 +9,6 @@
 #include "../dam/palette.hpp"
 #include "../dam/window.hpp"
 
-Chess::Chess()
-{
-}
-
 void Chess::handle_resize(dam::Context& ctx)
 {
     square_size = dam::window::get_height(ctx) / constants::board_height;

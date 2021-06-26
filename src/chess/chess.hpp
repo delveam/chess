@@ -8,7 +8,7 @@
 
 class Chess : public dam::App {
 public:
-    Chess();
+    Chess() = default;
 
     void initialize(dam::Context& ctx) override;
     void update(dam::Context& ctx) override;
