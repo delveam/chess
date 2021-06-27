@@ -2,6 +2,15 @@
 #include "coordinates.hpp"
 #include "utils.hpp"
 
+std::string Coordinates::to_string() const
+{
+    std::string result = "";
+    result.push_back('a' + m_x);
+    result.push_back('0' + constants::board_height - m_y);
+
+    return result;
+}
+
 std::optional<Coordinates> Coordinates::create(unsigned int x, unsigned int y)
 {
     if (x >= constants::board_width || y >= constants::board_height) {
@@ -9,15 +18,6 @@ std::optional<Coordinates> Coordinates::create(unsigned int x, unsigned int y)
     }
 
     auto result = Coordinates(x, y);
-
-    return result;
-}
-
-std::string Coordinates::to_string(Coordinates coordinates)
-{
-    std::string result = "";
-    result.push_back('a' + coordinates.m_x);
-    result.push_back('0' + constants::board_height - coordinates.m_y);
 
     return result;
 }

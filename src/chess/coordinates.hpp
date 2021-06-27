@@ -14,8 +14,9 @@ public:
         return m_y;
     }
 
+    std::string to_string() const;
+
     static std::optional<Coordinates> create(unsigned int x, unsigned int y);
-    static std::string to_string(Coordinates coordinates);
     static std::optional<Coordinates> from_string(std::string notation);
 private:
     // Coordinates' constructors are private because it is possible to create invalid coordinates.

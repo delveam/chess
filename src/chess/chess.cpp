@@ -75,9 +75,8 @@ void Chess::update(dam::Context& ctx)
             selected = true;
 
             auto coords = Coordinates::create(x, y).value();
-            auto coords_as_string = Coordinates::to_string(coords);
 
-            initial_selection = coords_as_string;
+            initial_selection = coords.to_string();
         }
     }
     else if (selected && Mouse::pressed(ctx, MouseButton::Left)) {
@@ -90,15 +89,16 @@ void Chess::update(dam::Context& ctx)
             y = constants::board_height - y - 1;
         }
 
-        auto coords = Coordinates::create(x, y);
+        auto target = board.get(x, y);
 
-        if (coords.has_value()) {
-            auto coords_as_string = Coordinates::to_string(coords.value());
+        if (target.has_value()) {
+            auto coords = Coordinates::create(x, y).value();
+            auto result = board.move_uci(initial_selection + coords.to_string());
 
-            auto result = board.move_uci(initial_selection + coords_as_string);
             if (result.has_value()) {
                 board = result.value();
             }
+
             selected = false;
             initial_selection = "";
         }
