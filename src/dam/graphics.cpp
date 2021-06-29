@@ -45,9 +45,9 @@ void dam::graphics::draw_rectangle(Context& ctx, DrawParams params)
 
 void dam::graphics::draw_circle(Context& ctx, DrawParams params)
 {
-    auto x = params.position().x();
-    auto y = params.position().y();
     auto width = params.scale().x();
+    auto x = params.position().x() + width * 0.5;
+    auto y = params.position().y() + width * 0.5;
     auto tint = convert_dam_color(params.tint());
 
     al_draw_filled_circle(x, y, width * 0.5, tint);
