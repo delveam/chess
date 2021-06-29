@@ -49,6 +49,35 @@ bool target_is_not(Pieces pieces, unsigned int x, unsigned int y, Team team)
     return target.has_value() && target->team() != team;
 }
 
+void walk(const Pieces& pieces, MoveSet& result, Coordinates coords, int dx, int dy, Team current_team)
+{
+    auto x = coords.x();
+    auto y = coords.y();
+    auto other_team = current_team == Team::White ? Team::Black : Team::White;
+    auto size = constants::board_width > constants::board_height ? constants::board_width : constants::board_height;
+
+    for (int i = 1; i < size; ++i) {
+        auto target_coords = Coordinates::create(x + i * dx, y + i * dy);
+        if (!target_coords.has_value()) {
+            break;
+        }
+
+        auto index = target_coords->y() * constants::board_width + target_coords->x();
+        auto target = pieces.at(index);
+
+        if (target.team() == Team::None) {
+            result.insert(coords.to_string() + target_coords.value().to_string());
+            continue;
+        }
+
+        if (target.team() == other_team) {
+            result.insert(coords.to_string() + target_coords.value().to_string());
+        }
+
+        break;
+    }
+}
+
 Board::Board()
 {
 
@@ -196,26 +225,10 @@ MoveSet Board::generate_bishop_moves(Coordinates coords) const
         return result;
     }
 
-    // TODO(thismarvin): This always checks the maximum amount of spaces. Can we optimize this easily?
-    auto size = constants::board_width > constants::board_height ? constants::board_width : constants::board_height;
-    for (int i = 0; i < size; ++i) {
-        if (target_is_not(m_pieces, x + i, y - i, team)) {
-            auto target_coords = Coordinates::create(x + i, y - i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x + i, y + i, team)) {
-            auto target_coords = Coordinates::create(x + i, y + i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x - i, y + i, team)) {
-            auto target_coords = Coordinates::create(x - i, y + i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x - i, y - i, team)) {
-            auto target_coords = Coordinates::create(x - i, y - i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-    }
+    walk(m_pieces, result, coords, 1, -1, team);
+    walk(m_pieces, result, coords, 1, 1, team);
+    walk(m_pieces, result, coords, -1, 1, team);
+    walk(m_pieces, result, coords, -1, -1, team);
 
     return result;
 }
@@ -234,26 +247,10 @@ MoveSet Board::generate_rook_moves(Coordinates coords) const
         return result;
     }
 
-    // TODO(thismarvin): This always checks the maximum amount of spaces. Can we optimize this easily?
-    auto size = constants::board_width > constants::board_height ? constants::board_width : constants::board_height;
-    for (int i = 0; i < size; ++i) {
-        if (target_is_not(m_pieces, x, y - i, team)) {
-            auto target_coords = Coordinates::create(x, y - i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x + i, y, team)) {
-            auto target_coords = Coordinates::create(x + i, y).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x, y + i, team)) {
-            auto target_coords = Coordinates::create(x, y + i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x - i, y, team)) {
-            auto target_coords = Coordinates::create(x - i, y).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-    }
+    walk(m_pieces, result, coords, 0, -1, team);
+    walk(m_pieces, result, coords, 1, 0, team);
+    walk(m_pieces, result, coords, 0, 1, team);
+    walk(m_pieces, result, coords, -1, 0, team);
 
     return result;
 }
@@ -272,43 +269,14 @@ MoveSet Board::generate_queen_moves(Coordinates coords) const
         return result;
     }
 
-    // TODO(thismarvin): This always checks the maximum amount of spaces. Can we optimize this easily?
-    // TODO(thismarvin): This is basically rook/bishop's logic combined. Should we do something about code duplication?
-    auto size = constants::board_width > constants::board_height ? constants::board_width : constants::board_height;
-    for (int i = 0; i < size; ++i) {
-        if (target_is_not(m_pieces, x + i, y - i, team)) {
-            auto target_coords = Coordinates::create(x + i, y - i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x + i, y + i, team)) {
-            auto target_coords = Coordinates::create(x + i, y + i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x - i, y + i, team)) {
-            auto target_coords = Coordinates::create(x - i, y + i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x - i, y - i, team)) {
-            auto target_coords = Coordinates::create(x - i, y - i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x, y - i, team)) {
-            auto target_coords = Coordinates::create(x, y - i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x + i, y, team)) {
-            auto target_coords = Coordinates::create(x + i, y).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x, y + i, team)) {
-            auto target_coords = Coordinates::create(x, y + i).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-        if (target_is_not(m_pieces, x - i, y, team)) {
-            auto target_coords = Coordinates::create(x - i, y).value();
-            result.insert(coords.to_string() + target_coords.to_string());
-        }
-    }
+    walk(m_pieces, result, coords, 1, -1, team);
+    walk(m_pieces, result, coords, 1, 1, team);
+    walk(m_pieces, result, coords, -1, 1, team);
+    walk(m_pieces, result, coords, -1, -1, team);
+    walk(m_pieces, result, coords, 0, -1, team);
+    walk(m_pieces, result, coords, 1, 0, team);
+    walk(m_pieces, result, coords, 0, 1, team);
+    walk(m_pieces, result, coords, -1, 0, team);
 
     return result;
 }
