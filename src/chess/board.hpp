@@ -63,5 +63,6 @@ private:
     MoveSet generate_knight_moves(Coordinates coords) const;
     MoveSet generate_bishop_moves(Coordinates coords) const;
     MoveSet generate_rook_moves(Coordinates coords) const;
+    MoveSet generate_queen_moves(Coordinates coords) const;
 };
 #endif
