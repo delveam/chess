@@ -1,27 +1,24 @@
 #ifndef BOARD_HPP
 #define BOARD_HPP
 #include <array>
+#include <map>
 #include <optional>
+#include <set>
 #include <string>
+#include "coordinates.hpp"
 #include "piece.hpp"
 
-// REMARK(thismarvin): I am not sure if this is a good idea, but it certainly saves on typing!
-typedef std::array<Piece, constants::board_width * constants::board_height> BoardArray;
+// TODO(thismarvin): I feel like these need better names!
+typedef std::array<Piece, constants::board_width * constants::board_height> Pieces;
+typedef std::set<std::string> MoveSet;
+typedef std::map<unsigned int, MoveSet> Moves;
 
 class Board {
 public:
-    Board() = default;
-    Board(BoardArray pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves) :
-        m_pieces(pieces),
-        m_next_team(next_team),
-        m_castling_rights(castling_rights),
-        m_en_passant_target(en_passant_target),
-        m_half_moves(half_moves),
-        m_full_moves(full_moves)
-    {
-    }
+    Board();
+    Board(Pieces pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves);
 
-    const BoardArray& pieces() const
+    const Pieces& pieces() const
     {
         return m_pieces;
     }
@@ -52,11 +49,16 @@ public:
     static std::optional<Board> load_from_fen(std::string fen);
     static std::optional<std::string> into_fen(Board board);
 private:
-    BoardArray m_pieces;
+    Pieces m_pieces;
     Team m_next_team { Team::None };
     CastlingRights m_castling_rights { CastlingRights::None };
     std::optional<std::string> m_en_passant_target { std::nullopt };
     unsigned int m_half_moves { 0 };
     unsigned int m_full_moves { 1 };
+
+    // TODO(thismarvin): I feel like the following properties/methods should be decoupled from Board...
+    Moves m_moves;
+    Moves generate_move_map() const;
+    MoveSet generate_pawn_moves(Coordinates coords) const;
 };
 #endif

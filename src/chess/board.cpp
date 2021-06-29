@@ -1,7 +1,5 @@
 #include <regex>
-#include <vector>
 #include "board.hpp"
-#include "coordinates.hpp"
 
 // ^((?:[pbnrqkPBNRQK1-8]+\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\d+) (\d+)$
 
@@ -22,6 +20,147 @@ std::vector<std::string> split(std::string string, std::string delimiter)
     }
 
     result.push_back(string.substr(pos_start));
+
+    return result;
+}
+
+// TODO(thismarvin): These utility functions should be somewhere else...
+std::optional<Piece> get_piece(Pieces pieces, unsigned int x, unsigned int y)
+{
+    if (x < 0 || x >= constants::board_width || y < 0 || y >= constants::board_height) {
+        return std::nullopt;
+    }
+
+    return pieces.at(y * constants::board_width + x);
+}
+
+bool target_is(Pieces pieces, unsigned int x, unsigned int y, Team team)
+{
+    auto target = get_piece(pieces, x, y);
+
+    return target.has_value() && target->team() == team;
+}
+
+Board::Board()
+{
+
+}
+
+Board::Board(Pieces pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves) :
+    m_pieces(pieces),
+    m_next_team(next_team),
+    m_castling_rights(castling_rights),
+    m_en_passant_target(en_passant_target),
+    m_half_moves(half_moves),
+    m_full_moves(full_moves)
+{
+    m_moves = generate_move_map();
+}
+
+MoveSet Board::generate_pawn_moves(Coordinates coords) const
+{
+    std::set<std::string> result;
+
+    auto x = coords.x();
+    auto y = coords.y();
+    auto index = y * constants::board_width + x;
+    auto current = m_pieces.at(index);
+
+    if (current.team() == Team::None) {
+        return result;
+    }
+
+    switch (current.team()) {
+    case Team::White: {
+        if (target_is(m_pieces, x, y - 1, Team::None)) {
+            auto target_coords = Coordinates::create(x, y - 1).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (y == 6 && target_is(m_pieces, x, y - 1, Team::None) && target_is(m_pieces, x, y - 2, Team::None)) {
+            auto target_coords = Coordinates::create(x, y - 2).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (target_is(m_pieces, x - 1, y - 1, Team::Black)) {
+            auto target_coords = Coordinates::create(x - 1, y - 1).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (target_is(m_pieces, x + 1, y - 1, Team::Black)) {
+            auto target_coords = Coordinates::create(x + 1, y - 1).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (m_en_passant_target.has_value()) {
+            result.insert(coords.to_string() + m_en_passant_target.value());
+        }
+        break;
+    }
+
+    case Team::Black: {
+        if (target_is(m_pieces, x, y + 1, Team::None)) {
+            auto target_coords = Coordinates::create(x, y + 1).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (y == 1 && target_is(m_pieces, x, y + 1, Team::None) && target_is(m_pieces, x, y + 2, Team::None)) {
+            auto target_coords = Coordinates::create(x, y + 2).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (target_is(m_pieces, x - 1, y + 1, Team::White)) {
+            auto target_coords = Coordinates::create(x - 1, y + 1).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (target_is(m_pieces, x + 1, y + 1, Team::White)) {
+            auto target_coords = Coordinates::create(x + 1, y + 1).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (m_en_passant_target.has_value()) {
+            result.insert(coords.to_string() + m_en_passant_target.value());
+        }
+        break;
+    }
+
+    default:
+        break;
+    }
+
+    return result;
+}
+
+Moves Board::generate_move_map() const
+{
+    Moves result;
+
+    for (int y = 0; y < constants::board_height; ++y) {
+        for (int x = 0; x < constants::board_width; ++x) {
+            auto index = y * constants::board_width + x;
+            auto current = m_pieces.at(index);
+            auto coords = Coordinates::create(x, y).value();
+
+            if (current.team() != m_next_team) {
+                continue;
+            }
+
+            std::set<std::string> moves;
+
+            switch (current.type()) {
+            case PieceType::Pawn:
+                moves = generate_pawn_moves(coords);
+                break;
+            case PieceType::Knight:
+                break;
+            case PieceType::Bishop:
+                break;
+            case PieceType::Rook:
+                break;
+            case PieceType::Queen:
+                break;
+            case PieceType::King:
+                break;
+            default:
+                break;
+            }
+
+            result.try_emplace(index, moves);
+        }
+    }
 
     return result;
 }
@@ -54,15 +193,25 @@ std::optional<Board> Board::move_uci(std::string notation) const
         return std::nullopt;
     }
 
-    // TODO(thismarvin): Implement Move Validation right here!
+    // Note that this if statement acts as a guard.
+    if (m_moves.count(start_index) == 0) {
+        return std::nullopt;
+    }
 
+    // Because of the guard above, this if statement (which is also a guard) shouldn't throw an exception.
+    if (m_moves.at(start_index).count(notation) == 0) {
+        return std::nullopt;
+    }
+
+    auto dx = (int)end_coords->x() - (int)start_coords->x();
+    auto dy = (int)end_coords->y() - (int)start_coords->y();
     auto was_capture = m_pieces.at(end_index).type() != PieceType::None;
 
     // Setup next Board.
-    BoardArray pieces;
+    Pieces pieces;
     auto next_team = m_next_team == Team::White ? Team::Black : Team::White;
     auto castling_rights = m_castling_rights;
-    auto en_passant_target = m_en_passant_target;
+    auto en_passant_target = std::make_optional<std::string>();
     auto half_moves = m_half_moves;
     auto full_moves = m_full_moves;
 
@@ -72,7 +221,21 @@ std::optional<Board> Board::move_uci(std::string notation) const
     }
 
     // TODO(thismarvin): castling_rights (depends on move validation system).
-    // TODO(thismarvin): en_passant_target (also depends on move validation system).
+
+    // Handle setting up potential en passant.
+    if (previous.type() == PieceType::Pawn && abs(dy) == 2) {
+        auto direction = dy > 0 ? 1 : -1;
+        auto temp = Coordinates::create(start_coords->x(), start_coords->y() + direction).value();
+        en_passant_target = temp.to_string();
+    }
+
+    // Deal with an en passant (Holy hell).
+    if (previous.type() == PieceType::Pawn && m_en_passant_target.has_value() && end_coords->to_string() == m_en_passant_target.value()) {
+        auto temp = Coordinates::from_string(m_en_passant_target.value()).value();
+        auto direction = dy > 0 ? -1 : 1;
+        auto index = (temp.y() + direction) * constants::board_width + temp.x();
+        pieces.at(index) = Piece();
+    }
 
     if (was_capture || previous.type() == PieceType::Pawn) {
         ++half_moves;
@@ -100,7 +263,7 @@ std::optional<Board> Board::load_from_fen(std::string fen)
     auto rows = split(sections[0], "/");
     auto index = 0;
 
-    BoardArray pieces;
+    Pieces pieces;
 
     for (auto row : rows) {
         for (auto i = 0; i < (int)row.size(); ++i) {
