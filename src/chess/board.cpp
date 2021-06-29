@@ -423,7 +423,7 @@ std::optional<Board> Board::move_uci(std::string notation) const
     Pieces pieces;
     auto current_team = m_current_team == Team::White ? Team::Black : Team::White;
     auto castling_rights = m_castling_rights;
-    auto en_passant_target = std::make_optional<std::string>();
+    std::optional<std::string> en_passant_target = std::nullopt;
     auto half_moves = m_half_moves + 1;
     auto full_moves = m_full_moves;
 
