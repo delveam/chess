@@ -163,7 +163,7 @@ void Chess::draw(dam::Context& ctx)
     }
 
     if (selected) {
-        auto first_char = initial_selection.substr(0, 1)[0];
+        auto first_char = initial_selection.substr(0, 1).c_str()[0];
         auto second_char = initial_selection.substr(1, 2);
         auto x = first_char - 'a';
         auto y = constants::board_height - std::stoi(second_char);
@@ -173,17 +173,34 @@ void Chess::draw(dam::Context& ctx)
             y = constants::board_height - y - 1;
         }
 
-        x *= square_size;
-        x += board_offset.x();
-        y *= square_size;
-        y += board_offset.y();
+        auto draw_x = x * square_size + board_offset.x();
+        auto draw_y = y * square_size + board_offset.y();
 
         auto params = DrawParams()
-                      .set_position(x, y)
+                      .set_position(draw_x, draw_y)
                       .set_scale(square_size, square_size)
                       .set_tint(Color(0x0000ff, 0.2));
 
         draw_rectangle(ctx, params);
+
+        auto index = y * constants::board_width + x;
+        auto target = board.moves().at(index);
+
+        for (const auto& value : target) {
+            auto temp_coords = value.substr(2, 4);
+            auto temp_x = temp_coords.c_str()[0] - 'a';
+            auto temp_y = constants::board_height - std::stoi(temp_coords.substr(1, 2));
+            auto temp_draw_x = temp_x * square_size + board_offset.x();
+            auto temp_draw_y = temp_y * square_size + board_offset.y();
+
+            auto radius = square_size * 0.4 * 0.5;
+            auto temp_params = DrawParams()
+                               .set_position(temp_draw_x + square_size * 0.5 - radius, temp_draw_y + square_size * 0.5 - radius)
+                               .set_scale(radius * 2, radius * 2)
+                               .set_tint(Color(0x0000ff, 0.2));
+
+            draw_circle(ctx, temp_params);
+        }
     }
 
     al_set_target_backbuffer(ctx.display);
