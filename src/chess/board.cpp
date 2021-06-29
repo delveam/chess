@@ -80,7 +80,7 @@ void walk(const Pieces& pieces, MoveSet& result, Coordinates coords, int dx, int
 
 Board::Board()
 {
-
+    m_moves = generate_move_map();
 }
 
 Board::Board(Pieces pieces, Team current_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves) :
