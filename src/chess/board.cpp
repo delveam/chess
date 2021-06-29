@@ -25,7 +25,7 @@ std::vector<std::string> split(std::string string, std::string delimiter)
 }
 
 // TODO(thismarvin): These utility functions should be somewhere else...
-std::optional<Piece> get_piece(Pieces pieces, unsigned int x, unsigned int y)
+std::optional<Piece> get_piece(const Pieces& pieces, unsigned int x, unsigned int y)
 {
     if (x < 0 || x >= constants::board_width || y < 0 || y >= constants::board_height) {
         return std::nullopt;
@@ -34,7 +34,7 @@ std::optional<Piece> get_piece(Pieces pieces, unsigned int x, unsigned int y)
     return pieces.at(y * constants::board_width + x);
 }
 
-bool target_is(Pieces pieces, unsigned int x, unsigned int y, Team team)
+bool target_is(const Pieces& pieces, unsigned int x, unsigned int y, Team team)
 {
     auto target = get_piece(pieces, x, y);
 
@@ -42,7 +42,7 @@ bool target_is(Pieces pieces, unsigned int x, unsigned int y, Team team)
 }
 
 // TODO(thismarvin): This works, but there has to be a better way!
-bool target_is_not(Pieces pieces, unsigned int x, unsigned int y, Team team)
+bool target_is_not(const Pieces& pieces, unsigned int x, unsigned int y, Team team)
 {
     auto target = get_piece(pieces, x, y);
 
