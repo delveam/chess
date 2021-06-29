@@ -42,6 +42,10 @@ public:
     {
         return m_full_moves;
     }
+    const Moves& moves() const
+    {
+        return m_moves;
+    }
 
     std::optional<Piece> get(unsigned int x, unsigned int y) const;
     std::optional<Board> move_uci(std::string notation) const;
