@@ -61,5 +61,6 @@ private:
     Moves generate_move_map() const;
     MoveSet generate_pawn_moves(Coordinates coords) const;
     MoveSet generate_knight_moves(Coordinates coords) const;
+    MoveSet generate_bishop_moves(Coordinates coords) const;
 };
 #endif
