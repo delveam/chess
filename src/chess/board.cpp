@@ -491,7 +491,7 @@ std::optional<Board> Board::load_from_fen(std::string fen)
         }
     }
 
-    auto next_team = sections[1] == "w" ? Team::White : Team::Black;
+    auto current_team = sections[1] == "w" ? Team::White : Team::Black;
 
     auto castling_rights_uint = 0;
     for (int i = 0; i < (int)sections[2].length(); ++i) {
@@ -522,7 +522,7 @@ std::optional<Board> Board::load_from_fen(std::string fen)
 
     auto full_moves = std::stoi(sections[5]);
 
-    return Board(pieces, next_team, castling_rights, en_passant_target, half_moves, full_moves);
+    return Board(pieces, current_team, castling_rights, en_passant_target, half_moves, full_moves);
 }
 
 std::optional<std::string> Board::into_fen(Board board)
