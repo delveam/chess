@@ -22,9 +22,9 @@ public:
     {
         return m_pieces;
     }
-    Team next_team() const
+    Team current_team() const
     {
-        return m_next_team;
+        return m_current_team;
     }
     CastlingRights castling_rights() const
     {
@@ -54,7 +54,7 @@ public:
     static std::optional<std::string> into_fen(Board board);
 private:
     Pieces m_pieces;
-    Team m_next_team { Team::None };
+    Team m_current_team { Team::None };
     CastlingRights m_castling_rights { CastlingRights::None };
     std::optional<std::string> m_en_passant_target { std::nullopt };
     unsigned int m_half_moves { 0 };

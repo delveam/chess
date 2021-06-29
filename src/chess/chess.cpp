@@ -71,7 +71,7 @@ void Chess::update(dam::Context& ctx)
 
         auto target = board.get(x, y);
 
-        if (target.has_value() && target->team() == board.next_team()) {
+        if (target.has_value() && target->team() == board.current_team()) {
             selected = true;
 
             auto coords = Coordinates::create(x, y).value();

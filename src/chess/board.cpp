@@ -83,9 +83,9 @@ Board::Board()
 
 }
 
-Board::Board(Pieces pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves) :
+Board::Board(Pieces pieces, Team current_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves) :
     m_pieces(pieces),
-    m_next_team(next_team),
+    m_current_team(current_team),
     m_castling_rights(castling_rights),
     m_en_passant_target(en_passant_target),
     m_half_moves(half_moves),
@@ -341,7 +341,7 @@ Moves Board::generate_move_map() const
             auto current = m_pieces.at(index);
             auto coords = Coordinates::create(x, y).value();
 
-            if (current.team() != m_next_team) {
+            if (current.team() != m_current_team) {
                 continue;
             }
 
@@ -421,7 +421,7 @@ std::optional<Board> Board::move_uci(std::string notation) const
 
     // Setup next Board.
     Pieces pieces;
-    auto next_team = m_next_team == Team::White ? Team::Black : Team::White;
+    auto current_team = m_current_team == Team::White ? Team::Black : Team::White;
     auto castling_rights = m_castling_rights;
     auto en_passant_target = std::make_optional<std::string>();
     auto half_moves = m_half_moves;
@@ -453,7 +453,7 @@ std::optional<Board> Board::move_uci(std::string notation) const
         ++half_moves;
     }
 
-    if (next_team == Team::Black) {
+    if (current_team == Team::Black) {
         ++full_moves;
     }
 
@@ -461,7 +461,7 @@ std::optional<Board> Board::move_uci(std::string notation) const
     pieces.at(start_index) = Piece();
     pieces.at(end_index) = previous;
 
-    return Board(pieces, next_team, castling_rights, en_passant_target, half_moves, full_moves);
+    return Board(pieces, current_team, castling_rights, en_passant_target, half_moves, full_moves);
 }
 
 std::optional<Board> Board::load_from_fen(std::string fen)
@@ -558,7 +558,7 @@ std::optional<std::string> Board::into_fen(Board board)
     }
 
     fen += " ";
-    switch (board.m_next_team) {
+    switch (board.m_current_team) {
     case Team::White:
         fen += "w";
         break;
