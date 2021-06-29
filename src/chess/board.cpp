@@ -313,6 +313,56 @@ MoveSet Board::generate_queen_moves(Coordinates coords) const
     return result;
 }
 
+MoveSet Board::generate_king_moves(Coordinates coords) const
+{
+    MoveSet result;
+
+    auto x = coords.x();
+    auto y = coords.y();
+    auto index = y * constants::board_width + x;
+    auto current = m_pieces.at(index);
+    auto team = current.team();
+
+    if (team == Team::None) {
+        return result;
+    }
+
+    if (target_is_not(m_pieces, x, y - 1, team)) {
+        auto target_coords = Coordinates::create(x, y - 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x + 1, y - 1, team)) {
+        auto target_coords = Coordinates::create(x + 1, y - 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x + 1, y, team)) {
+        auto target_coords = Coordinates::create(x + 1, y).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x + 1, y + 1, team)) {
+        auto target_coords = Coordinates::create(x + 1, y + 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x, y + 1, team)) {
+        auto target_coords = Coordinates::create(x, y + 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x - 1, y + 1, team)) {
+        auto target_coords = Coordinates::create(x - 1, y + 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x - 1, y, team)) {
+        auto target_coords = Coordinates::create(x - 1, y).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x - 1, y - 1, team)) {
+        auto target_coords = Coordinates::create(x - 1, y - 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+
+    return result;
+}
+
 Moves Board::generate_move_map() const
 {
     Moves result;
@@ -346,6 +396,7 @@ Moves Board::generate_move_map() const
                 moves = generate_queen_moves(coords);
                 break;
             case PieceType::King:
+                moves = generate_king_moves(coords);
                 break;
             default:
                 break;
