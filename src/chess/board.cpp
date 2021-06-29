@@ -424,7 +424,7 @@ std::optional<Board> Board::move_uci(std::string notation) const
     auto current_team = m_current_team == Team::White ? Team::Black : Team::White;
     auto castling_rights = m_castling_rights;
     auto en_passant_target = std::make_optional<std::string>();
-    auto half_moves = m_half_moves;
+    auto half_moves = m_half_moves + 1;
     auto full_moves = m_full_moves;
 
     // Copy the current board.
@@ -450,10 +450,10 @@ std::optional<Board> Board::move_uci(std::string notation) const
     }
 
     if (was_capture || previous.type() == PieceType::Pawn) {
-        ++half_moves;
+        half_moves = 0;
     }
 
-    if (current_team == Team::Black) {
+    if (m_current_team == Team::Black) {
         ++full_moves;
     }
 
