@@ -67,7 +67,7 @@ Board::Board(Pieces pieces, Team next_team, CastlingRights castling_rights, std:
 
 MoveSet Board::generate_pawn_moves(Coordinates coords) const
 {
-    std::set<std::string> result;
+    MoveSet result;
 
     auto x = coords.x();
     auto y = coords.y();
@@ -134,7 +134,7 @@ MoveSet Board::generate_pawn_moves(Coordinates coords) const
 
 MoveSet Board::generate_knight_moves(Coordinates coords) const
 {
-    std::set<std::string> result;
+    MoveSet result;
 
     auto x = coords.x();
     auto y = coords.y();
@@ -184,7 +184,7 @@ MoveSet Board::generate_knight_moves(Coordinates coords) const
 
 MoveSet Board::generate_bishop_moves(Coordinates coords) const
 {
-    std::set<std::string> result;
+    MoveSet result;
 
     auto x = coords.x();
     auto y = coords.y();
