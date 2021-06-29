@@ -220,6 +220,44 @@ MoveSet Board::generate_bishop_moves(Coordinates coords) const
     return result;
 }
 
+MoveSet Board::generate_rook_moves(Coordinates coords) const
+{
+    MoveSet result;
+
+    auto x = coords.x();
+    auto y = coords.y();
+    auto index = y * constants::board_width + x;
+    auto current = m_pieces.at(index);
+    auto team = current.team();
+
+    if (team == Team::None) {
+        return result;
+    }
+
+    // TODO(thismarvin): This always checks the maximum amount of spaces. Can we optimize this easily?
+    auto size = constants::board_width > constants::board_height ? constants::board_width : constants::board_height;
+    for (int i = 0; i < size; ++i) {
+        if (target_is_not(m_pieces, x, y - i, team)) {
+            auto target_coords = Coordinates::create(x, y - i).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (target_is_not(m_pieces, x + i, y, team)) {
+            auto target_coords = Coordinates::create(x + i, y).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (target_is_not(m_pieces, x, y + i, team)) {
+            auto target_coords = Coordinates::create(x, y + i).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+        if (target_is_not(m_pieces, x - i, y, team)) {
+            auto target_coords = Coordinates::create(x - i, y).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+    }
+
+    return result;
+}
+
 Moves Board::generate_move_map() const
 {
     Moves result;
@@ -247,6 +285,7 @@ Moves Board::generate_move_map() const
                 moves = generate_bishop_moves(coords);
                 break;
             case PieceType::Rook:
+                moves = generate_rook_moves(coords);
                 break;
             case PieceType::Queen:
                 break;
