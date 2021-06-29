@@ -41,6 +41,14 @@ bool target_is(Pieces pieces, unsigned int x, unsigned int y, Team team)
     return target.has_value() && target->team() == team;
 }
 
+// TODO(thismarvin): This works, but there has to be a better way!
+bool target_is_not(Pieces pieces, unsigned int x, unsigned int y, Team team)
+{
+    auto target = get_piece(pieces, x, y);
+
+    return target.has_value() && target->team() != team;
+}
+
 Board::Board()
 {
 
@@ -124,6 +132,56 @@ MoveSet Board::generate_pawn_moves(Coordinates coords) const
     return result;
 }
 
+MoveSet Board::generate_knight_moves(Coordinates coords) const
+{
+    std::set<std::string> result;
+
+    auto x = coords.x();
+    auto y = coords.y();
+    auto index = y * constants::board_width + x;
+    auto current = m_pieces.at(index);
+    auto team = current.team();
+
+    if (team == Team::None) {
+        return result;
+    }
+
+    if (target_is_not(m_pieces, x + 1, y - 2, team)) {
+        auto target_coords = Coordinates::create(x + 1, y - 2).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x + 2, y - 1, team)) {
+        auto target_coords = Coordinates::create(x + 2, y - 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x + 2, y + 1, team)) {
+        auto target_coords = Coordinates::create(x + 2, y + 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x + 1, y + 2, team)) {
+        auto target_coords = Coordinates::create(x + 1, y + 2).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x - 1, y + 2, team)) {
+        auto target_coords = Coordinates::create(x - 1, y + 2).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x - 2, y + 1, team)) {
+        auto target_coords = Coordinates::create(x - 2, y + 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x - 2, y - 1, team)) {
+        auto target_coords = Coordinates::create(x - 2, y - 1).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+    if (target_is_not(m_pieces, x - 1, y - 2, team)) {
+        auto target_coords = Coordinates::create(x - 1, y - 2).value();
+        result.insert(coords.to_string() + target_coords.to_string());
+    }
+
+    return result;
+}
+
 Moves Board::generate_move_map() const
 {
     Moves result;
@@ -145,6 +203,7 @@ Moves Board::generate_move_map() const
                 moves = generate_pawn_moves(coords);
                 break;
             case PieceType::Knight:
+                moves = generate_knight_moves(coords);
                 break;
             case PieceType::Bishop:
                 break;
