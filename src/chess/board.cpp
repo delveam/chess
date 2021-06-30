@@ -125,7 +125,7 @@ MoveSet Board::generate_pawn_moves(Coordinates coords) const
             auto target_coords = Coordinates::create(x + 1, y - 1).value();
             result.insert(coords.to_string() + target_coords.to_string());
         }
-        if (m_en_passant_target.has_value()) {
+        if (y == 3 && m_en_passant_target.has_value()) {
             result.insert(coords.to_string() + m_en_passant_target.value());
         }
         break;
@@ -148,7 +148,7 @@ MoveSet Board::generate_pawn_moves(Coordinates coords) const
             auto target_coords = Coordinates::create(x + 1, y + 1).value();
             result.insert(coords.to_string() + target_coords.to_string());
         }
-        if (m_en_passant_target.has_value()) {
+        if (y == 4 && m_en_passant_target.has_value()) {
             result.insert(coords.to_string() + m_en_passant_target.value());
         }
         break;
