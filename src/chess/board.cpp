@@ -78,6 +78,19 @@ void walk(const Pieces& pieces, MoveSet& result, Coordinates coords, int dx, int
     }
 }
 
+bool contains_castling_right(CastlingRights a, CastlingRights b)
+{
+    return (static_cast<int>(a) & static_cast<int>(b)) != static_cast<int>(CastlingRights::None);
+}
+
+CastlingRights remove_castling_right(CastlingRights a, CastlingRights b)
+{
+    if (contains_castling_right(a, b)) {
+        return static_cast<CastlingRights>(static_cast<int>(a) ^ static_cast<int>(b));
+    }
+    return a;
+}
+
 Board::Board()
 {
     m_moves = generate_move_map();
@@ -451,9 +464,92 @@ std::optional<Board> Board::move_uci(std::string notation) const
         pieces.at(i) = m_pieces[i];
     }
 
-    // TODO(thismarvin): castling_rights (depends on move validation system).
+    // Keep castling rights up to date.
+    if (previous.type() == PieceType::King) {
+        // If the king castled then make sure to move the rook!
+        if (abs(dx) == 2) {
+            auto y = previous.team() == Team::White ? constants::board_height - 1 : 0;
+            if (dx < 0) {
+                auto x = 0;
+                auto index = y * constants::board_width + x;
+                auto temp = pieces.at(index);
+                pieces.at(index) = Piece();
+                pieces.at(index + 3) = temp;
+            }
+            else {
+                auto x = constants::board_width - 1;
+                auto index = y * constants::board_width + x;
+                auto temp = pieces.at(index);
+                pieces.at(index) = Piece();
+                pieces.at(index - 2) = temp;
+            }
+        }
 
-    // Handle setting up potential en passant.
+        // If the king moves then remove their ability to castle.
+        switch (previous.team()) {
+        case Team::White: {
+            castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteKingSide);
+            castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteQueenSide);
+            break;
+        }
+        case Team::Black: {
+            castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackKingSide);
+            castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackQueenSide);
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
+    // Make sure that moving a rook affects the king's ability to castle.
+    if (previous.type() == PieceType::Rook) {
+        switch (previous.team()) {
+        case Team::White: {
+            if (contains_castling_right(castling_rights, CastlingRights::WhiteKingSide)) {
+                auto x = constants::board_width - 1;
+                auto y = constants::board_height - 1;
+                auto index = y * constants::board_width + x;
+                if ((int)start_index == index) {
+                    castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteKingSide);
+                }
+            }
+            if (contains_castling_right(castling_rights, CastlingRights::WhiteQueenSide)) {
+                auto x = 0;
+                auto y = constants::board_height - 1;
+                auto index = y * constants::board_width + x;
+                if ((int)start_index == index) {
+                    castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteQueenSide);
+                }
+            }
+            break;
+        }
+        // TODO(thismarvin): This is very similar to White's case. How can we avoid code duplication?
+        case Team::Black: {
+            if (contains_castling_right(castling_rights, CastlingRights::BlackKingSide)) {
+                auto x = constants::board_width - 1;
+                auto y = 0;
+                auto index = y * constants::board_width + x;
+                if ((int)start_index == index) {
+                    castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackKingSide);
+                }
+            }
+            if (contains_castling_right(castling_rights, CastlingRights::BlackQueenSide)) {
+                auto x = 0;
+                auto y = 0;
+                auto index = y * constants::board_width + x;
+                if ((int)start_index == index) {
+                    castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackQueenSide);
+                }
+            }
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
+    // Handle setting up a potential en passant.
     if (previous.type() == PieceType::Pawn && abs(dy) == 2) {
         auto direction = dy > 0 ? 1 : -1;
         auto temp = Coordinates::create(start_coords->x(), start_coords->y() + direction).value();
