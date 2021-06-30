@@ -184,22 +184,33 @@ void Chess::draw(dam::Context& ctx)
         draw_rectangle(ctx, params);
 
         auto index = y * constants::board_width + x;
-        auto target = board.moves().at(index);
+        auto target_move_set = board.moves().at(index);
 
-        for (const auto& value : target) {
+        for (const auto& value : target_move_set) {
             auto temp_coords = value.substr(2, 4);
             auto temp_x = temp_coords.c_str()[0] - 'a';
             auto temp_y = constants::board_height - std::stoi(temp_coords.substr(1, 2));
             auto temp_draw_x = temp_x * square_size + board_offset.x();
             auto temp_draw_y = temp_y * square_size + board_offset.y();
 
-            auto radius = square_size * 0.4 * 0.5;
-            auto temp_params = DrawParams()
-                               .set_position(temp_draw_x + square_size * 0.5 - radius, temp_draw_y + square_size * 0.5 - radius)
-                               .set_scale(radius * 2, radius * 2)
-                               .set_tint(Color(0x0000ff, 0.2));
+            auto target_piece = board.get(temp_x, temp_y);
+            if (target_piece.has_value() && target_piece->team() == Team::None) {
+                auto radius = square_size * 0.4 * 0.5;
+                auto temp_params = DrawParams()
+                                   .set_position(temp_draw_x + square_size * 0.5 - radius, temp_draw_y + square_size * 0.5 - radius)
+                                   .set_scale(radius * 2, radius * 2)
+                                   .set_tint(Color(0x0000ff, 0.2));
 
-            draw_circle(ctx, temp_params);
+                draw_circle(ctx, temp_params);
+            }
+            else {
+                auto temp_params = DrawParams()
+                                   .set_position(temp_draw_x, temp_draw_y)
+                                   .set_scale(square_size, square_size)
+                                   .set_tint(Color(0xff0000, 0.2));
+
+                draw_rectangle_but_not_filled(ctx, temp_params, square_size * 0.25);
+            }
         }
     }
 
