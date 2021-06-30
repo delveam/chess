@@ -12,6 +12,7 @@
 typedef std::array<Piece, constants::board_width * constants::board_height> Pieces;
 typedef std::set<std::string> MoveSet;
 typedef std::map<unsigned int, MoveSet> Moves;
+typedef std::array<bool, constants::board_width * constants::board_height> DangerZone;
 
 class Board {
 public:
@@ -46,6 +47,10 @@ public:
     {
         return m_moves;
     }
+    const DangerZone& danger_zone() const
+    {
+        return m_danger_zone;
+    }
 
     std::optional<Piece> get(unsigned int x, unsigned int y) const;
     std::optional<Board> move_uci(std::string notation) const;
@@ -62,6 +67,7 @@ private:
 
     // TODO(thismarvin): I feel like the following properties/methods should be decoupled from Board...
     Moves m_moves;
+    DangerZone m_danger_zone;
     Moves generate_move_map() const;
     MoveSet generate_pawn_moves(Coordinates coords) const;
     MoveSet generate_knight_moves(Coordinates coords) const;

@@ -1,3 +1,4 @@
+#include <cmath>
 #include <regex>
 #include "board.hpp"
 
@@ -91,9 +92,75 @@ CastlingRights remove_castling_right(CastlingRights a, CastlingRights b)
     return a;
 }
 
+// TODO(thismarvin): This works, but the parameters are completly wrong! However, I cannot fix them until Board is refactored :(
+DangerZone generate_danger_zone(const Pieces& pieces, const Moves& moves, Team opponent)
+{
+    DangerZone result;
+    result.fill(false);
+
+    for (const auto& pair : moves) {
+        auto index = pair.first;
+        auto start = pieces.at(index);
+
+        if (start.team() != opponent) {
+            continue;
+        }
+
+        auto x = index % constants::board_width;
+        auto y = (int)trunc((float)index / constants::board_width);
+
+        // We do not care about Pawn advances, just Pawn captures. The current MoveSet doesn't help us here, so we roll our own logic!
+        if (start.type() == PieceType::Pawn) {
+            switch (opponent) {
+            case Team::White: {
+                auto left = Coordinates::create(x - 1, y - 1);
+                auto right = Coordinates::create(x + 1, y - 1);
+                if (left.has_value()) {
+                    auto index = left->y() * constants::board_width + left->x();
+                    result[index] = true;
+                }
+                if (right.has_value()) {
+                    auto index = right->y() * constants::board_width + right->x();
+                    result[index] = true;
+                }
+                break;
+            }
+            case Team::Black: {
+                auto left = Coordinates::create(x - 1, y + 1);
+                auto right = Coordinates::create(x + 1, y + 1);
+                if (left.has_value()) {
+                    auto index = left->y() * constants::board_width + left->x();
+                    result[index] = true;
+                }
+                if (right.has_value()) {
+                    auto index = right->y() * constants::board_width + right->x();
+                    result[index] = true;
+                }
+                break;
+            }
+            default:
+                break;
+            }
+
+            // HEY! Notice me! I exist to prevent unnecessary nesting.
+            continue;
+        }
+
+        // Once Pawns are out of the equation, every potential move is considered dangerous!
+        for (const auto& entry : pair.second) {
+            auto coords = Coordinates::from_string(entry.substr(2, 4)).value();
+            auto index = coords.y() * constants::board_width + coords.x();
+            result[index] = true;
+        }
+    }
+
+    return result;
+}
+
 Board::Board()
 {
     m_moves = generate_move_map();
+    m_danger_zone = generate_danger_zone(m_pieces, m_moves, m_current_team);
 }
 
 Board::Board(Pieces pieces, Team current_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves) :
@@ -105,6 +172,7 @@ Board::Board(Pieces pieces, Team current_team, CastlingRights castling_rights, s
     m_full_moves(full_moves)
 {
     m_moves = generate_move_map();
+    m_danger_zone = generate_danger_zone(m_pieces, m_moves, m_current_team);
 }
 
 MoveSet Board::generate_pawn_moves(Coordinates coords) const
