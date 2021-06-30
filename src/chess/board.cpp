@@ -328,6 +328,25 @@ MoveSet Board::generate_king_moves(Coordinates coords) const
         result.insert(coords.to_string() + target_coords.to_string());
     }
 
+    // Handle castling.
+    // TODO(thismarvin): We are not checking if the king is moving through a check!
+    auto king_side = team == Team::White ? CastlingRights::WhiteKingSide : CastlingRights::BlackKingSide;
+    auto queen_side = team == Team::White ? CastlingRights::WhiteQueenSide : CastlingRights::BlackQueenSide;
+
+    if ((static_cast<int>(m_castling_rights) & static_cast<int>(king_side)) != static_cast<int>(CastlingRights::None)) {
+        if (target_is(m_pieces, x + 1, y, Team::None) && target_is(m_pieces, x + 2, y, Team::None)) {
+            auto target_coords = Coordinates::create(x + 2, y).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+    }
+
+    if ((static_cast<int>(m_castling_rights) & static_cast<int>(queen_side)) != static_cast<int>(CastlingRights::None)) {
+        if (target_is(m_pieces, x - 1, y, Team::None) && target_is(m_pieces, x - 2, y, Team::None) && target_is(m_pieces, x - 3, y, Team::None)) {
+            auto target_coords = Coordinates::create(x - 2, y).value();
+            result.insert(coords.to_string() + target_coords.to_string());
+        }
+    }
+
     return result;
 }
 
