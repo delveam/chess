@@ -43,6 +43,18 @@ void dam::graphics::draw_rectangle(Context& ctx, DrawParams params)
     al_draw_filled_rectangle(x, y, x + width, y + height, tint);
 }
 
+// FIXME(thismarvin): I have no idea why the rectangle is bigger than you would expect??
+void dam::graphics::draw_rectangle_but_not_filled(Context& ctx, DrawParams params, unsigned int line_width)
+{
+    auto x = params.position().x();
+    auto y = params.position().y();
+    auto width = params.scale().x();
+    auto height = params.scale().y();
+    auto tint = convert_dam_color(params.tint());
+
+    al_draw_rectangle(x, y, x + width, y + height, tint, line_width);
+}
+
 void dam::graphics::draw_circle(Context& ctx, DrawParams params)
 {
     auto width = params.scale().x();
