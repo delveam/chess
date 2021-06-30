@@ -168,13 +168,16 @@ void Chess::draw(dam::Context& ctx)
         auto x = first_char - 'a';
         auto y = constants::board_height - std::stoi(second_char);
 
+        auto draw_x = x;
+        auto draw_y = y;
+
         if (board_flipped) {
-            x = constants::board_width - x - 1;
-            y = constants::board_height - y - 1;
+            draw_x = constants::board_width - draw_x - 1;
+            draw_y = constants::board_height - draw_y - 1;
         }
 
-        auto draw_x = x * square_size + board_offset.x();
-        auto draw_y = y * square_size + board_offset.y();
+        draw_x = draw_x * square_size + board_offset.x();
+        draw_y = draw_y * square_size + board_offset.y();
 
         auto params = DrawParams()
                       .set_position(draw_x, draw_y)
@@ -187,13 +190,24 @@ void Chess::draw(dam::Context& ctx)
         auto target_move_set = board.moves().at(index);
 
         for (const auto& value : target_move_set) {
+            // TODO(thismarvin): This is very similar to the code above. How can we get rid of code duplication?
             auto temp_coords = value.substr(2, 4);
             auto temp_x = temp_coords.c_str()[0] - 'a';
             auto temp_y = constants::board_height - std::stoi(temp_coords.substr(1, 2));
-            auto temp_draw_x = temp_x * square_size + board_offset.x();
-            auto temp_draw_y = temp_y * square_size + board_offset.y();
+
+            auto temp_draw_x = temp_x;
+            auto temp_draw_y = temp_y;
+
+            if (board_flipped) {
+                temp_draw_x = constants::board_width - temp_x - 1;
+                temp_draw_y = constants::board_height - temp_y - 1;
+            }
+
+            temp_draw_x = temp_draw_x * square_size + board_offset.x();
+            temp_draw_y = temp_draw_y * square_size + board_offset.y();
 
             auto target_piece = board.get(temp_x, temp_y);
+
             if (target_piece.has_value() && target_piece->team() == Team::None) {
                 auto radius = square_size * 0.4 * 0.5;
                 auto temp_params = DrawParams()
