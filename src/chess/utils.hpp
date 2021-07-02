@@ -1,3 +1,6 @@
+#ifndef UTILS_HPP
+#define UTILS_HPP
+
 #include <string>
 
 namespace constants {
@@ -29,3 +32,4 @@ enum class CastlingRights {
     BlackKingSide = 4,
     BlackQueenSide = 8,
 };
+#endif
