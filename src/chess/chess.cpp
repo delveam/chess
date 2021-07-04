@@ -34,10 +34,8 @@ void Chess::initialize(dam::Context& ctx)
 
     handle_resize(ctx);
 
-    auto temp = Board::load_from_fen(constants::starting_fen);
-    if (temp.has_value()) {
-        board = temp.value();
-    }
+    match = Match::create();
+
     board_flipped = false;
     selected = false;
 }
@@ -69,9 +67,9 @@ void Chess::update(dam::Context& ctx)
             y = constants::board_height - y - 1;
         }
 
-        auto target = board.get(x, y);
+        auto target = match.board().get(x, y);
 
-        if (target.has_value() && target->team() == board.current_team()) {
+        if (target.has_value() && target->team() == match.board().current_team()) {
             selected = true;
 
             auto coords = Coordinates::create(x, y).value();
@@ -89,15 +87,12 @@ void Chess::update(dam::Context& ctx)
             y = constants::board_height - y - 1;
         }
 
-        auto target = board.get(x, y);
+        auto target = match.board().get(x, y);
 
         if (target.has_value()) {
             auto coords = Coordinates::create(x, y).value();
-            auto result = board.move_uci(initial_selection + coords.to_string());
 
-            if (result.has_value()) {
-                board = result.value();
-            }
+            match.submit_move(initial_selection + coords.to_string());
 
             selected = false;
             initial_selection = "";
@@ -187,7 +182,8 @@ void Chess::draw(dam::Context& ctx)
         draw_rectangle(ctx, params);
 
         auto index = y * constants::board_width + x;
-        auto target_move_set = board.moves().at(index);
+        auto moves = match.moves();
+        auto target_move_set = moves.at(index);
 
         for (const auto& value : target_move_set) {
             // TODO(thismarvin): This is very similar to the code above. How can we get rid of code duplication?
@@ -206,7 +202,7 @@ void Chess::draw(dam::Context& ctx)
             temp_draw_x = temp_draw_x * square_size + board_offset.x();
             temp_draw_y = temp_draw_y * square_size + board_offset.y();
 
-            auto target_piece = board.get(temp_x, temp_y);
+            auto target_piece = match.board().get(temp_x, temp_y);
 
             if (target_piece.has_value() && target_piece->team() == Team::None) {
                 auto radius = square_size * 0.4 * 0.5;
@@ -233,7 +229,7 @@ void Chess::draw(dam::Context& ctx)
     for (int y = 0; y < constants::board_height; ++y) {
         for (int x = 0; x < constants::board_width; ++x) {
             auto index = board_flipped ? ((constants::board_height - 1) - y) * constants::board_width + ((constants::board_width - 1) - x) : y * constants::board_width + x;
-            auto current = board.pieces()[index];
+            auto current = match.board().pieces()[index];
 
             auto subregion_x = 0;
             switch (current.type()) {

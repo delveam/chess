@@ -3,6 +3,7 @@
 #include <allegro5/allegro_font.h>
 #include <iostream>
 #include "board.hpp"
+#include "match.hpp"
 #include "../dam/app.hpp"
 #include "../dam/graphics.hpp"
 
@@ -22,7 +23,7 @@ private:
     int sprite_size;
     float sprite_scale;
     dam::Vector2F board_offset;
-    Board board;
+    Match match;
     bool board_flipped;
     bool selected;
     std::string initial_selection;
