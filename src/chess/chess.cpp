@@ -23,6 +23,12 @@ void Chess::handle_resize(dam::Context& ctx)
     sprite_scale = (float)square_size / sprite_size;
 }
 
+void Chess::reset_selection()
+{
+    selected = false;
+    initial_selection = "";
+}
+
 void Chess::initialize(dam::Context& ctx)
 {
     using namespace dam::graphics;
@@ -52,9 +58,17 @@ void Chess::update(dam::Context& ctx)
         board_flipped = !board_flipped;
     }
 
+    if (Mouse::get_scroll_stride(ctx) > 0) {
+        match.redo();
+        reset_selection();
+    }
+    if (Mouse::get_scroll_stride(ctx) < 0) {
+        match.undo();
+        reset_selection();
+    }
+
     if (selected && Mouse::pressed(ctx, MouseButton::Right)) {
-        selected = false;
-        initial_selection = "";
+        reset_selection();
     }
 
     if (!selected && Mouse::pressed(ctx, MouseButton::Left)) {
@@ -91,11 +105,11 @@ void Chess::update(dam::Context& ctx)
 
         if (target.has_value()) {
             auto coords = Coordinates::create(x, y).value();
+            auto lan = initial_selection + coords.to_string();
 
-            match.submit_move(initial_selection + coords.to_string());
+            match.submit_move(lan);
 
-            selected = false;
-            initial_selection = "";
+            reset_selection();
         }
     }
 }

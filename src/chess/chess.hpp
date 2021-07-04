@@ -29,5 +29,6 @@ private:
     std::string initial_selection;
 
     void handle_resize(dam::Context& ctx);
+    void reset_selection();
 };
 #endif
