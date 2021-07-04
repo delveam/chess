@@ -23,6 +23,9 @@ public:
     }
 
     static std::optional<Move> create(std::string lan);
+
+    static const Move& nullmove;
+
 private:
     Move() = default;
     Move(std::string lan, Coordinates start, Coordinates end, std::optional<PieceType> promotion) :
@@ -38,5 +41,4 @@ private:
     Coordinates m_end;
     std::optional<PieceType> m_promotion;
 };
-
 #endif

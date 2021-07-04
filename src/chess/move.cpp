@@ -1,6 +1,8 @@
 #include <regex>
 #include "move.hpp"
 
+const Move& Move::nullmove = Move { "0000", Coordinates::create(0, 0).value(), Coordinates::create(0, 0).value(), std::nullopt };
+
 std::optional<Move> Move::create(std::string lan)
 {
     if (!std::regex_match(lan, std::regex("^([a-h]{1}[1-8]{1}){2}[bnrq]?$"))) {
