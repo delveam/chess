@@ -5,6 +5,10 @@
 
 class Move {
 public:
+    std::string lan() const
+    {
+        return m_lan;
+    }
     Coordinates start() const
     {
         return m_start;
@@ -18,16 +22,18 @@ public:
         return m_promotion;
     }
 
-    static std::optional<Move> create(std::string notation);
+    static std::optional<Move> create(std::string lan);
 private:
     Move() = default;
-    Move(Coordinates start, Coordinates end, std::optional<PieceType> promotion) :
+    Move(std::string lan, Coordinates start, Coordinates end, std::optional<PieceType> promotion) :
+        m_lan(lan),
         m_start(start),
         m_end(end),
         m_promotion(promotion)
     {
     }
 
+    std::string m_lan;
     Coordinates m_start;
     Coordinates m_end;
     std::optional<PieceType> m_promotion;

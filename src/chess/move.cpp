@@ -34,5 +34,5 @@ std::optional<Move> Move::create(std::string lan)
         }
     }
 
-    return Move(start.value(), end.value(), promotion);
+    return Move(lan, start.value(), end.value(), promotion);
 }
