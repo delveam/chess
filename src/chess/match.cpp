@@ -22,19 +22,19 @@ std::optional<bool> Match::submit_move(std::string lan)
 
     auto next = std::make_pair(move.value(), board.value());
 
-    // If the head is not the end then we need to create a new timeline.
-    if (m_head != m_end) {
-        m_head += 1;
-        m_end = m_head;
+    m_head += 1;
+    // Note that the following is required to prevent the user from redoing into an invalid state.
+    m_end = m_head;
+
+    // If we are not at the end of the vector then replace whatever is at the current index.
+    if (m_head != m_state.size()) {
         m_state.at(m_head) = next;
 
         return true;
     }
 
-    // Otherwise, we can just add to the end of the list.
+    // Otherwise, we can just add to the end of the vector.
     m_state.push_back(next);
-    m_head += 1;
-    m_end += 1;
 
     return true;
 }
