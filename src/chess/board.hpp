@@ -8,16 +8,20 @@
 #include "coordinates.hpp"
 #include "piece.hpp"
 
-// TODO(thismarvin): I feel like these need better names!
-typedef std::array<Piece, constants::board_width * constants::board_height> Pieces;
-typedef std::set<std::string> MoveSet;
-typedef std::map<unsigned int, MoveSet> Moves;
-typedef std::array<bool, constants::board_width * constants::board_height> DangerZone;
+typedef std::array<Piece, constants::board_size> Pieces;
 
 class Board {
 public:
-    Board();
-    Board(Pieces pieces, Team next_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves);
+    Board() = default;
+    Board(Pieces pieces, Team current_team, CastlingRights castling_rights, std::optional<std::string> en_passant_target, unsigned int half_moves, unsigned int full_moves) :
+        m_pieces(pieces),
+        m_current_team(current_team),
+        m_castling_rights(castling_rights),
+        m_en_passant_target(en_passant_target),
+        m_half_moves(half_moves),
+        m_full_moves(full_moves)
+    {
+    }
 
     const Pieces& pieces() const
     {
@@ -43,17 +47,8 @@ public:
     {
         return m_full_moves;
     }
-    const Moves& moves() const
-    {
-        return m_moves;
-    }
-    const DangerZone& danger_zone() const
-    {
-        return m_danger_zone;
-    }
 
     std::optional<Piece> get(unsigned int x, unsigned int y) const;
-    std::optional<Board> move_uci(std::string notation) const;
 
     static std::optional<Board> load_from_fen(std::string fen);
     static std::optional<std::string> into_fen(Board board);
@@ -64,16 +59,5 @@ private:
     std::optional<std::string> m_en_passant_target { std::nullopt };
     unsigned int m_half_moves { 0 };
     unsigned int m_full_moves { 1 };
-
-    // TODO(thismarvin): I feel like the following properties/methods should be decoupled from Board...
-    Moves m_moves;
-    DangerZone m_danger_zone;
-    Moves generate_move_map() const;
-    MoveSet generate_pawn_moves(Coordinates coords) const;
-    MoveSet generate_knight_moves(Coordinates coords) const;
-    MoveSet generate_bishop_moves(Coordinates coords) const;
-    MoveSet generate_rook_moves(Coordinates coords) const;
-    MoveSet generate_queen_moves(Coordinates coords) const;
-    MoveSet generate_king_moves(Coordinates coords) const;
 };
 #endif
