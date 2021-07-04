@@ -8,9 +8,9 @@ public:
     {
         return m_board;
     }
-    const Moves& moves() const
+    const gm::Analysis& analysis() const
     {
-        return m_moves;
+        return m_analysis;
     }
 
     std::optional<MatchState> submit_move(Move move) const;
@@ -18,13 +18,13 @@ public:
     static std::optional<MatchState> create(std::string fen);
 
 private:
-    MatchState(Board board, Moves moves) :
+    MatchState(Board board, gm::Analysis analysis) :
         m_board(board),
-        m_moves(moves)
+        m_analysis(analysis)
     {
     }
 
     Board m_board;
-    Moves m_moves;
+    gm::Analysis m_analysis;
 };
 #endif

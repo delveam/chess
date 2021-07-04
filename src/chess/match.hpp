@@ -16,10 +16,13 @@ public:
     {
         return m_state.at(m_head).second.board();
     }
-    const Moves& moves() const
+    const gm::Analysis& analysis() const
     {
-        return m_state.at(m_head).second.moves();
+        return m_state.at(m_head).second.analysis();
     }
+    Move last_move() const
+    {
+        return m_state.at(m_head).first;
     }
 
     std::optional<bool> submit_move(std::string notation);

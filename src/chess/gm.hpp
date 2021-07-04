@@ -16,8 +16,7 @@ enum class Event {
 };
 
 std::optional<Board> apply_move(const Board& board, Move team);
-DangerZone generate_danger_zone(const Board& board, Team team);
-std::optional<Moves> generate_moves(const Board& board, Team team);
+std::optional<Analysis> analyze(const Board& board, Team team);
 }
 
 class gm::Analysis {

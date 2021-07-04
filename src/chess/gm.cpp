@@ -436,6 +436,78 @@ bool being_attacked(const Board& board, unsigned int target_index)
     return false;
 }
 
+bool can_move(const Moves& moves)
+{
+    for (auto const& pair : moves) {
+        if (pair.second.size() > 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Create an array that represents every possible square the opposing team can capture.
+DangerZone generate_danger_zone(const Board& board, Team team)
+{
+    DangerZone result;
+    result.fill(false);
+
+    auto other_team = team == Team::White ? Team::Black : Team::White;
+    auto opponents_moves = generate_move_canidates(board, other_team);
+
+    // Generate the DangerZone of our opponent's moves.
+    for (const auto& pair : opponents_moves) {
+        auto attacker = board.pieces().at(pair.first);
+
+        auto x = pair.first % constants::board_width;
+        auto y = (int)trunc((float)pair.first / constants::board_width);
+
+        // We do not care about Pawn advances, just Pawn captures. The current MoveSet doesn't help us here,
+        // so we roll our own logic!
+        if (attacker.type() == PieceType::Pawn) {
+            std::optional<Coordinates> left = std::nullopt;
+            std::optional<Coordinates> right = std::nullopt;
+
+            switch (attacker.team()) {
+            case Team::White: {
+                left = Coordinates::create(x - 1, y - 1);
+                right = Coordinates::create(x + 1, y - 1);
+                break;
+            }
+            case Team::Black: {
+                left = Coordinates::create(x - 1, y + 1);
+                right = Coordinates::create(x + 1, y + 1);
+                break;
+            }
+            default:
+                break;
+            }
+
+            if (left.has_value()) {
+                auto index = left->y() * constants::board_width + left->x();
+                result[index] = true;
+            }
+            if (right.has_value()) {
+                auto index = right->y() * constants::board_width + right->x();
+                result[index] = true;
+            }
+
+            // HEY! Notice me! I exist to prevent unnecessary nesting.
+            continue;
+        }
+
+        // Once Pawns are out of the equation, every potential move is considered dangerous!
+        for (const auto& entry : pair.second) {
+            auto coords = Coordinates::from_string(entry.substr(2, 4)).value();
+            auto index = coords.y() * constants::board_width + coords.x();
+            result[index] = true;
+        }
+    }
+
+    return result;
+}
+
 std::optional<Board> gm::apply_move(const Board& board, Move move)
 {
     auto start_index = move.start().y() * constants::board_width + move.start().x();
@@ -575,68 +647,7 @@ std::optional<Board> gm::apply_move(const Board& board, Move move)
     return Board(pieces, current_team, castling_rights, en_passant_target, half_moves, full_moves);
 }
 
-// Create an array that represents every possible square the opposing team could capture.
-DangerZone gm::generate_danger_zone(const Board& board, Team team)
-{
-    DangerZone result;
-    result.fill(false);
-
-    auto other_team = team == Team::White ? Team::Black : Team::White;
-    auto opponents_moves = generate_move_canidates(board, other_team);
-
-    // Generate the DangerZone of our opponent's moves.
-    for (const auto& pair : opponents_moves) {
-        auto attacker = board.pieces().at(pair.first);
-
-        auto x = pair.first % constants::board_width;
-        auto y = (int)trunc((float)pair.first / constants::board_width);
-
-        // We do not care about Pawn advances, just Pawn captures. The current MoveSet doesn't help us here,
-        // so we roll our own logic!
-        if (attacker.type() == PieceType::Pawn) {
-            std::optional<Coordinates> left = std::nullopt;
-            std::optional<Coordinates> right = std::nullopt;
-
-            switch (attacker.team()) {
-            case Team::White: {
-                left = Coordinates::create(x - 1, y - 1);
-                right = Coordinates::create(x + 1, y - 1);
-                break;
-            }
-            case Team::Black: {
-                left = Coordinates::create(x - 1, y + 1);
-                right = Coordinates::create(x + 1, y + 1);
-                break;
-            }
-            default:
-                break;
-            }
-
-            if (left.has_value()) {
-                auto index = left->y() * constants::board_width + left->x();
-                result[index] = true;
-            }
-            if (right.has_value()) {
-                auto index = right->y() * constants::board_width + right->x();
-                result[index] = true;
-            }
-
-            // HEY! Notice me! I exist to prevent unnecessary nesting.
-            continue;
-        }
-
-        // Once Pawns are out of the equation, every potential move is considered dangerous!
-        for (const auto& entry : pair.second) {
-            auto coords = Coordinates::from_string(entry.substr(2, 4)).value();
-            auto index = coords.y() * constants::board_width + coords.x();
-            result[index] = true;
-        }
-    }
-
-    return result;
-}
-
-std::optional<Moves> gm::generate_moves(const Board& board, Team team)
+std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
 {
     auto king_index = find_king(board, team);
 
@@ -692,5 +703,10 @@ std::optional<Moves> gm::generate_moves(const Board& board, Team team)
         }
     }
 
-    return moves;
+    auto event = gm::Event::None;
+    if (danger_zone[king_index.value()]) {
+        event = can_move(moves) ? gm::Event::Check : gm::Event::Checkmate;
+    }
+
+    return Analysis(moves, danger_zone, event);
 }

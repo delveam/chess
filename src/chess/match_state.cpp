@@ -6,19 +6,19 @@ std::optional<MatchState> MatchState::submit_move(Move move) const
     auto start_index = start.y() * constants::board_width + start.x();
 
     // Note that this if statement acts as a guard.
-    if (m_moves.count(start_index) == 0) {
+    if (m_analysis.moves().count(start_index) == 0) {
         return std::nullopt;
     }
 
     // Because of the guard above, this if statement (which is also a guard) shouldn't throw an exception.
-    if (m_moves.at(start_index).count(move.lan()) == 0) {
+    if (m_analysis.moves().at(start_index).count(move.lan()) == 0) {
         return std::nullopt;
     }
 
     auto board = gm::apply_move(m_board, move).value();
-    auto moves = gm::generate_moves(board, board.current_team());
+    auto analysis = gm::analyze(board, board.current_team()).value();
 
-    return MatchState(board, moves.value());
+    return MatchState(board, analysis);
 }
 
 std::optional<MatchState> MatchState::create(std::string fen)
@@ -29,7 +29,7 @@ std::optional<MatchState> MatchState::create(std::string fen)
         return std::nullopt;
     }
 
-    auto moves = gm::generate_moves(board.value(), board.value().current_team());
+    auto analysis = gm::analyze(board.value(), board->current_team()).value();
 
-    return MatchState(board.value(), moves.value());
+    return MatchState(board.value(), analysis);
 }
