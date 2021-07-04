@@ -1,11 +1,11 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
-
 #include <string>
 
 namespace constants {
 constexpr int board_width = 8;
 constexpr int board_height = 8;
+constexpr int board_size = board_width * board_height;
 const std::string starting_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 }
 
