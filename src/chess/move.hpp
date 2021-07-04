@@ -27,7 +27,6 @@ public:
     static const Move& nullmove;
 
 private:
-    Move() = default;
     Move(std::string lan, Coordinates start, Coordinates end, std::optional<PieceType> promotion) :
         m_lan(lan),
         m_start(start),
