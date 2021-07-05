@@ -168,6 +168,57 @@ void Chess::draw(dam::Context& ctx)
         draw_text(ctx, text, font, params);
     }
 
+    if (match.last_move().lan() != Move::nullmove.lan()) {
+        auto start_x = match.last_move().start().x();
+        auto start_y = match.last_move().start().y();
+        auto end_x = match.last_move().end().x();
+        auto end_y = match.last_move().end().y();
+
+        if (board_flipped) {
+            start_x = constants::board_width - start_x - 1;
+            start_y = constants::board_height - start_y - 1;
+            end_x = constants::board_width - end_x - 1;
+            end_y = constants::board_height - end_y - 1;
+        }
+
+        start_x = start_x * square_size + board_offset.x();
+        start_y = start_y * square_size + board_offset.y();
+        end_x = end_x * square_size + board_offset.x();
+        end_y = end_y * square_size + board_offset.y();
+
+        auto start_params = DrawParams()
+                            .set_position(start_x, start_y)
+                            .set_scale(square_size, square_size)
+                            .set_tint(Color(0xffff00, 0.3));
+        auto end_params = DrawParams()
+                          .set_position(end_x, end_y)
+                          .set_scale(square_size, square_size)
+                          .set_tint(Color(0xffff00, 0.3));
+
+        draw_rectangle(ctx, start_params);
+        draw_rectangle(ctx, end_params);
+    }
+
+    if (match.analysis().king_safety() != gm::KingSafety::Safe) {
+        auto draw_x = match.analysis().king_location().x();
+        auto draw_y = match.analysis().king_location().y();
+
+        if (board_flipped) {
+            draw_x = constants::board_width - draw_x - 1;
+            draw_y = constants::board_height - draw_y - 1;
+        }
+
+        draw_x = draw_x * square_size + board_offset.x();
+        draw_y = draw_y * square_size + board_offset.y();
+
+        auto temp_params = DrawParams()
+                           .set_position(draw_x, draw_y)
+                           .set_scale(square_size, square_size)
+                           .set_tint(Color(0xff0000, 0.3));
+
+        draw_rectangle_but_not_filled(ctx, temp_params, square_size * 0.25);
+    }
+
     if (selected) {
         auto first_char = initial_selection->to_string().substr(0, 1).c_str()[0];
         auto second_char = initial_selection->to_string().substr(1, 1);
@@ -193,7 +244,7 @@ void Chess::draw(dam::Context& ctx)
         draw_rectangle(ctx, params);
 
         auto index = y * constants::board_width + x;
-        auto moves = match.moves();
+        auto moves = match.analysis().moves();
         auto target_move_set = moves.at(index);
 
         for (const auto& value : target_move_set) {
