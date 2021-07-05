@@ -703,10 +703,10 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
         }
     }
 
-    auto event = gm::Event::None;
+    auto king_safety = gm::KingSafety::Safe;
     if (danger_zone[king_index.value()]) {
-        event = can_move(moves) ? gm::Event::Check : gm::Event::Checkmate;
+        king_safety = can_move(moves) ? gm::KingSafety::Check : gm::KingSafety::Checkmate;
     }
 
-    return Analysis(moves, danger_zone, event);
+    return Analysis(moves, danger_zone, king_safety);
 }

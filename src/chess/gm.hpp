@@ -9,8 +9,8 @@ typedef std::array<bool, constants::board_size> DangerZone;
 
 namespace gm {
 class Analysis;
-enum class Event {
-    None,
+enum class KingSafety {
+    Safe,
     Check,
     Checkmate
 };
@@ -22,10 +22,10 @@ std::optional<Analysis> analyze(const Board& board, Team team);
 class gm::Analysis {
 public:
     Analysis() = default;
-    Analysis(Moves moves, DangerZone danger_zone, Event event) :
+    Analysis(Moves moves, DangerZone danger_zone, KingSafety king_safety) :
         m_moves(moves),
         m_danger_zone(danger_zone),
-        m_event(event)
+        m_king_safety(king_safety)
     {
     }
 
@@ -37,13 +37,13 @@ public:
     {
         return m_danger_zone;
     }
-    Event event() const
+    KingSafety king_safety() const
     {
-        return m_event;
+        return m_king_safety;
     }
 private:
     Moves m_moves;
     DangerZone m_danger_zone;
-    Event m_event { Event::None };
+    KingSafety m_king_safety { KingSafety::Safe };
 };
 #endif
