@@ -3,6 +3,7 @@
 #include "gm.hpp"
 
 const MoveSet castle_set = MoveSet{ "e1g1", "e1c1", "e8g8", "e8c8" };
+const std::array<std::string, 4> promotion_array = std::array<std::string, 4> { "b", "n", "r", "q" };
 
 bool target_is(const Board& board, unsigned int x, unsigned int y, Team team)
 {
@@ -79,7 +80,16 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
     case Team::White: {
         if (target_is(board, x, y - 1, Team::None)) {
             auto target_coords = Coordinates::create(x, y - 1).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            auto temp = coords.to_string() + target_coords.to_string();
+
+            if (y == 1) {
+                for (int i = 0; i < (int)promotion_array.size(); ++i) {
+                    result.insert(temp + promotion_array[i]);
+                }
+            }
+            else {
+                result.insert(temp);
+            }
         }
         if (y == 6 && target_is(board, x, y - 1, Team::None) && target_is(board, x, y - 2, Team::None)) {
             auto target_coords = Coordinates::create(x, y - 2).value();
@@ -102,7 +112,16 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
     case Team::Black: {
         if (target_is(board, x, y + 1, Team::None)) {
             auto target_coords = Coordinates::create(x, y + 1).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            auto temp = coords.to_string() + target_coords.to_string();
+
+            if (y == 6) {
+                for (int i = 0; i < (int)promotion_array.size(); ++i) {
+                    result.insert(temp + promotion_array[i]);
+                }
+            }
+            else {
+                result.insert(temp);
+            }
         }
         if (y == 1 && target_is(board, x, y + 1, Team::None) && target_is(board, x, y + 2, Team::None)) {
             auto target_coords = Coordinates::create(x, y + 2).value();
@@ -638,6 +657,11 @@ std::optional<Board> gm::apply_move(const Board& board, Move move)
 
     if (board.current_team() == Team::Black) {
         ++full_moves;
+    }
+
+    // Handle a promotion.
+    if (previous.type() == PieceType::Pawn && move.promotion().has_value()) {
+        previous = Piece(move.promotion().value(), previous.team());
     }
 
     // Move the piece.
