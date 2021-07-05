@@ -26,7 +26,7 @@ void Chess::handle_resize(dam::Context& ctx)
 void Chess::reset_selection()
 {
     selected = false;
-    initial_selection = "";
+    initial_selection = std::nullopt;
 }
 
 void Chess::initialize(dam::Context& ctx)
@@ -85,10 +85,7 @@ void Chess::update(dam::Context& ctx)
 
         if (target.has_value() && target->team() == match.board().current_team()) {
             selected = true;
-
-            auto coords = Coordinates::create(x, y).value();
-
-            initial_selection = coords.to_string();
+            initial_selection = Coordinates::create(x, y);
         }
     }
     else if (selected && Mouse::pressed(ctx, MouseButton::Left)) {
@@ -105,7 +102,7 @@ void Chess::update(dam::Context& ctx)
 
         if (target.has_value()) {
             auto coords = Coordinates::create(x, y).value();
-            auto lan = initial_selection + coords.to_string();
+            auto lan = initial_selection->to_string() + coords.to_string();
 
             match.submit_move(lan);
 

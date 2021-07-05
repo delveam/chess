@@ -26,7 +26,7 @@ private:
     Match match;
     bool board_flipped;
     bool selected;
-    std::string initial_selection;
+    std::optional<Coordinates> initial_selection { std::nullopt };
 
     void handle_resize(dam::Context& ctx);
     void reset_selection();
