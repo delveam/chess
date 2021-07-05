@@ -425,7 +425,7 @@ bool being_attacked(const Board& board, unsigned int target_index)
 
         // Once Pawns are out of the equation, every potential move is considered dangerous!
         for (const auto& entry : pair.second) {
-            auto coords = Coordinates::from_string(entry.substr(2, 4)).value();
+            auto coords = Coordinates::from_string(entry.substr(2, 2)).value();
             auto index = coords.y() * constants::board_width + coords.x();
             if (index == target_index) {
                 return true;
@@ -499,7 +499,7 @@ DangerZone generate_danger_zone(const Board& board, Team team)
 
         // Once Pawns are out of the equation, every potential move is considered dangerous!
         for (const auto& entry : pair.second) {
-            auto coords = Coordinates::from_string(entry.substr(2, 4)).value();
+            auto coords = Coordinates::from_string(entry.substr(2, 2)).value();
             auto index = coords.y() * constants::board_width + coords.x();
             result[index] = true;
         }

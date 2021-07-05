@@ -10,12 +10,12 @@ std::optional<Move> Move::create(std::string lan)
     }
 
     auto start = Coordinates::from_string(lan.substr(0, 2));
-    auto end = Coordinates::from_string(lan.substr(2, 4));
+    auto end = Coordinates::from_string(lan.substr(2, 2));
 
     std::optional<PieceType> promotion = std::nullopt;
 
     if (lan.length() == 5) {
-        auto temp = lan.substr(4, 5).c_str()[0];
+        auto temp = lan.substr(4, 1).c_str()[0];
 
         // TODO(thismarvin): It might be worth it to put this in utils!
         switch (temp) {

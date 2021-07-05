@@ -64,7 +64,7 @@ std::optional<Board> Board::load_from_fen(std::string fen)
 
     auto castling_rights_uint = 0;
     for (int i = 0; i < (int)sections[2].length(); ++i) {
-        auto current = sections[2].substr(i, i + 1).c_str()[0];
+        auto current = sections[2].substr(i, 1).c_str()[0];
         switch (current) {
         case 'K':
             castling_rights_uint |= static_cast<unsigned int>(CastlingRights::WhiteKingSide);

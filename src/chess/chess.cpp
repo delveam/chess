@@ -172,8 +172,8 @@ void Chess::draw(dam::Context& ctx)
     }
 
     if (selected) {
-        auto first_char = initial_selection.substr(0, 1).c_str()[0];
-        auto second_char = initial_selection.substr(1, 2);
+        auto first_char = initial_selection->to_string().substr(0, 1).c_str()[0];
+        auto second_char = initial_selection->to_string().substr(1, 1);
         auto x = first_char - 'a';
         auto y = constants::board_height - std::stoi(second_char);
 
@@ -201,9 +201,9 @@ void Chess::draw(dam::Context& ctx)
 
         for (const auto& value : target_move_set) {
             // TODO(thismarvin): This is very similar to the code above. How can we get rid of code duplication?
-            auto temp_coords = value.substr(2, 4);
+            auto temp_coords = value.substr(2, 2);
             auto temp_x = temp_coords.c_str()[0] - 'a';
-            auto temp_y = constants::board_height - std::stoi(temp_coords.substr(1, 2));
+            auto temp_y = constants::board_height - std::stoi(temp_coords.substr(1, 1));
 
             auto temp_draw_x = temp_x;
             auto temp_draw_y = temp_y;

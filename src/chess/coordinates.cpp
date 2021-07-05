@@ -32,7 +32,7 @@ std::optional<Coordinates> Coordinates::from_string(std::string notation)
     temp = tolower(temp);
 
     auto column = constants::board_width - ((int)'h' - (int)temp) - 1;
-    auto row = constants::board_height - std::stoi(notation.substr(1, 2));
+    auto row = constants::board_height - std::stoi(notation.substr(1, 1));
 
     return Coordinates::create(column, row);
 }
