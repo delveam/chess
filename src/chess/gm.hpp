@@ -10,6 +10,7 @@ typedef std::array<bool, constants::board_size> DangerZone;
 namespace gm {
 class Analysis;
 enum class KingSafety {
+    None,
     Safe,
     Check,
     Checkmate
@@ -21,10 +22,10 @@ std::optional<Analysis> analyze(const Board& board, Team team);
 
 class gm::Analysis {
 public:
-    Analysis() = default;
-    Analysis(Moves moves, DangerZone danger_zone, KingSafety king_safety) :
+    Analysis(Moves moves, DangerZone danger_zone, Coordinates king_location, KingSafety king_safety) :
         m_moves(moves),
         m_danger_zone(danger_zone),
+        m_king_location(king_location),
         m_king_safety(king_safety)
     {
     }
@@ -37,6 +38,10 @@ public:
     {
         return m_danger_zone;
     }
+    Coordinates king_location() const
+    {
+        return m_king_location;
+    }
     KingSafety king_safety() const
     {
         return m_king_safety;
@@ -44,6 +49,7 @@ public:
 private:
     Moves m_moves;
     DangerZone m_danger_zone;
-    KingSafety m_king_safety { KingSafety::Safe };
+    Coordinates m_king_location;
+    KingSafety m_king_safety { KingSafety::None };
 };
 #endif

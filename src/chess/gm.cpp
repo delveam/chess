@@ -727,10 +727,12 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
         }
     }
 
+    auto king_location = Coordinates::create(king_index.value() % constants::board_width, (unsigned int)trunc((float)king_index.value() / constants::board_width)).value();
+
     auto king_safety = gm::KingSafety::Safe;
     if (danger_zone[king_index.value()]) {
         king_safety = can_move(moves) ? gm::KingSafety::Check : gm::KingSafety::Checkmate;
     }
 
-    return Analysis(moves, danger_zone, king_safety);
+    return Analysis(moves, danger_zone, king_location, king_safety);
 }
