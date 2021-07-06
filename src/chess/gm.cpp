@@ -100,12 +100,31 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
         // Handle capturing to the top left.
         if (target_is(board, x - 1, y - 1, Team::Black)) {
             auto target_coords = Coordinates::create(x - 1, y - 1).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            auto temp = coords.to_string() + target_coords.to_string();
+
+            if (y == 1) {
+                for (int i = 0; i < (int)promotion_array.size(); ++i) {
+                    result.insert(temp + promotion_array[i]);
+                }
+            }
+            else {
+                result.insert(temp);
+            }
         }
         // Handle capturing to the top right.
         if (target_is(board, x + 1, y - 1, Team::Black)) {
             auto target_coords = Coordinates::create(x + 1, y - 1).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            auto temp = coords.to_string() + target_coords.to_string();
+
+            // TODO(thismarvin): This is duplicated 3 times! How can we get around this?
+            if (y == 1) {
+                for (int i = 0; i < (int)promotion_array.size(); ++i) {
+                    result.insert(temp + promotion_array[i]);
+                }
+            }
+            else {
+                result.insert(temp);
+            }
         }
         // Handle en passant.
         if (y == 3 && board.en_passant_target().has_value()) {
@@ -140,12 +159,31 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
         // Handle capturing to the bottom left.
         if (target_is(board, x - 1, y + 1, Team::White)) {
             auto target_coords = Coordinates::create(x - 1, y + 1).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            auto temp = coords.to_string() + target_coords.to_string();
+
+            if (y == 6) {
+                for (int i = 0; i < (int)promotion_array.size(); ++i) {
+                    result.insert(temp + promotion_array[i]);
+                }
+            }
+            else {
+                result.insert(temp);
+            }
         }
         // Handle capturing to the bottom right.
         if (target_is(board, x + 1, y + 1, Team::White)) {
             auto target_coords = Coordinates::create(x + 1, y + 1).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            auto temp = coords.to_string() + target_coords.to_string();
+
+            // TODO(thismarvin): This is duplicated 3 times! How can we get around this?
+            if (y == 6) {
+                for (int i = 0; i < (int)promotion_array.size(); ++i) {
+                    result.insert(temp + promotion_array[i]);
+                }
+            }
+            else {
+                result.insert(temp);
+            }
         }
         // Handle en passant.
         if (y == 4 && board.en_passant_target().has_value()) {
