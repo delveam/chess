@@ -78,6 +78,7 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
 
     switch (current.team()) {
     case Team::White: {
+        // Handle advancing one square.
         if (target_is(board, x, y - 1, Team::None)) {
             auto target_coords = Coordinates::create(x, y - 1).value();
             auto temp = coords.to_string() + target_coords.to_string();
@@ -91,18 +92,22 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
                 result.insert(temp);
             }
         }
+        // Handle advancing two squares (if the pawn has not moved before).
         if (y == 6 && target_is(board, x, y - 1, Team::None) && target_is(board, x, y - 2, Team::None)) {
             auto target_coords = Coordinates::create(x, y - 2).value();
             result.insert(coords.to_string() + target_coords.to_string());
         }
+        // Handle capturing to the top left.
         if (target_is(board, x - 1, y - 1, Team::Black)) {
             auto target_coords = Coordinates::create(x - 1, y - 1).value();
             result.insert(coords.to_string() + target_coords.to_string());
         }
+        // Handle capturing to the top right.
         if (target_is(board, x + 1, y - 1, Team::Black)) {
             auto target_coords = Coordinates::create(x + 1, y - 1).value();
             result.insert(coords.to_string() + target_coords.to_string());
         }
+        // Handle en passant.
         if (y == 3 && board.en_passant_target().has_value()) {
             result.insert(coords.to_string() + board.en_passant_target().value());
         }
@@ -110,6 +115,7 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
     }
 
     case Team::Black: {
+        // Handle advancing one square.
         if (target_is(board, x, y + 1, Team::None)) {
             auto target_coords = Coordinates::create(x, y + 1).value();
             auto temp = coords.to_string() + target_coords.to_string();
@@ -123,18 +129,22 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
                 result.insert(temp);
             }
         }
+        // Handle advancing two squares (if the pawn has not moved before).
         if (y == 1 && target_is(board, x, y + 1, Team::None) && target_is(board, x, y + 2, Team::None)) {
             auto target_coords = Coordinates::create(x, y + 2).value();
             result.insert(coords.to_string() + target_coords.to_string());
         }
+        // Handle capturing to the bottom left.
         if (target_is(board, x - 1, y + 1, Team::White)) {
             auto target_coords = Coordinates::create(x - 1, y + 1).value();
             result.insert(coords.to_string() + target_coords.to_string());
         }
+        // Handle capturing to the bottom right.
         if (target_is(board, x + 1, y + 1, Team::White)) {
             auto target_coords = Coordinates::create(x + 1, y + 1).value();
             result.insert(coords.to_string() + target_coords.to_string());
         }
+        // Handle en passant.
         if (y == 4 && board.en_passant_target().has_value()) {
             result.insert(coords.to_string() + board.en_passant_target().value());
         }
