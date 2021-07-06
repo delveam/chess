@@ -109,7 +109,10 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
         }
         // Handle en passant.
         if (y == 3 && board.en_passant_target().has_value()) {
-            result.insert(coords.to_string() + board.en_passant_target().value());
+            auto temp = Coordinates::from_string(board.en_passant_target().value()).value();
+            if ((temp.x() - 1 == x && temp.y() + 1 == y) || (temp.x() + 1 == x && temp.y() + 1 == y)) {
+                result.insert(coords.to_string() + board.en_passant_target().value());
+            }
         }
         break;
     }
@@ -146,7 +149,10 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
         }
         // Handle en passant.
         if (y == 4 && board.en_passant_target().has_value()) {
-            result.insert(coords.to_string() + board.en_passant_target().value());
+            auto temp = Coordinates::from_string(board.en_passant_target().value()).value();
+            if ((temp.x() - 1 == x && temp.y() - 1 == y) || (temp.x() + 1 == x && temp.y() - 1 == y)) {
+                result.insert(coords.to_string() + board.en_passant_target().value());
+            }
         }
         break;
     }
