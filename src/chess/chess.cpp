@@ -104,6 +104,33 @@ void Chess::update(dam::Context& ctx)
             auto coords = Coordinates::create(x, y).value();
             auto lan = initial_selection->to_string() + coords.to_string();
 
+            auto initial_piece = match.board().get(initial_selection->x(), initial_selection->y()).value();
+            if (initial_piece.type() == PieceType::Pawn) {
+                auto start_y = 0;
+                auto end_y = 0;
+
+                switch (match.board().current_team()) {
+                case Team::White: {
+                    start_y = 1;
+                    end_y = 0;
+                    break;
+                }
+                case Team::Black: {
+                    start_y = 6;
+                    end_y = 7;
+                    break;
+                }
+                default:
+                    break;
+                }
+
+                // Check if we are about to promote a pawn.
+                if ((int)initial_selection->y() == start_y && y == end_y) {
+                    // TODO(thismarvin): Instead of automatically promoting to a queen, implement a UI that allows the player to choose what piece to promote to.
+                    lan += "q";
+                }
+            }
+
             match.submit_move(lan);
 
             reset_selection();
