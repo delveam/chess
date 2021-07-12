@@ -24,6 +24,10 @@ public:
     {
         return m_state.at(m_index).first;
     }
+    bool at_end() const
+    {
+        return m_index == m_end;
+    }
 
     std::optional<bool> submit_move(std::string notation);
     void undo();
