@@ -13,7 +13,8 @@ enum class KingSafety {
     None,
     Safe,
     Check,
-    Checkmate
+    Checkmate,
+    Stalemate
 };
 
 std::optional<Board> apply_move(const Board& board, Move team);
