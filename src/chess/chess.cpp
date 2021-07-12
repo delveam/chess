@@ -226,7 +226,7 @@ void Chess::draw(dam::Context& ctx)
         draw_rectangle(ctx, end_params);
     }
 
-    if (match.analysis().king_safety() != gm::KingSafety::Safe) {
+    if (match.analysis().king_safety() == gm::KingSafety::Check || match.analysis().king_safety() == gm::KingSafety::Checkmate) {
         auto draw_x = match.analysis().king_location().x();
         auto draw_y = match.analysis().king_location().y();
 
