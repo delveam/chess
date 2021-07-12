@@ -44,6 +44,8 @@ void Chess::initialize(dam::Context& ctx)
 
     board_flipped = false;
     selected = false;
+
+    srand(time(NULL));
 }
 
 void Chess::update(dam::Context& ctx)
@@ -134,6 +136,41 @@ void Chess::update(dam::Context& ctx)
             match.submit_move(lan);
 
             reset_selection();
+        }
+    }
+
+    // Random AI
+    if (match.at_end() && match.board().current_team() == Team::Black) {
+        if (match.analysis().king_safety() != gm::KingSafety::Stalemate && match.analysis().king_safety() != gm::KingSafety::Checkmate) {
+            std::vector<int> potential_pieces;
+            for (auto const& pair : match.analysis().moves()) {
+                potential_pieces.push_back(pair.first);
+            }
+
+            std::optional<std::string> move = std::nullopt;
+
+            while (!move.has_value()) {
+                MoveSet move_set = match.analysis().moves().at(potential_pieces[rand() % (int)potential_pieces.size()]);
+
+                if (move_set.size() == 0) {
+                    continue;
+                }
+
+                int temp = rand() % (int)move_set.size();
+
+                int i = 0;
+                for (const auto& yeet : move_set) {
+                    if (i == temp) {
+                        move = yeet;
+                        break;
+                    }
+
+                    i += 1;
+                }
+
+            }
+
+            match.submit_move(move.value());
         }
     }
 }
