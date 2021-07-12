@@ -14,15 +14,15 @@ public:
 
     const Board& board() const
     {
-        return m_state.at(m_head).second.board();
+        return m_state.at(m_index).second.board();
     }
     const gm::Analysis& analysis() const
     {
-        return m_state.at(m_head).second.analysis();
+        return m_state.at(m_index).second.analysis();
     }
     Move last_move() const
     {
-        return m_state.at(m_head).first;
+        return m_state.at(m_index).first;
     }
 
     std::optional<bool> submit_move(std::string notation);
@@ -32,7 +32,7 @@ public:
     static Match create();
     // TODO(thismarvin): setup `static std::optional<Match> from_pgn(std::string pgn);`
 private:
-    unsigned int m_head { 0 };
+    unsigned int m_index { 0 };
     unsigned int m_end { 0 };
     std::vector<std::pair<Move, MatchState>> m_state;
 
