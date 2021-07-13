@@ -29,7 +29,7 @@ public:
         return m_index == m_end;
     }
 
-    std::optional<bool> submit_move(std::string notation);
+    bool submit_move(std::string lan);
     void undo();
     void redo();
 

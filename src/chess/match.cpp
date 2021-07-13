@@ -1,15 +1,15 @@
 #include "match.hpp"
 
-std::optional<bool> Match::submit_move(std::string lan)
+bool Match::submit_move(std::string lan)
 {
     auto move = Move::create(lan);
 
     if (!move.has_value()) {
-        return std::nullopt;
+        return false;
     }
 
     if (m_state.size() == 0) {
-        return std::nullopt;
+        return false;
     }
 
     auto current = m_state.at(m_index);
