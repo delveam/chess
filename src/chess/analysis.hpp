@@ -41,6 +41,8 @@ public:
     {
         return m_king_safety;
     }
+
+    bool contains_move(std::string lan) const;
 private:
     Moves m_moves;
     DangerZone m_danger_zone;
