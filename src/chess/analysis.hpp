@@ -1,14 +1,14 @@
 #ifndef ANALYSIS_HPP
 #define ANALYSIS_HPP
-#include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include "coordinates.hpp"
 #include "king_safety.hpp"
 #include "utils.hpp"
 
 typedef std::set<std::string> MoveSet;
-typedef std::map<unsigned int, MoveSet> Moves;
+typedef std::unordered_map<unsigned int, MoveSet> Moves;
 typedef std::array<bool, constants::board_size> DangerZone;
 
 namespace gm {
