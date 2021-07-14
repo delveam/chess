@@ -1,9 +1,7 @@
 #ifndef BOARD_HPP
 #define BOARD_HPP
 #include <array>
-#include <map>
 #include <optional>
-#include <set>
 #include <string>
 #include "coordinates.hpp"
 #include "piece.hpp"
