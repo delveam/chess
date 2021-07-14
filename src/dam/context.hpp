@@ -19,5 +19,9 @@ public:
     unsigned int display_height;
     dam::input::SmartKeyboard keyboard;
     dam::input::SmartMouse mouse;
+
+    float total_time;
+    float delta_time;
+    float alpha;
 };
 #endif

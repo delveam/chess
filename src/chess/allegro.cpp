@@ -105,11 +105,18 @@ void Allegro::run(dam::AppConfig& config, dam::App& app)
 
     app.initialize(ctx);
 
-    // TODO: This might be a little egregious for chess? I don't know...
-    auto target = 1.0 / 120.0;
+    // This might be a little egregious for chess? I don't know...
+    auto target = 1.0 / 250.0;
     auto accumulator = 0.0;
+    auto max_frame_skip = 25;
+    auto max_delta_time = max_frame_skip * target;
 
     auto previous_time = al_get_time();
+
+    ctx.total_time = 0;
+    // The app updates using a fixed time-step.
+    ctx.delta_time = target;
+    ctx.alpha = 0;
 
     while (!should_close) {
         while(al_get_next_event(queue, &event)) {
@@ -128,6 +135,12 @@ void Allegro::run(dam::AppConfig& config, dam::App& app)
 
         auto current_time = al_get_time();
         auto delta_time = current_time - previous_time;
+
+        // Set a maximum delta time in order to avoid a "Spiral of Doom."
+        if (delta_time > max_delta_time) {
+            delta_time = max_delta_time;
+        }
+
         previous_time = current_time;
 
         accumulator += delta_time;
@@ -142,7 +155,10 @@ void Allegro::run(dam::AppConfig& config, dam::App& app)
             }
 
             accumulator -= target;
+            ctx.total_time += target;
         }
+
+        ctx.alpha = accumulator / target;
 
         app.draw(ctx);
 
