@@ -26,9 +26,18 @@ private:
     Match match;
     bool board_flipped;
     bool selected;
+
     std::optional<Coordinates> initial_selection { std::nullopt };
+    bool move_was_queued { false };
+    std::optional<Move> queued_move { std::nullopt };
+    float move_time;
+    dam::Vector2F current_position;
+    dam::Vector2F previous_position;
+
+    float engine_delay { 0 };
 
     void handle_resize(dam::Context& ctx);
     void reset_selection();
+    void queue_move(std::string lan);
 };
 #endif

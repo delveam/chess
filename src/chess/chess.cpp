@@ -29,6 +29,20 @@ void Chess::reset_selection()
     initial_selection = std::nullopt;
 }
 
+void Chess::queue_move(std::string lan)
+{
+    auto move = Move::create(lan);
+
+    if (!move.has_value()) {
+        return;
+    }
+
+    move_was_queued = true;
+    queued_move = move;
+    move_time = 0;
+    current_position = dam::Vector2F(move->start().x(), move->start().y());
+}
+
 void Chess::initialize(dam::Context& ctx)
 {
     using namespace dam::graphics;
@@ -73,104 +87,146 @@ void Chess::update(dam::Context& ctx)
         reset_selection();
     }
 
-    if (!selected && Mouse::pressed(ctx, MouseButton::Left)) {
-        auto position = Mouse::get_position(ctx);
-        auto x = (int)((position.x() - board_offset.x()) / square_size);
-        auto y = (int)((position.y() - board_offset.y()) / square_size);
+    if (!move_was_queued && Mouse::pressed(ctx, MouseButton::Left)) {
+        if (!selected) {
+            auto position = Mouse::get_position(ctx);
+            auto x = (int)((position.x() - board_offset.x()) / square_size);
+            auto y = (int)((position.y() - board_offset.y()) / square_size);
 
-        if (board_flipped) {
-            x = constants::board_width - x - 1;
-            y = constants::board_height - y - 1;
-        }
-
-        auto target = match.board().get(x, y);
-
-        if (target.has_value() && target->team() == match.board().current_team()) {
-            selected = true;
-            initial_selection = Coordinates::create(x, y);
-        }
-    }
-    else if (selected && Mouse::pressed(ctx, MouseButton::Left)) {
-        auto position = Mouse::get_position(ctx);
-        auto x = (int)((position.x() - board_offset.x()) / square_size);
-        auto y = (int)((position.y() - board_offset.y()) / square_size);
-
-        if (board_flipped) {
-            x = constants::board_width - x - 1;
-            y = constants::board_height - y - 1;
-        }
-
-        auto target = match.board().get(x, y);
-
-        if (target.has_value()) {
-            auto coords = Coordinates::create(x, y).value();
-            auto lan = initial_selection->to_string() + coords.to_string();
-
-            auto initial_piece = match.board().get(initial_selection->x(), initial_selection->y()).value();
-            if (initial_piece.type() == PieceType::Pawn) {
-                auto start_y = 0;
-                auto end_y = 0;
-
-                switch (match.board().current_team()) {
-                case Team::White: {
-                    start_y = 1;
-                    end_y = 0;
-                    break;
-                }
-                case Team::Black: {
-                    start_y = 6;
-                    end_y = 7;
-                    break;
-                }
-                default:
-                    break;
-                }
-
-                // Check if we are about to promote a pawn.
-                if ((int)initial_selection->y() == start_y && y == end_y) {
-                    // TODO(thismarvin): Instead of automatically promoting to a queen, implement a UI that allows the player to choose what piece to promote to.
-                    lan += "q";
-                }
+            if (board_flipped) {
+                x = constants::board_width - x - 1;
+                y = constants::board_height - y - 1;
             }
 
-            match.submit_move(lan);
+            auto target = match.board().get(x, y);
 
-            reset_selection();
+            if (target.has_value() && target->team() == match.board().current_team()) {
+                selected = true;
+                initial_selection = Coordinates::create(x, y);
+            }
         }
-    }
+        else {
+            auto position = Mouse::get_position(ctx);
+            auto x = (int)((position.x() - board_offset.x()) / square_size);
+            auto y = (int)((position.y() - board_offset.y()) / square_size);
 
-    // Random AI
-    if (match.at_end() && match.board().current_team() == Team::Black) {
-        if (match.analysis().king_safety() != gm::KingSafety::Stalemate && match.analysis().king_safety() != gm::KingSafety::Checkmate) {
-            std::vector<int> potential_pieces;
-            for (auto const& pair : match.analysis().moves()) {
-                potential_pieces.push_back(pair.first);
+            if (board_flipped) {
+                x = constants::board_width - x - 1;
+                y = constants::board_height - y - 1;
             }
 
-            std::optional<std::string> move = std::nullopt;
+            auto target = match.board().get(x, y);
 
-            while (!move.has_value()) {
-                MoveSet move_set = match.analysis().moves().at(potential_pieces[rand() % (int)potential_pieces.size()]);
-
-                if (move_set.size() == 0) {
-                    continue;
+            if (target.has_value()) {
+                // Quickly change to another piece.
+                if (target->team() == match.board().current_team()) {
+                    initial_selection = Coordinates::create(x, y);
                 }
+                else {
+                    auto coords = Coordinates::create(x, y).value();
+                    auto lan = initial_selection->to_string() + coords.to_string();
 
-                int temp = rand() % (int)move_set.size();
+                    auto initial_piece = match.board().get(initial_selection->x(), initial_selection->y()).value();
 
-                int i = 0;
-                for (const auto& yeet : move_set) {
-                    if (i == temp) {
-                        move = yeet;
-                        break;
+                    if (initial_piece.type() == PieceType::Pawn) {
+                        auto start_y = 0;
+                        auto end_y = 0;
+
+                        switch (match.board().current_team()) {
+                        case Team::White: {
+                            start_y = 1;
+                            end_y = 0;
+                            break;
+                        }
+                        case Team::Black: {
+                            start_y = 6;
+                            end_y = 7;
+                            break;
+                        }
+                        default:
+                            break;
+                        }
+
+                        // Check if we are about to promote a pawn.
+                        if ((int)initial_selection->y() == start_y && y == end_y) {
+                            // TODO(thismarvin): Instead of automatically promoting to a queen, implement a UI that allows the player to choose what piece to promote to.
+                            lan += "q";
+                        }
                     }
 
-                    i += 1;
+                    if (match.analysis().contains_move(lan)) {
+                        queue_move(lan);
+                    }
+                    else {
+                        reset_selection();
+                    }
                 }
+            }
+        }
+    }
 
+    if (!move_was_queued && match.at_end() && match.board().current_team() == Team::Black && match.analysis().king_safety() != gm::KingSafety::Checkmate && match.analysis().king_safety() != gm::KingSafety::Stalemate) {
+        engine_delay += ctx.delta_time;
+
+        if (engine_delay >= 0.8) {
+            // Random AI
+            if (match.at_end() && match.board().current_team() == Team::Black) {
+                if (match.analysis().king_safety() != gm::KingSafety::Stalemate && match.analysis().king_safety() != gm::KingSafety::Checkmate) {
+                    std::vector<int> potential_pieces;
+                    for (auto const& pair : match.analysis().moves()) {
+                        potential_pieces.push_back(pair.first);
+                    }
+
+                    std::optional<unsigned int> piece_index = std::nullopt;
+                    std::optional<std::string> move = std::nullopt;
+
+                    while (!move.has_value()) {
+                        piece_index = (unsigned int)(potential_pieces[rand() % (int)potential_pieces.size()]);
+                        MoveSet move_set = match.analysis().moves().at(piece_index.value());
+
+                        if (move_set.size() == 0) {
+                            continue;
+                        }
+
+                        int temp = rand() % (int)move_set.size();
+
+                        int i = 0;
+                        for (const auto& yeet : move_set) {
+                            if (i == temp) {
+                                move = yeet;
+                                break;
+                            }
+
+                            i += 1;
+                        }
+                    }
+
+                    queue_move(move.value());
+                }
             }
 
-            match.submit_move(move.value());
+            engine_delay = 0;
+        }
+    }
+
+    if (move_was_queued) {
+        int start_x = queued_move->start().x();
+        int start_y = queued_move->start().y();
+        int end_x = queued_move->end().x();
+        int end_y = queued_move->end().y();
+
+        move_time += ctx.delta_time / 0.25;
+
+        auto x = (1 - move_time) * start_x + move_time * end_x;
+        auto y = (1 - move_time) * start_y + move_time * end_y;
+
+        previous_position = current_position;
+        current_position = dam::Vector2F(x, y);
+
+        if (move_time >= 1) {
+            move_was_queued = false;
+            match.submit_move(queued_move->lan());
+            reset_selection();
         }
     }
 }
@@ -232,11 +288,19 @@ void Chess::draw(dam::Context& ctx)
         draw_text(ctx, text, font, params);
     }
 
+    // Draw an indicator that represents the most recent move.
     if (match.last_move().lan() != Move::nullmove.lan()) {
         auto start_x = match.last_move().start().x();
         auto start_y = match.last_move().start().y();
         auto end_x = match.last_move().end().x();
         auto end_y = match.last_move().end().y();
+
+        if (move_was_queued) {
+            start_x = queued_move->start().x();
+            start_y = queued_move->start().y();
+            end_x = queued_move->end().x();
+            end_y = queued_move->end().y();
+        }
 
         if (board_flipped) {
             start_x = constants::board_width - start_x - 1;
@@ -263,6 +327,7 @@ void Chess::draw(dam::Context& ctx)
         draw_rectangle(ctx, end_params);
     }
 
+    // Draw an indicator around the King when they are being attacked.
     if (match.analysis().king_safety() == gm::KingSafety::Check || match.analysis().king_safety() == gm::KingSafety::Checkmate) {
         auto draw_x = match.analysis().king_location().x();
         auto draw_y = match.analysis().king_location().y();
@@ -278,12 +343,13 @@ void Chess::draw(dam::Context& ctx)
         auto temp_params = DrawParams()
                            .set_position(draw_x, draw_y)
                            .set_scale(square_size, square_size)
-                           .set_tint(Color(0xff0000, 0.3));
+                           .set_tint(Color(0xff0000, 0.4));
 
         draw_rectangle_but_not_filled(ctx, temp_params, square_size * 0.25);
     }
 
-    if (selected) {
+    // Draw an indicator for every possible square the current piece can move to.
+    if (selected && !move_was_queued) {
         auto first_char = initial_selection->to_string().substr(0, 1).c_str()[0];
         auto second_char = initial_selection->to_string().substr(1, 1);
         auto x = first_char - 'a';
@@ -303,13 +369,17 @@ void Chess::draw(dam::Context& ctx)
         auto params = DrawParams()
                       .set_position(draw_x, draw_y)
                       .set_scale(square_size, square_size)
-                      .set_tint(Color(0x0000ff, 0.2));
+                      .set_tint(Color(0x547c64, 0.8));
 
         draw_rectangle(ctx, params);
 
         auto index = y * constants::board_width + x;
         auto moves = match.analysis().moves();
         auto target_move_set = moves.at(index);
+
+        auto mouse_position = dam::input::Mouse::get_position(ctx);
+        auto mouse_x = (int)((mouse_position.x() - board_offset.x()) / square_size);
+        auto mouse_y = (int)((mouse_position.y() - board_offset.y()) / square_size);
 
         for (const auto& value : target_move_set) {
             // TODO(thismarvin): This is very similar to the code above. How can we get rid of code duplication?
@@ -325,27 +395,43 @@ void Chess::draw(dam::Context& ctx)
                 temp_draw_y = constants::board_height - temp_y - 1;
             }
 
+            auto mouse_hover = mouse_x == temp_draw_x && mouse_y == temp_draw_y;
+
             temp_draw_x = temp_draw_x * square_size + board_offset.x();
             temp_draw_y = temp_draw_y * square_size + board_offset.y();
 
             auto target_piece = match.board().get(temp_x, temp_y);
 
             if (target_piece.has_value() && target_piece->team() == Team::None) {
-                auto radius = square_size * 0.4 * 0.5;
+                auto radius = square_size * 0.35 * 0.5;
+                auto alpha = 0.8;
+
+                if (mouse_hover) {
+                    radius *= 1.1;
+                    alpha = 0.95;
+                }
                 auto temp_params = DrawParams()
                                    .set_position(temp_draw_x + square_size * 0.5 - radius, temp_draw_y + square_size * 0.5 - radius)
                                    .set_scale(radius * 2, radius * 2)
-                                   .set_tint(Color(0x0000ff, 0.2));
+                                   .set_tint(Color(0x547c64, alpha));
 
                 draw_circle(ctx, temp_params);
             }
             else {
+                auto line_width = square_size * 0.25;
+                auto alpha = 0.2;
+
+                if (mouse_hover) {
+                    line_width *= 1.2;
+                    alpha = 0.3;
+                }
+
                 auto temp_params = DrawParams()
                                    .set_position(temp_draw_x, temp_draw_y)
                                    .set_scale(square_size, square_size)
-                                   .set_tint(Color(0xff0000, 0.2));
+                                   .set_tint(Color(0xff0000, alpha));
 
-                draw_rectangle_but_not_filled(ctx, temp_params, square_size * 0.25);
+                draw_rectangle_but_not_filled(ctx, temp_params, line_width);
             }
         }
     }
@@ -354,6 +440,20 @@ void Chess::draw(dam::Context& ctx)
     // Draw pieces.
     for (int y = 0; y < constants::board_height; ++y) {
         for (int x = 0; x < constants::board_width; ++x) {
+            // Do not draw the piece that is currently moving!
+            if (move_was_queued) {
+                int temp_x = queued_move->start().x();
+                int temp_y = queued_move->start().y();
+
+                if (board_flipped) {
+                    temp_x = constants::board_width - temp_x - 1;
+                    temp_y = constants::board_width - temp_y - 1;
+                }
+
+                if (x == temp_x && y == temp_y) {
+                    continue;
+                }
+            }
             auto index = board_flipped ? ((constants::board_height - 1) - y) * constants::board_width + ((constants::board_width - 1) - x) : y * constants::board_width + x;
             auto current = match.board().pieces()[index];
 
@@ -393,6 +493,63 @@ void Chess::draw(dam::Context& ctx)
 
                 draw_texture(ctx, pieces, region, params);
             }
+        }
+    }
+
+    // Animate the most recent move.
+    if (move_was_queued) {
+        auto temp_draw_x = current_position.x() * ctx.alpha + previous_position.x() * (1 - ctx.alpha);
+        auto temp_draw_y = current_position.y() * ctx.alpha + previous_position.y() * (1 - ctx.alpha);
+
+        if (board_flipped) {
+            temp_draw_x = constants::board_width - temp_draw_x - 1;
+            temp_draw_y = constants::board_height - temp_draw_y - 1;
+        }
+
+        temp_draw_x = temp_draw_x * square_size + board_offset.x();
+        temp_draw_y = temp_draw_y * square_size + board_offset.y();
+
+        auto x = queued_move->start().x();
+        auto y = queued_move->start().y();
+
+        auto index = y * constants::board_width + x;
+        auto current = match.board().pieces()[index];
+
+        auto subregion_x = 0;
+        switch (current.type()) {
+        case PieceType::Pawn:
+            break;
+        case PieceType::Bishop:
+            subregion_x = sprite_size;
+            break;
+        case PieceType::Knight:
+            subregion_x = sprite_size * 2;
+            break;
+        case PieceType::Rook:
+            subregion_x = sprite_size * 3;
+            break;
+        case PieceType::Queen:
+            subregion_x = sprite_size * 4;
+            break;
+        case PieceType::King:
+            subregion_x = sprite_size * 5;
+            break;
+        case PieceType::None:
+            break;
+        }
+
+        if (current.type() != PieceType::None) {
+            auto params = DrawParams()
+                          .set_position(temp_draw_x, temp_draw_y)
+                          .set_scale(sprite_scale, sprite_scale);
+            auto region = ImageRegion(
+                              subregion_x,
+                              current.team() == Team::White ? 0 : sprite_size,
+                              sprite_size,
+                              sprite_size
+                          );
+
+            draw_texture(ctx, pieces, region, params);
         }
     }
 }
