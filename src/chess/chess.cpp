@@ -9,6 +9,16 @@
 #include "../dam/palette.hpp"
 #include "../dam/window.hpp"
 
+int random_range(int min, int max)
+{
+    return min + rand() % (max - min);
+}
+
+float lerp_precise(float a, float b, float t)
+{
+    return (1 - t) * a + t * b;
+}
+
 void Chess::handle_resize(dam::Context& ctx)
 {
     square_size = dam::window::get_height(ctx) / constants::board_height;
@@ -43,26 +53,7 @@ void Chess::queue_move(std::string lan)
     current_position = dam::Vector2F(move->start().x(), move->start().y());
 }
 
-void Chess::initialize(dam::Context& ctx)
-{
-    using namespace dam::graphics;
-
-    font = load_font("./content/fonts/FiraCode-SemiBold.ttf", 16);
-
-    pieces = load_texture("./content/sprites/pieces.png");
-    sprite_size = 16;
-
-    handle_resize(ctx);
-
-    match = Match::create();
-
-    board_flipped = false;
-    selected = false;
-
-    srand(time(NULL));
-}
-
-void Chess::update(dam::Context& ctx)
+void Chess::update_input(dam::Context& ctx)
 {
     using namespace dam::input;
 
@@ -87,7 +78,11 @@ void Chess::update(dam::Context& ctx)
         reset_selection();
     }
 
-    if (!move_was_queued && Mouse::pressed(ctx, MouseButton::Left)) {
+    if (move_was_queued) {
+        return;
+    }
+
+    if (Mouse::pressed(ctx, MouseButton::Left)) {
         if (!selected) {
             auto position = Mouse::get_position(ctx);
             auto x = (int)((position.x() - board_offset.x()) / square_size);
@@ -100,10 +95,12 @@ void Chess::update(dam::Context& ctx)
 
             auto target = match.board().get(x, y);
 
-            if (target.has_value() && target->team() == match.board().current_team()) {
-                selected = true;
-                initial_selection = Coordinates::create(x, y);
+            if (!target.has_value() || target->team() != match.board().current_team()) {
+                return;
             }
+
+            initial_selection = Coordinates::create(x, y);
+            selected = true;
         }
         else {
             auto position = Mouse::get_position(ctx);
@@ -117,118 +114,156 @@ void Chess::update(dam::Context& ctx)
 
             auto target = match.board().get(x, y);
 
-            if (target.has_value()) {
-                // Quickly change to another piece.
-                if (target->team() == match.board().current_team()) {
-                    initial_selection = Coordinates::create(x, y);
-                }
-                else {
-                    auto coords = Coordinates::create(x, y).value();
-                    auto lan = initial_selection->to_string() + coords.to_string();
-
-                    auto initial_piece = match.board().get(initial_selection->x(), initial_selection->y()).value();
-
-                    if (initial_piece.type() == PieceType::Pawn) {
-                        auto start_y = 0;
-                        auto end_y = 0;
-
-                        switch (match.board().current_team()) {
-                        case Team::White: {
-                            start_y = 1;
-                            end_y = 0;
-                            break;
-                        }
-                        case Team::Black: {
-                            start_y = 6;
-                            end_y = 7;
-                            break;
-                        }
-                        default:
-                            break;
-                        }
-
-                        // Check if we are about to promote a pawn.
-                        if ((int)initial_selection->y() == start_y && y == end_y) {
-                            // TODO(thismarvin): Instead of automatically promoting to a queen, implement a UI that allows the player to choose what piece to promote to.
-                            lan += "q";
-                        }
-                    }
-
-                    if (match.analysis().contains_move(lan)) {
-                        queue_move(lan);
-                    }
-                    else {
-                        reset_selection();
-                    }
-                }
+            if (!target.has_value()) {
+                return;
             }
-        }
-    }
 
-    if (!move_was_queued && match.at_end() && match.board().current_team() == Team::Black && match.analysis().king_safety() != gm::KingSafety::Checkmate && match.analysis().king_safety() != gm::KingSafety::Stalemate) {
-        engine_delay += ctx.delta_time;
+            // Quickly change to another piece.
+            if (target->team() == match.board().current_team()) {
+                initial_selection = Coordinates::create(x, y);
+                return;
+            }
 
-        if (engine_delay >= 0.8) {
-            // Random AI
-            if (match.at_end() && match.board().current_team() == Team::Black) {
-                if (match.analysis().king_safety() != gm::KingSafety::Stalemate && match.analysis().king_safety() != gm::KingSafety::Checkmate) {
-                    std::vector<int> potential_pieces;
-                    for (auto const& pair : match.analysis().moves()) {
-                        potential_pieces.push_back(pair.first);
-                    }
+            auto coords = Coordinates::create(x, y).value();
+            auto lan = initial_selection->to_string() + coords.to_string();
 
-                    std::optional<unsigned int> piece_index = std::nullopt;
-                    std::optional<std::string> move = std::nullopt;
+            auto initial_piece = match.board().get(initial_selection->x(), initial_selection->y()).value();
 
-                    while (!move.has_value()) {
-                        piece_index = (unsigned int)(potential_pieces[rand() % (int)potential_pieces.size()]);
-                        MoveSet move_set = match.analysis().moves().at(piece_index.value());
+            if (initial_piece.type() == PieceType::Pawn) {
+                auto start_y = 0;
+                auto end_y = 0;
 
-                        if (move_set.size() == 0) {
-                            continue;
-                        }
+                switch (match.board().current_team()) {
+                case Team::White: {
+                    start_y = 1;
+                    end_y = 0;
+                    break;
+                }
+                case Team::Black: {
+                    start_y = 6;
+                    end_y = 7;
+                    break;
+                }
+                default:
+                    break;
+                }
 
-                        int temp = rand() % (int)move_set.size();
-
-                        int i = 0;
-                        for (const auto& yeet : move_set) {
-                            if (i == temp) {
-                                move = yeet;
-                                break;
-                            }
-
-                            i += 1;
-                        }
-                    }
-
-                    queue_move(move.value());
+                // Check if we are about to promote a pawn.
+                if ((int)initial_selection->y() == start_y && y == end_y) {
+                    // TODO(thismarvin): Instead of automatically promoting to a queen, implement a UI that allows the player to choose what piece to promote to.
+                    lan += "q";
                 }
             }
 
-            engine_delay = 0;
+            if (match.analysis().contains_move(lan)) {
+                queue_move(lan);
+            }
+            else {
+                reset_selection();
+            }
         }
     }
+}
 
+void Chess::update_ai(dam::Context& ctx)
+{
     if (move_was_queued) {
-        int start_x = queued_move->start().x();
-        int start_y = queued_move->start().y();
-        int end_x = queued_move->end().x();
-        int end_y = queued_move->end().y();
-
-        move_time += ctx.delta_time / 0.25;
-
-        auto x = (1 - move_time) * start_x + move_time * end_x;
-        auto y = (1 - move_time) * start_y + move_time * end_y;
-
-        previous_position = current_position;
-        current_position = dam::Vector2F(x, y);
-
-        if (move_time >= 1) {
-            move_was_queued = false;
-            match.submit_move(queued_move->lan());
-            reset_selection();
-        }
+        return;
     }
+
+    if (!match.at_end() || match.board().current_team() != ai_team) {
+        return;
+    }
+
+    if (gm::end_condition(match.analysis().king_safety())) {
+        return;
+    }
+
+    engine_delay += ctx.delta_time;
+
+    if (engine_delay >= ai_delay_duration) {
+        // Random AI
+        std::vector<unsigned int> potential_pieces;
+        for (auto const& pair : match.analysis().moves()) {
+            potential_pieces.push_back(pair.first);
+        }
+
+        std::optional<unsigned int> piece_index = std::nullopt;
+        std::optional<std::string> move = std::nullopt;
+
+        while (!move.has_value()) {
+            piece_index = potential_pieces[random_range(0, (int)potential_pieces.size())];
+            MoveSet move_set = match.analysis().moves().at(piece_index.value());
+
+            if (move_set.size() == 0) {
+                continue;
+            }
+
+            int temp = random_range(0, (int)move_set.size());
+
+            int i = 0;
+            for (const auto& entry : move_set) {
+                if (i == temp) {
+                    move = entry;
+                    break;
+                }
+
+                i += 1;
+            }
+        }
+
+        queue_move(move.value());
+
+        engine_delay = 0;
+    }
+}
+
+void Chess::update_tweening(dam::Context& ctx)
+{
+    if (!move_was_queued) {
+        return;
+    }
+
+    int start_x = queued_move->start().x();
+    int start_y = queued_move->start().y();
+    int end_x = queued_move->end().x();
+    int end_y = queued_move->end().y();
+
+    move_time += ctx.delta_time / 0.25;
+
+    auto x = lerp_precise(start_x, end_x, move_time);
+    auto y = lerp_precise(start_y, end_y, move_time);
+
+    previous_position = current_position;
+    current_position = dam::Vector2F(x, y);
+
+    if (move_time >= 1) {
+        move_was_queued = false;
+        match.submit_move(queued_move->lan());
+        reset_selection();
+    }
+}
+
+void Chess::initialize(dam::Context& ctx)
+{
+    using namespace dam::graphics;
+
+    font = load_font("./content/fonts/FiraCode-SemiBold.ttf", 16);
+
+    pieces = load_texture("./content/sprites/pieces.png");
+
+    handle_resize(ctx);
+
+    match = Match::create();
+
+    srand(time(NULL));
+}
+
+void Chess::update(dam::Context& ctx)
+{
+    update_input(ctx);
+    update_ai(ctx);
+    update_tweening(ctx);
 }
 
 void Chess::event(dam::Context& ctx, dam::EventType event)
