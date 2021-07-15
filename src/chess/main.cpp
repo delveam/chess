@@ -4,6 +4,7 @@
 int main()
 {
     auto config = dam::AppConfig()
+                  .enable_resizable_window()
                   .set_title("Chess");
 
     auto backend = Allegro();
