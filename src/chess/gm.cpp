@@ -794,3 +794,8 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
 
     return Analysis(moves, danger_zone, king_location, king_safety);
 }
+
+bool gm::end_condition(KingSafety king_safety)
+{
+    return king_safety == KingSafety::Checkmate || king_safety == KingSafety::Stalemate;
+}

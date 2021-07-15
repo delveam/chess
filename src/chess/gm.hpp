@@ -8,5 +8,6 @@
 namespace gm {
 std::optional<Board> apply_move(const Board& board, Move team);
 std::optional<gm::Analysis> analyze(const Board& board, Team team);
+bool end_condition(KingSafety king_safety);
 }
 #endif
