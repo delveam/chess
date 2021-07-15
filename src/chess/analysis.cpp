@@ -21,11 +21,5 @@ bool gm::Analysis::contains_move(std::string lan) const
         return false;
     }
 
-    for (const auto& entry : m_moves.at(index)) {
-        if (lan == entry) {
-            return true;
-        }
-    }
-
-    return false;
+    return m_moves.at(index).count(lan) > 0;
 }
