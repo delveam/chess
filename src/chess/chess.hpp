@@ -19,7 +19,7 @@ public:
 private:
     dam::graphics::Font* font;
     dam::graphics::Texture* pieces;
-    int sprite_size { 16 };
+    int sprite_size { 32 };
     int square_size;
     float sprite_scale;
     dam::Vector2F board_offset;
