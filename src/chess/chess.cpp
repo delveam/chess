@@ -22,15 +22,20 @@ float lerp_precise(float a, float b, float t)
 void Chess::handle_resize(dam::Context& ctx)
 {
     square_size = dam::window::get_height(ctx) / constants::board_height;
+
     if (square_size * constants::board_width > (int)dam::window::get_width(ctx)) {
         square_size = dam::window::get_width(ctx) / constants::board_width;
     }
+
     board_offset = dam::Vector2F(
                        (dam::window::get_width(ctx) - (square_size * constants::board_width)) / 2,
                        (dam::window::get_height(ctx) - (square_size * constants::board_height)) / 2
                    );
 
     sprite_scale = (float)square_size / sprite_size;
+
+    dam::graphics::unload_font(font);
+    font = dam::graphics::load_font("./content/fonts/FiraCode-SemiBold.ttf", square_size * 0.22);
 }
 
 void Chess::reset_selection()
@@ -319,7 +324,7 @@ void Chess::draw_coordinates(dam::Context& ctx)
         text.push_back(temp);
 
         auto params = dam::graphics::DrawParams()
-                      .set_position(board_offset.x() + x * square_size + square_size * 0.08, board_offset.y() + (constants::board_height - 1) * square_size + square_size * 0.75)
+                      .set_position(board_offset.x() + x * square_size + square_size * 0.02, board_offset.y() + (constants::board_height - 1) * square_size + square_size * 0.76)
                       .set_tint(color);
 
         draw_text(ctx, text, font, params);
@@ -331,7 +336,7 @@ void Chess::draw_coordinates(dam::Context& ctx)
         text.push_back(temp);
 
         auto params = dam::graphics::DrawParams()
-                      .set_position(board_offset.x() + (constants::board_width - 1) * square_size + square_size * 0.75, board_offset.y() + y * square_size + square_size * 0.08)
+                      .set_position(board_offset.x() + (constants::board_width - 1) * square_size + square_size * 0.85, board_offset.y() + y * square_size - square_size * 0.01)
                       .set_tint(color);
 
         draw_text(ctx, text, font, params);
@@ -545,11 +550,7 @@ void Chess::draw_move_animation(dam::Context& ctx)
 
 void Chess::initialize(dam::Context& ctx)
 {
-    using namespace dam::graphics;
-
-    font = load_font("./content/fonts/FiraCode-SemiBold.ttf", 16);
-
-    pieces = load_texture("./content/sprites/pieces.png");
+    pieces = dam::graphics::load_texture("./content/sprites/pieces.png");
 
     handle_resize(ctx);
 
