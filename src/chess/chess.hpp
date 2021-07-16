@@ -1,6 +1,5 @@
 #ifndef CHESS_HPP
 #define CHESS_HPP
-#include <allegro5/allegro_font.h>
 #include <iostream>
 #include "board.hpp"
 #include "match.hpp"
