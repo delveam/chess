@@ -21,6 +21,8 @@ public:
     {
         return m_y;
     }
+
+    static Vector2F lerp_precise(Vector2F a, Vector2F b, float step);
 private:
     float m_x { 0 };
     float m_y { 0 };
