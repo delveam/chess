@@ -14,9 +14,24 @@ int random_range(int min, int max)
     return min + rand() % (max - min);
 }
 
-float lerp_precise(float a, float b, float t)
+std::optional<CastlingRights> lan_as_castling_rights(std::string lan)
 {
-    return (1 - t) * a + t * b;
+    // This does not check whether or not the current piece is even a King!
+
+    if (lan == "e1g1") {
+        return CastlingRights::WhiteKingSide;
+    }
+    if (lan == "e1c1") {
+        return CastlingRights::WhiteQueenSide;
+    }
+    if (lan == "e8g8") {
+        return CastlingRights::BlackKingSide;
+    }
+    if (lan == "e8c8") {
+        return CastlingRights::BlackQueenSide;
+    }
+
+    return std::nullopt;
 }
 
 void Chess::handle_resize(dam::Context& ctx)
@@ -54,8 +69,70 @@ void Chess::queue_move(std::string lan)
 
     move_was_queued = true;
     queued_move = move;
-    move_time = 0;
-    current_position = dam::Vector2F(move->start().x(), move->start().y());
+
+    primary_renderable.set(dam::Vector2F(move->start().x(), move->start().y()));
+
+    auto start = dam::Vector2F(move->start().x(), move->start().y());
+    auto end = dam::Vector2F(move->end().x(), move->end().y());
+
+    primary_mover = Tweenable(start, end, move_duration);
+}
+
+void Chess::queue_castle(std::string lan, CastlingRights castling_rights)
+{
+    auto move = Move::create(lan);
+
+    if (!move.has_value()) {
+        return;
+    }
+
+    queued_move = move.value();
+
+    dam::Vector2F king_start;
+    dam::Vector2F king_end;
+    dam::Vector2F rook_start;
+    dam::Vector2F rook_end;
+
+    switch (castling_rights) {
+    case CastlingRights::WhiteKingSide: {
+        king_start = dam::Vector2F(4, 7);
+        king_end = dam::Vector2F(6, 7);
+        rook_start = dam::Vector2F(7, 7);
+        rook_end = dam::Vector2F(5, 7);
+        break;
+    }
+    case CastlingRights::WhiteQueenSide: {
+        king_start = dam::Vector2F(4, 7);
+        king_end = dam::Vector2F(2, 7);
+        rook_start = dam::Vector2F(0, 7);
+        rook_end = dam::Vector2F(3, 7);
+        break;
+    }
+    case CastlingRights::BlackKingSide: {
+        king_start = dam::Vector2F(4, 0);
+        king_end = dam::Vector2F(6, 0);
+        rook_start = dam::Vector2F(7, 0);
+        rook_end = dam::Vector2F(5, 0);
+        break;
+    }
+    case CastlingRights::BlackQueenSide: {
+        king_start = dam::Vector2F(4, 0);
+        king_end = dam::Vector2F(2, 0);
+        rook_start = dam::Vector2F(0, 0);
+        rook_end = dam::Vector2F(3, 0);
+        break;
+    }
+    default:
+        break;
+    }
+
+    move_was_queued = true;
+
+    primary_renderable.set(king_start);
+
+    primary_mover = Tweenable(king_start, king_end, move_duration);
+    secondary_mover = Tweenable(rook_start, rook_end, move_duration);
+    rook_index = rook_start.y() * constants::board_width + rook_start.x();
 }
 
 void Chess::update_input(dam::Context& ctx)
@@ -161,6 +238,16 @@ void Chess::update_input(dam::Context& ctx)
             }
 
             if (match.analysis().contains_move(lan)) {
+                // Castling requires that two pieces move simultaneously; however, `queue_move` only supports moving one piece.
+                // The following makes sure we use `queue_castling` (which supports moving two pieces) instead of `queue_move` when necessary.
+                if (initial_piece.type() == PieceType::King) {
+                    auto temp = lan_as_castling_rights(lan);
+                    if (temp.has_value()) {
+                        queue_castle(lan, temp.value());
+                        return;
+                    }
+                }
+
                 queue_move(lan);
             }
             else {
@@ -184,9 +271,9 @@ void Chess::update_ai(dam::Context& ctx)
         return;
     }
 
-    engine_delay += ctx.delta_time;
+    engine_delay_timer += ctx.delta_time;
 
-    if (engine_delay >= ai_delay_duration) {
+    if (engine_delay_timer >= ai_delay_duration) {
         // Random AI
         std::vector<unsigned int> potential_pieces;
         for (auto const& pair : match.analysis().moves()) {
@@ -219,7 +306,7 @@ void Chess::update_ai(dam::Context& ctx)
 
         queue_move(move.value());
 
-        engine_delay = 0;
+        engine_delay_timer = 0;
     }
 }
 
@@ -229,23 +316,19 @@ void Chess::update_tweening(dam::Context& ctx)
         return;
     }
 
-    int start_x = queued_move->start().x();
-    int start_y = queued_move->start().y();
-    int end_x = queued_move->end().x();
-    int end_y = queued_move->end().y();
+    primary_mover.update(ctx.delta_time);
+    primary_renderable.set(primary_mover.position());
 
-    move_time += ctx.delta_time / 0.25;
+    if (secondary_mover.has_value()) {
+        secondary_mover->update(ctx.delta_time);
+        secondary_renderable.set(secondary_mover->position());
+    }
 
-    auto x = lerp_precise(start_x, end_x, move_time);
-    auto y = lerp_precise(start_y, end_y, move_time);
-
-    previous_position = current_position;
-    current_position = dam::Vector2F(x, y);
-
-    if (move_time >= 1) {
+    if (primary_mover.done()) {
         move_was_queued = false;
         match.submit_move(queued_move->lan());
         reset_selection();
+        secondary_mover = std::nullopt;
     }
 }
 
@@ -506,6 +589,12 @@ void Chess::draw_pieces(dam::Context& ctx)
                 if (x == temp_x && y == temp_y) {
                     continue;
                 }
+
+                if (secondary_mover.has_value()) {
+                    if (y * constants::board_width + x == rook_index) {
+                        continue;
+                    }
+                }
             }
 
             auto index = board_flipped ? ((constants::board_height - 1) - y) * constants::board_width + ((constants::board_width - 1) - x) : y * constants::board_width + x;
@@ -529,21 +618,35 @@ void Chess::draw_move_animation(dam::Context& ctx)
         return;
     }
 
-    auto x = lerp_precise(previous_position.x(), current_position.x(), ctx.alpha);
-    auto y = lerp_precise(previous_position.y(), current_position.y(), ctx.alpha);
+    if (secondary_mover.has_value()) {
+        auto temp = secondary_renderable.interpolate(ctx.alpha);
 
-    auto draw_position = calculate_draw_position(x, y);
+        auto draw_position = calculate_draw_position(temp.x(), temp.y());
+
+        auto piece = match.board().pieces()[rook_index];
+
+        auto region = image_region_from_piece(piece).value();
+        auto params = dam::graphics::DrawParams()
+                      .set_position(draw_position.x(), draw_position.y())
+                      .set_scale(sprite_scale, sprite_scale);
+
+        draw_texture(ctx, pieces, region, params);
+    }
+
+    auto temp = primary_renderable.interpolate(ctx.alpha);
+
+    auto draw_position = calculate_draw_position(temp.x(), temp.y());
 
     auto temp_x = queued_move->start().x();
     auto temp_y = queued_move->start().y();
 
     auto index = temp_y * constants::board_width + temp_x;
-    auto current = match.board().pieces()[index];
+    auto piece = match.board().pieces()[index];
 
+    auto region = image_region_from_piece(piece).value();
     auto params = dam::graphics::DrawParams()
                   .set_position(draw_position.x(), draw_position.y())
                   .set_scale(sprite_scale, sprite_scale);
-    auto region = image_region_from_piece(current).value();
 
     draw_texture(ctx, pieces, region, params);
 }

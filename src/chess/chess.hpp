@@ -3,6 +3,8 @@
 #include <iostream>
 #include "board.hpp"
 #include "match.hpp"
+#include "renderable.hpp"
+#include "tweenable.hpp"
 #include "../dam/app.hpp"
 #include "../dam/graphics.hpp"
 
@@ -29,22 +31,28 @@ private:
     dam::graphics::Color board_light_color { dam::graphics::Color(0xdee3e6) };
     dam::graphics::Color board_dark_color { dam::graphics::Color(0x8ca2ad) };
 
-    float ai_delay_duration { 0.8 };
+    float ai_delay_duration { 0.7 };
     Team ai_team { Team::Black };
 
     std::optional<Coordinates> initial_selection { std::nullopt };
     bool move_was_queued { false };
     std::optional<Move> queued_move { std::nullopt };
-    float move_time { 0 };
-    dam::Vector2F current_position;
-    dam::Vector2F previous_position;
 
-    float engine_delay { 0 };
+    float move_duration { 0.25 };
+    Tweenable primary_mover;
+    std::optional<Tweenable> secondary_mover;
+    int rook_index { 0 };
+
+    Renderable primary_renderable;
+    Renderable secondary_renderable;
+
+    float engine_delay_timer { 0 };
 
     void handle_resize(dam::Context& ctx);
 
     void reset_selection();
     void queue_move(std::string lan);
+    void queue_castle(std::string lan, CastlingRights castling_rights);
 
     void update_input(dam::Context& ctx);
     void update_ai(dam::Context& ctx);
