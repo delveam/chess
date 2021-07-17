@@ -591,7 +591,9 @@ void Chess::draw_pieces(dam::Context& ctx)
                 }
 
                 if (secondary_mover.has_value()) {
-                    if (y * constants::board_width + x == rook_index) {
+                    auto temp = board_flipped ? constants::board_size - rook_index - 1 : rook_index;
+
+                    if (y * constants::board_width + x == temp) {
                         continue;
                     }
                 }
