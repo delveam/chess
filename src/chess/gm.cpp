@@ -83,12 +83,12 @@ void walk(const Board& board, MoveSet& result, Coordinates coords, int dx, int d
         auto target = board.pieces().at(index);
 
         if (target.team() == Team::None) {
-            result.insert(coords.to_string() + target_coords.value().to_string());
+            result.insert(coords.to_string() + target_coords->to_string());
             continue;
         }
 
         if (target.team() == other_team) {
-            result.insert(coords.to_string() + target_coords.value().to_string());
+            result.insert(coords.to_string() + target_coords->to_string());
         }
 
         break;
@@ -196,37 +196,34 @@ MoveSet generate_knight_moves(const Board& board, Coordinates coords)
         return result;
     }
 
+    auto register_move = [&](unsigned int x, unsigned int y) {
+        auto lan = coords.to_string() + Coordinates::create(x, y)->to_string();
+        result.insert(lan);
+    };
+
     if (target_is_not(board, x + 1, y - 2, team)) {
-        auto target_coords = Coordinates::create(x + 1, y - 2).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x + 1, y - 2);
     }
     if (target_is_not(board, x + 2, y - 1, team)) {
-        auto target_coords = Coordinates::create(x + 2, y - 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x + 2, y - 1);
     }
     if (target_is_not(board, x + 2, y + 1, team)) {
-        auto target_coords = Coordinates::create(x + 2, y + 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x + 2, y + 1);
     }
     if (target_is_not(board, x + 1, y + 2, team)) {
-        auto target_coords = Coordinates::create(x + 1, y + 2).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x + 1, y + 2);
     }
     if (target_is_not(board, x - 1, y + 2, team)) {
-        auto target_coords = Coordinates::create(x - 1, y + 2).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x - 1, y + 2);
     }
     if (target_is_not(board, x - 2, y + 1, team)) {
-        auto target_coords = Coordinates::create(x - 2, y + 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x - 2, y + 1);
     }
     if (target_is_not(board, x - 2, y - 1, team)) {
-        auto target_coords = Coordinates::create(x - 2, y - 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x - 2, y - 1);
     }
     if (target_is_not(board, x - 1, y - 2, team)) {
-        auto target_coords = Coordinates::create(x - 1, y - 2).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x - 1, y - 2);
     }
 
     return result;
@@ -316,37 +313,34 @@ MoveSet generate_king_moves(const Board& board, Coordinates coords)
         return result;
     }
 
+    auto register_move = [&](unsigned int x, unsigned int y) {
+        auto lan = coords.to_string() + Coordinates::create(x, y)->to_string();
+        result.insert(lan);
+    };
+
     if (target_is_not(board, x, y - 1, team)) {
-        auto target_coords = Coordinates::create(x, y - 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x, y - 1);
     }
     if (target_is_not(board, x + 1, y - 1, team)) {
-        auto target_coords = Coordinates::create(x + 1, y - 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x + 1, y - 1);
     }
     if (target_is_not(board, x + 1, y, team)) {
-        auto target_coords = Coordinates::create(x + 1, y).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x + 1, y);
     }
     if (target_is_not(board, x + 1, y + 1, team)) {
-        auto target_coords = Coordinates::create(x + 1, y + 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x + 1, y + 1);
     }
     if (target_is_not(board, x, y + 1, team)) {
-        auto target_coords = Coordinates::create(x, y + 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x, y + 1);
     }
     if (target_is_not(board, x - 1, y + 1, team)) {
-        auto target_coords = Coordinates::create(x - 1, y + 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x - 1, y + 1);
     }
     if (target_is_not(board, x - 1, y, team)) {
-        auto target_coords = Coordinates::create(x - 1, y).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x - 1, y);
     }
     if (target_is_not(board, x - 1, y - 1, team)) {
-        auto target_coords = Coordinates::create(x - 1, y - 1).value();
-        result.insert(coords.to_string() + target_coords.to_string());
+        register_move(x - 1, y - 1);
     }
 
     // Handle castling.
@@ -355,15 +349,13 @@ MoveSet generate_king_moves(const Board& board, Coordinates coords)
 
     if (contains_castling_right(board.castling_rights(), king_side)) {
         if (target_is(board, x + 1, y, Team::None) && target_is(board, x + 2, y, Team::None)) {
-            auto target_coords = Coordinates::create(x + 2, y).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            register_move(x + 2, y);
         }
     }
 
     if (contains_castling_right(board.castling_rights(), queen_side)) {
         if (target_is(board, x - 1, y, Team::None) && target_is(board, x - 2, y, Team::None) && target_is(board, x - 3, y, Team::None)) {
-            auto target_coords = Coordinates::create(x - 2, y).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            register_move(x - 2, y);
         }
     }
 
