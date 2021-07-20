@@ -25,6 +25,38 @@ bool contains_castling_right(CastlingRights a, CastlingRights b)
     return (static_cast<int>(a) & static_cast<int>(b)) != static_cast<int>(CastlingRights::None);
 }
 
+std::optional<unsigned int> get_significant_rook_index(CastlingRights castling_rights)
+{
+    switch (castling_rights) {
+    case CastlingRights::WhiteKingSide: {
+        auto x = constants::board_width - 1;
+        auto y = constants::board_height - 1;
+
+        return y * constants::board_width + x;
+    }
+    case CastlingRights::WhiteQueenSide: {
+        auto x = 0;
+        auto y = constants::board_height - 1;
+
+        return y * constants::board_width + x;
+    }
+    case CastlingRights::BlackKingSide: {
+        auto x = constants::board_width - 1;
+        auto y = 0;
+
+        return y * constants::board_width + x;
+    }
+    case CastlingRights::BlackQueenSide: {
+        auto x = 0;
+        auto y = 0;
+
+        return y * constants::board_width + x;
+    }
+    default:
+        return std::nullopt;
+    }
+};
+
 CastlingRights remove_castling_right(CastlingRights a, CastlingRights b)
 {
     if (contains_castling_right(a, b)) {
@@ -647,43 +679,20 @@ std::optional<Board> gm::apply_move(const Board& board, Move move)
     if (previous.type() == PieceType::Rook) {
         switch (previous.team()) {
         case Team::White: {
-            if (contains_castling_right(castling_rights, CastlingRights::WhiteKingSide)) {
-                auto x = constants::board_width - 1;
-                auto y = constants::board_height - 1;
-                auto index = y * constants::board_width + x;
-                if ((int)start_index == index) {
-                    castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteKingSide);
-                }
+            if (start_index == get_significant_rook_index(CastlingRights::WhiteKingSide)) {
+                castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteKingSide);
             }
-            if (contains_castling_right(castling_rights, CastlingRights::WhiteQueenSide)) {
-                auto x = 0;
-                auto y = constants::board_height - 1;
-                auto index = y * constants::board_width + x;
-                if ((int)start_index == index) {
-                    castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteQueenSide);
-                }
+            else if (start_index == get_significant_rook_index(CastlingRights::WhiteQueenSide)) {
+                castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteQueenSide);
             }
-            break;
         }
-        // TODO(thismarvin): This is very similar to White's case. How can we avoid code duplication?
         case Team::Black: {
-            if (contains_castling_right(castling_rights, CastlingRights::BlackKingSide)) {
-                auto x = constants::board_width - 1;
-                auto y = 0;
-                auto index = y * constants::board_width + x;
-                if ((int)start_index == index) {
-                    castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackKingSide);
-                }
+            if (start_index == get_significant_rook_index(CastlingRights::BlackKingSide)) {
+                castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackKingSide);
             }
-            if (contains_castling_right(castling_rights, CastlingRights::BlackQueenSide)) {
-                auto x = 0;
-                auto y = 0;
-                auto index = y * constants::board_width + x;
-                if ((int)start_index == index) {
-                    castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackQueenSide);
-                }
+            else if (start_index == get_significant_rook_index(CastlingRights::BlackQueenSide)) {
+                castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackQueenSide);
             }
-            break;
         }
         default:
             break;
