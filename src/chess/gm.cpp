@@ -108,55 +108,37 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
         return result;
     }
 
+    auto register_move = [&](unsigned int x, unsigned int y) {
+        auto lan = coords.to_string() + Coordinates::create(x, y)->to_string();
+
+        // If a pawn is at the very top or bottom of the board then we must append all possible promotions to the lan.
+        if (y == 0 || y == constants::board_height - 1) {
+            for (int i = 0; i < (int)promotion_array.size(); ++i) {
+                result.insert(lan + promotion_array[i]);
+            }
+            return;
+        }
+
+        result.insert(lan);
+    };
+
     switch (current.team()) {
     case Team::White: {
         // Handle advancing one square.
         if (target_is(board, x, y - 1, Team::None)) {
-            auto target_coords = Coordinates::create(x, y - 1).value();
-            auto temp = coords.to_string() + target_coords.to_string();
-
-            if (y == 1) {
-                for (int i = 0; i < (int)promotion_array.size(); ++i) {
-                    result.insert(temp + promotion_array[i]);
-                }
-            }
-            else {
-                result.insert(temp);
-            }
+            register_move(x, y - 1);
         }
         // Handle advancing two squares (if the pawn has not moved before).
         if (y == 6 && target_is(board, x, y - 1, Team::None) && target_is(board, x, y - 2, Team::None)) {
-            auto target_coords = Coordinates::create(x, y - 2).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            register_move(x, y - 2);
         }
         // Handle capturing to the top left.
         if (target_is(board, x - 1, y - 1, Team::Black)) {
-            auto target_coords = Coordinates::create(x - 1, y - 1).value();
-            auto temp = coords.to_string() + target_coords.to_string();
-
-            if (y == 1) {
-                for (int i = 0; i < (int)promotion_array.size(); ++i) {
-                    result.insert(temp + promotion_array[i]);
-                }
-            }
-            else {
-                result.insert(temp);
-            }
+            register_move(x - 1, y - 1);
         }
         // Handle capturing to the top right.
         if (target_is(board, x + 1, y - 1, Team::Black)) {
-            auto target_coords = Coordinates::create(x + 1, y - 1).value();
-            auto temp = coords.to_string() + target_coords.to_string();
-
-            // TODO(thismarvin): This is duplicated 3 times! How can we get around this?
-            if (y == 1) {
-                for (int i = 0; i < (int)promotion_array.size(); ++i) {
-                    result.insert(temp + promotion_array[i]);
-                }
-            }
-            else {
-                result.insert(temp);
-            }
+            register_move(x + 1, y - 1);
         }
         // Handle en passant.
         if (y == 3 && board.en_passant_target().has_value()) {
@@ -167,55 +149,22 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
         }
         break;
     }
-
     case Team::Black: {
         // Handle advancing one square.
         if (target_is(board, x, y + 1, Team::None)) {
-            auto target_coords = Coordinates::create(x, y + 1).value();
-            auto temp = coords.to_string() + target_coords.to_string();
-
-            if (y == 6) {
-                for (int i = 0; i < (int)promotion_array.size(); ++i) {
-                    result.insert(temp + promotion_array[i]);
-                }
-            }
-            else {
-                result.insert(temp);
-            }
+            register_move(x, y + 1);
         }
         // Handle advancing two squares (if the pawn has not moved before).
         if (y == 1 && target_is(board, x, y + 1, Team::None) && target_is(board, x, y + 2, Team::None)) {
-            auto target_coords = Coordinates::create(x, y + 2).value();
-            result.insert(coords.to_string() + target_coords.to_string());
+            register_move(x, y + 2);
         }
         // Handle capturing to the bottom left.
         if (target_is(board, x - 1, y + 1, Team::White)) {
-            auto target_coords = Coordinates::create(x - 1, y + 1).value();
-            auto temp = coords.to_string() + target_coords.to_string();
-
-            if (y == 6) {
-                for (int i = 0; i < (int)promotion_array.size(); ++i) {
-                    result.insert(temp + promotion_array[i]);
-                }
-            }
-            else {
-                result.insert(temp);
-            }
+            register_move(x - 1, y + 1);
         }
         // Handle capturing to the bottom right.
         if (target_is(board, x + 1, y + 1, Team::White)) {
-            auto target_coords = Coordinates::create(x + 1, y + 1).value();
-            auto temp = coords.to_string() + target_coords.to_string();
-
-            // TODO(thismarvin): This is duplicated 3 times! How can we get around this?
-            if (y == 6) {
-                for (int i = 0; i < (int)promotion_array.size(); ++i) {
-                    result.insert(temp + promotion_array[i]);
-                }
-            }
-            else {
-                result.insert(temp);
-            }
+            register_move(x + 1, y + 1);
         }
         // Handle en passant.
         if (y == 4 && board.en_passant_target().has_value()) {
@@ -226,7 +175,6 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
         }
         break;
     }
-
     default:
         break;
     }
