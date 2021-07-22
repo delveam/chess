@@ -516,10 +516,22 @@ void Chess::draw_moves(dam::Context& ctx)
     auto mouse_x = (int)((mouse_position.x() - board_offset.x()) / square_size);
     auto mouse_y = (int)((mouse_position.y() - board_offset.y()) / square_size);
 
+    std::optional<int> duplicate = std::nullopt;
+
     for (const auto& value : target_move_set) {
         auto temp_coords = value.substr(2, 2);
         auto x = temp_coords.c_str()[0] - 'a';
         auto y = constants::board_height - std::stoi(temp_coords.substr(1, 1));
+
+        // The following is necessary in order to only draw one move indicator instead of one for each promotion.
+        // I will admit the solution is hacky, but it works!
+        auto temp = y * constants::board_width + x;
+
+        if (duplicate == temp) {
+            continue;
+        }
+
+        duplicate = temp;
 
         // This could be simplified with calculate_draw_position, but I do not know how to handle to mouse_hover part...
         auto temp_draw_x = x;
