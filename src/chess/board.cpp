@@ -1,29 +1,6 @@
 #include <regex>
 #include "board.hpp"
 
-// ^((?:[pbnrqkPBNRQK1-8]+\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\d+) (\d+)$
-
-// Yoinked from: https://stackoverflow.com/a/46931770
-std::vector<std::string> split(std::string string, std::string delimiter)
-{
-    size_t pos_start = 0;
-    size_t pos_end = 0;
-    size_t delim_len = delimiter.length();
-
-    std::string token;
-    std::vector<std::string> result;
-
-    while ((pos_end = string.find(delimiter, pos_start)) != std::string::npos) {
-        token = string.substr(pos_start, pos_end - pos_start);
-        pos_start = pos_end + delim_len;
-        result.push_back(token);
-    }
-
-    result.push_back(string.substr(pos_start));
-
-    return result;
-}
-
 std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
 {
     if (x < 0 || x >= constants::board_width || y < 0 || y >= constants::board_height) {
@@ -35,13 +12,13 @@ std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
 
 std::optional<Board> Board::load_from_fen(std::string fen)
 {
-    if (!std::regex_match(fen, std::regex("^((?:[pbnrqkPBNRQK1-8]+\\/){7}[pbnrqkPBNRQK1-8]+) ([wb]{1})( (?! )K?Q?k?q? | - )((?:[a-h]{1}[36]{1})|-) (\\d+) (\\d+)$"))) {
+    if (!std::regex_match(fen, std::regex("^" + constants::fen_regex + "$"))) {
         return std::nullopt;
     }
 
-    auto sections = split(fen, " ");
+    auto sections = utils::split_whitespace(fen);
 
-    auto rows = split(sections[0], "/");
+    auto rows = utils::split(sections[0], "/");
     auto index = 0;
 
     Pieces pieces;
