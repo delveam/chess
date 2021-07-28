@@ -23,7 +23,7 @@ std::optional<MatchState> MatchState::submit_move(Move move) const
 
 std::optional<MatchState> MatchState::create(std::string fen)
 {
-    auto board = Board::load_from_fen(fen);
+    auto board = Board::from_fen(fen);
 
     if (!board.has_value()) {
         return std::nullopt;
