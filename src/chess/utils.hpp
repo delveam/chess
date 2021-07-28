@@ -15,12 +15,4 @@ namespace utils {
 std::vector<std::string> split(std::string string, std::string delimiter);
 std::vector<std::string> split_whitespace(std::string string);
 }
-
-enum class CastlingRights {
-    None = 0,
-    WhiteKingSide = 1,
-    WhiteQueenSide = 2,
-    BlackKingSide = 4,
-    BlackQueenSide = 8,
-};
 #endif
