@@ -15,7 +15,7 @@ std::optional<MatchState> MatchState::submit_move(Move move) const
         return std::nullopt;
     }
 
-    auto board = gm::apply_move(m_board, move).value();
+    auto board = gm::apply_move(m_board, move);
     auto analysis = gm::analyze(board, board.current_team()).value();
 
     return MatchState(board, analysis);

@@ -6,7 +6,7 @@
 #include "move.hpp"
 
 namespace gm {
-std::optional<Board> apply_move(const Board& board, Move team);
+Board apply_move(const Board& board, Move move);
 std::optional<gm::Analysis> analyze(const Board& board, Team team);
 bool end_condition(KingSafety king_safety);
 }

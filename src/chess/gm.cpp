@@ -553,12 +553,16 @@ DangerZone generate_danger_zone(const Board& board, Team team)
     return result;
 }
 
-std::optional<Board> gm::apply_move(const Board& board, Move move)
+Board gm::apply_move(const Board& board, Move move)
 {
     auto start_index = move.start().y() * constants::board_width + move.start().x();
     auto end_index = move.end().y() * constants::board_width + move.end().x();
 
     auto previous = board.pieces().at(start_index);
+
+    if (previous.type() == PieceType::None) {
+        return board;
+    }
 
     auto dx = (int)move.end().x() - (int)move.start().x();
     auto dy = (int)move.end().y() - (int)move.start().y();
@@ -708,7 +712,7 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
                 continue;
             }
 
-            auto temp_board = gm::apply_move(board, Move::create(move).value()).value();
+            auto temp_board = gm::apply_move(board, Move::create(move).value());
 
             // Now that we have applied the move to the board, we need to make sure the King is not in check.
             // If we happen to have moved the King then we need to recalculate their index.
