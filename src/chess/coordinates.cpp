@@ -1,6 +1,6 @@
 #include <regex>
+#include "constants.hpp"
 #include "coordinates.hpp"
-#include "utils.hpp"
 
 std::string Coordinates::to_string() const
 {

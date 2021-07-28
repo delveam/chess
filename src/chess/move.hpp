@@ -1,7 +1,7 @@
 #ifndef MOVE_HPP
 #define MOVE_HPP
 #include "coordinates.hpp"
-#include "utils.hpp"
+#include "piece.hpp"
 
 class Move {
 public:

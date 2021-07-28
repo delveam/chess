@@ -3,6 +3,8 @@
 #include <array>
 #include <optional>
 #include <string>
+#include "castling_rights.hpp"
+#include "constants.hpp"
 #include "coordinates.hpp"
 #include "piece.hpp"
 

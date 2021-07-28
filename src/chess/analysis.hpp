@@ -3,9 +3,9 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include "constants.hpp"
 #include "coordinates.hpp"
 #include "king_safety.hpp"
-#include "utils.hpp"
 
 typedef std::set<std::string> MoveSet;
 typedef std::unordered_map<unsigned int, MoveSet> Moves;

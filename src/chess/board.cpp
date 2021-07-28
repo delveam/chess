@@ -1,5 +1,6 @@
 #include <regex>
 #include "board.hpp"
+#include "utils.hpp"
 
 std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
 {
