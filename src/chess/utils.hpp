@@ -16,12 +16,6 @@ std::vector<std::string> split(std::string string, std::string delimiter);
 std::vector<std::string> split_whitespace(std::string string);
 }
 
-enum class Team {
-    None = 0,
-    White = 1,
-    Black = 2,
-};
-
 enum class CastlingRights {
     None = 0,
     WhiteKingSide = 1,
