@@ -757,7 +757,7 @@ bool gm::end_condition(KingSafety king_safety)
 
 std::optional<Board> gm::board_from_sequence(std::string fen, std::string moves) {
 
-    auto board = Board::from_fen(fen);
+    auto board = Board::create(fen);
 
     if (!board.has_value()) {
         return std::nullopt;

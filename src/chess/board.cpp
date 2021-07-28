@@ -11,7 +11,7 @@ std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
     return m_pieces.at(y * constants::board_width + x);
 }
 
-std::optional<Board> Board::from_fen(std::string fen)
+std::optional<Board> Board::create(std::string fen)
 {
     if (!std::regex_match(fen, std::regex("^" + constants::fen_regex + "$"))) {
         return std::nullopt;
