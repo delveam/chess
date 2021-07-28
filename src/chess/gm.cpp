@@ -1,6 +1,8 @@
 #include <cmath>
+#include <queue>
 #include <vector>
 #include "gm.hpp"
+#include "utils.hpp"
 
 const MoveSet castle_set = MoveSet{ "e1g1", "e1c1", "e8g8", "e8c8" };
 const std::array<std::string, 4> promotion_array = std::array<std::string, 4> { "b", "n", "r", "q" };
@@ -752,3 +754,51 @@ bool gm::end_condition(KingSafety king_safety)
 {
     return king_safety == KingSafety::Checkmate || king_safety == KingSafety::Stalemate;
 }
+
+std::optional<Board> gm::board_from_sequence(std::string fen, std::string moves) {
+
+    auto board = Board::from_fen(fen);
+
+    if (!board.has_value()) {
+        return std::nullopt;
+    }
+
+    auto entries = utils::split_whitespace(moves);
+
+    if (entries.size() == 0) {
+        return std::nullopt;
+    }
+
+    std::queue<Move> sanitized;
+
+    for (int i = 0; i < (int)entries.size(); ++i) {
+        auto move = Move::create(entries.at(i));
+
+        if (!move.has_value()) {
+            return std::nullopt;
+        }
+
+        sanitized.push(move.value());
+    }
+
+    while (sanitized.size() > 0) {
+        auto analysis = analyze(board.value(), board->current_team());
+
+        if (!analysis.has_value()) {
+            return std::nullopt;
+        }
+
+        auto move = sanitized.front();
+
+        if (!analysis->contains_move(move.lan())) {
+            return std::nullopt;
+        }
+
+        board = apply_move(board.value(), move);
+
+        sanitized.pop();
+    }
+
+    return board;
+}
+
