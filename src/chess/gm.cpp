@@ -755,7 +755,8 @@ bool gm::end_condition(KingSafety king_safety)
     return king_safety == KingSafety::Checkmate || king_safety == KingSafety::Stalemate;
 }
 
-std::optional<Board> gm::board_from_sequence(std::string fen, std::string moves) {
+std::optional<Board> gm::board_from_sequence(std::string fen, std::string moves)
+{
 
     auto board = Board::create(fen);
 
