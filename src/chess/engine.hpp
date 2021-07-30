@@ -99,20 +99,21 @@ private:
 
 class engine::Fisher {
 public:
-    Suggestion go(Depth depth);
-    Suggestion go(Millisecond millisecond);
-
-    static Fisher create();
-    static std::optional<Fisher> from_position(std::string fen);
-    static std::optional<Fisher> from_sequence(std::string fen, std::vector<Move> moves);
-private:
     Fisher() = default;
     Fisher(Board board) :
         m_board(board)
     {
     }
 
-    Board m_board;
+    Board board()
+    {
+        return m_board;
+    }
+
+    Suggestion go(Depth depth);
+    Suggestion go(Millisecond milliseconds);
+private:
+    Board m_board { Board::create(constants::starting_fen).value() };
     // std::unordered_map<std::string, float> m_cache;
 };
 
