@@ -105,7 +105,7 @@ public:
     {
     }
 
-    Board board()
+    Board& board()
     {
         return m_board;
     }
