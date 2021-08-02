@@ -4,7 +4,7 @@
 #include "gm.hpp"
 #include "utils.hpp"
 
-const MoveSet castle_set = MoveSet{ "e1g1", "e1c1", "e8g8", "e8c8" };
+const MoveSet castle_set = MoveSet { "e1g1", "e1c1", "e8g8", "e8c8" };
 const std::array<std::string, 4> promotion_array = std::array<std::string, 4> { "b", "n", "r", "q" };
 
 bool target_is(const Board& board, unsigned int x, unsigned int y, Team team)
@@ -372,13 +372,14 @@ Moves generate_move_canidates(const Board& board, Team team)
         for (int x = 0; x < constants::board_width; ++x) {
             auto index = y * constants::board_width + x;
             auto target = board.pieces().at(index);
-            auto coords = Coordinates::create(x, y).value();
 
             if (target.team() != team) {
                 continue;
             }
 
-            std::set<std::string> moves;
+            auto coords = Coordinates::create(x, y).value();
+
+            MoveSet moves;
 
             switch (target.type()) {
             case PieceType::Pawn:
@@ -757,7 +758,6 @@ bool gm::end_condition(KingSafety king_safety)
 
 std::optional<Board> gm::board_from_sequence(std::string fen, std::string moves)
 {
-
     auto board = Board::create(fen);
 
     if (!board.has_value()) {
