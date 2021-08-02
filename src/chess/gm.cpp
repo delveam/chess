@@ -709,9 +709,36 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
 
         // TODO(thismarvin): Verifying that a move is legal is expensive. We need to figure out why...
         for (auto const& move : pair.second) {
-            // If the King is in check then make sure it cannot castle.
-            if (pair.first == king_index.value() && danger_zone[pair.first] && castle_set.count(move) > 0) {
-                move_deletion_queue.push_back(move);
+            if (pair.first == king_index.value() && castle_set.count(move) > 0) {
+                // If the King is in check then make sure it cannot castle.
+                if (danger_zone[pair.first]) {
+                    move_deletion_queue.push_back(move);
+                    continue;
+                }
+
+                // Make sure the King can not castle through or into a check.
+                auto king_side = team == Team::White ? CastlingRights::WhiteKingSide : CastlingRights::BlackKingSide;
+                auto queen_side = team == Team::White ? CastlingRights::WhiteQueenSide : CastlingRights::BlackQueenSide;
+
+                auto x = pair.first % constants::board_width;
+                auto y = pair.first / constants::board_width;
+
+                auto coords_to_index = [](unsigned int x, unsigned int y) {
+                    return y * constants::board_width + x;
+                };
+
+                if (contains_castling_right(board.castling_rights(), king_side)) {
+                    if (danger_zone[coords_to_index(x + 1, y)] || danger_zone[coords_to_index(x + 2, y)]) {
+                        move_deletion_queue.push_back(move);
+                    }
+                }
+
+                if (contains_castling_right(board.castling_rights(), queen_side)) {
+                    if (danger_zone[coords_to_index(x - 1, y)] || danger_zone[coords_to_index(x - 2, y)] || danger_zone[coords_to_index(x - 3, y)]) {
+                        move_deletion_queue.push_back(move);
+                    }
+                }
+
                 continue;
             }
 
