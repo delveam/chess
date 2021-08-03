@@ -63,14 +63,31 @@ Match Match::create()
 
     return Match(state);
 }
+
+std::optional<Match> Match::create_from_position(std::string fen)
+{
+    auto match_state = MatchState::create(fen);
+
+    if (!match_state.has_value()) {
+        return std::nullopt;
+    }
+
+    std::vector<std::pair<Move, MatchState>> state { std::make_pair(Move::nullmove, match_state.value()) };
+
+    return Match(state);
+}
+
 std::string Match::get_moves() const
 {
     if (m_state.size() == 1) {
         return "";
     }
+
     std::string result { m_state.at(1).first.lan() };
+
     for (int i = 2; i < (int)m_state.size(); ++i) {
         result += " " + m_state.at(i).first.lan();
     }
+
     return result;
 }

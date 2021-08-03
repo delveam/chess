@@ -36,6 +36,7 @@ public:
     std::string get_moves() const;
 
     static Match create();
+    static std::optional<Match> create_from_position(std::string fen);
     // TODO(thismarvin): setup `static std::optional<Match> from_pgn(std::string pgn);`
 private:
     unsigned int m_index { 0 };
