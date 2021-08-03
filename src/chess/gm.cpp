@@ -861,9 +861,12 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
             // If we happen to have moved the King then we need to recalculate their index.
             if (pair.first == king_index.value()) {
                 auto new_king_index = find_king(temp_board, team).value();
-                if (being_attacked(temp_board, new_king_index)) {
+
+                // I do not think we need to recalculate the DangerZone if the King is moving.
+                if (danger_zone[new_king_index]) {
                     move_deletion.push(move);
                 }
+
                 continue;
             }
 
