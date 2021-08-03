@@ -692,11 +692,9 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
     auto moves = generate_move_canidates(board, team);
     auto danger_zone = generate_danger_zone(board, team);
 
-    std::vector<std::string> move_deletion_queue;
+    std::queue<std::string> move_deletion;
 
     for (auto& pair : moves) {
-        move_deletion_queue.clear();
-
         // We need to make sure that each move does not cause the King to be in check; however, if we
         // verify every move then the application slows down.
         //
@@ -712,7 +710,7 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
             if (pair.first == king_index.value() && castle_set.count(move) > 0) {
                 // If the King is in check then make sure it cannot castle.
                 if (danger_zone[pair.first]) {
-                    move_deletion_queue.push_back(move);
+                    move_deletion.push(move);
                     continue;
                 }
 
@@ -729,13 +727,13 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
 
                 if (contains_castling_right(board.castling_rights(), king_side)) {
                     if (danger_zone[coords_to_index(x + 1, y)] || danger_zone[coords_to_index(x + 2, y)]) {
-                        move_deletion_queue.push_back(move);
+                        move_deletion.push(move);
                     }
                 }
 
                 if (contains_castling_right(board.castling_rights(), queen_side)) {
                     if (danger_zone[coords_to_index(x - 1, y)] || danger_zone[coords_to_index(x - 2, y)] || danger_zone[coords_to_index(x - 3, y)]) {
-                        move_deletion_queue.push_back(move);
+                        move_deletion.push(move);
                     }
                 }
 
@@ -749,18 +747,20 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
             if (pair.first == king_index.value()) {
                 auto new_king_index = find_king(temp_board, team).value();
                 if (being_attacked(temp_board, new_king_index)) {
-                    move_deletion_queue.push_back(move);
+                    move_deletion.push(move);
                 }
                 continue;
             }
 
             if (being_attacked(temp_board, king_index.value())) {
-                move_deletion_queue.push_back(move);
+                move_deletion.push(move);
             }
         }
 
-        for (auto const& move : move_deletion_queue) {
-            pair.second.erase(move);
+        while (move_deletion.size() > 0) {
+            auto target = move_deletion.front();
+            pair.second.erase(target);
+            move_deletion.pop();
         }
     }
 
