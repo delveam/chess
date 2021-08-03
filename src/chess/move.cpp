@@ -5,12 +5,14 @@ const Move& Move::nullmove = Move { "0000", Coordinates::create(0, 0).value(), C
 
 std::optional<Move> Move::create(std::string lan)
 {
-    if (!std::regex_match(lan, std::regex("^([a-h]{1}[1-8]{1}){2}[bnrq]?$"))) {
+    static const auto regex = std::regex("^([a-h]{1}[1-8]{1}){2}[bnrq]?$");
+
+    if (!std::regex_match(lan, regex)) {
         return std::nullopt;
     }
 
-    auto start = Coordinates::from_string(lan.substr(0, 2));
-    auto end = Coordinates::from_string(lan.substr(2, 2));
+    auto start = Coordinates::from_string(lan.substr(0, 2)).value();
+    auto end = Coordinates::from_string(lan.substr(2, 2)).value();
 
     std::optional<PieceType> promotion = std::nullopt;
 
@@ -19,22 +21,26 @@ std::optional<Move> Move::create(std::string lan)
 
         // TODO(thismarvin): It might be worth it to put this in utils!
         switch (temp) {
-        case 'b':
+        case 'b': {
             promotion = PieceType::Bishop;
             break;
-        case 'n':
+        }
+        case 'n': {
             promotion = PieceType::Knight;
             break;
-        case 'r':
+        }
+        case 'r': {
             promotion = PieceType::Rook;
             break;
-        case 'q':
+        }
+        case 'q': {
             promotion = PieceType::Queen;
             break;
+        }
         default:
             break;
         }
     }
 
-    return Move(lan, start.value(), end.value(), promotion);
+    return Move(lan, start, end, promotion);
 }

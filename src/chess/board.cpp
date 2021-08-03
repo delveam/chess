@@ -13,7 +13,10 @@ std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
 
 std::optional<Board> Board::create(std::string fen)
 {
-    if (!std::regex_match(fen, std::regex("^" + constants::fen_regex + "$"))) {
+    static const auto regex_fen = std::regex("^" + constants::fen_regex + "$");
+    static const auto regex_digit = std::regex("\\d");
+
+    if (!std::regex_match(fen, regex_fen)) {
         return std::nullopt;
     }
 
@@ -28,7 +31,7 @@ std::optional<Board> Board::create(std::string fen)
         for (auto i = 0; i < (int)row.size(); ++i) {
             auto character = row.substr(i, 1);
 
-            if (std::regex_match(character, std::regex("\\d"))) {
+            if (std::regex_match(character, regex_digit)) {
                 index += std::stoi(character);
             }
             else {
@@ -41,26 +44,34 @@ std::optional<Board> Board::create(std::string fen)
     auto current_team = sections[1] == "w" ? Team::White : Team::Black;
 
     auto castling_rights_uint = 0;
+
     for (int i = 0; i < (int)sections[2].length(); ++i) {
         auto current = sections[2].substr(i, 1).c_str()[0];
+
         switch (current) {
-        case 'K':
+        case 'K': {
             castling_rights_uint |= static_cast<unsigned int>(CastlingRights::WhiteKingSide);
             break;
-        case 'Q':
+        }
+        case 'Q': {
             castling_rights_uint |= static_cast<unsigned int>(CastlingRights::WhiteQueenSide);
             break;
-        case 'k':
+        }
+        case 'k': {
             castling_rights_uint |= static_cast<unsigned int>(CastlingRights::BlackKingSide);
             break;
-        case 'q':
+        }
+        case 'q': {
             castling_rights_uint |= static_cast<unsigned int>(CastlingRights::BlackQueenSide);
             break;
         }
+        }
     }
+
     auto castling_rights = static_cast<CastlingRights>(castling_rights_uint);
 
     std::optional<std::string> en_passant_target = std::nullopt;
+
     if (sections[3] != "-") {
         en_passant_target = sections[3];
     }
@@ -82,6 +93,7 @@ std::optional<std::string> Board::into_fen(Board board)
 
             if (piece->type() == PieceType::None) {
                 auto total_empty = 1;
+
                 while (true) {
                     auto next_piece = board.get(x + 1, y);
                     if (next_piece.has_value() && next_piece->type() == PieceType::None) {
@@ -100,24 +112,29 @@ std::optional<std::string> Board::into_fen(Board board)
 
         }
         if (y < constants::board_height - 1) {
-            fen+="/";
+            fen += "/";
         }
     }
 
     fen += " ";
+
     switch (board.m_current_team) {
-    case Team::White:
+    case Team::White: {
         fen += "w";
         break;
-    case Team::Black:
+    }
+    case Team::Black: {
         fen += "b";
         break;
+    }
     case Team::None:
         return std::nullopt;
     }
 
     fen += " ";
+
     auto can_castle = false;
+
     if (static_cast<int>(board.m_castling_rights) & static_cast<int>(CastlingRights::WhiteKingSide)) {
         fen += "K";
         can_castle = true;
@@ -140,6 +157,7 @@ std::optional<std::string> Board::into_fen(Board board)
     }
 
     fen += " ";
+
     if (board.m_en_passant_target.has_value()) {
         fen += board.m_en_passant_target.value();
     }

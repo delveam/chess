@@ -17,14 +17,14 @@ std::optional<Coordinates> Coordinates::create(unsigned int x, unsigned int y)
         return std::nullopt;
     }
 
-    auto result = Coordinates(x, y);
-
-    return result;
+    return Coordinates(x, y);
 }
 
 std::optional<Coordinates> Coordinates::from_string(std::string notation)
 {
-    if (!std::regex_match(notation, std::regex("[a-h]{1}[1-8]{1}"))) {
+    static const auto regex = std::regex("[a-h][1-8]");
+
+    if (!std::regex_match(notation, regex)) {
         return std::nullopt;
     }
 
