@@ -33,6 +33,8 @@ public:
     void undo();
     void redo();
 
+    std::string get_moves() const;
+
     static Match create();
     // TODO(thismarvin): setup `static std::optional<Match> from_pgn(std::string pgn);`
 private:
