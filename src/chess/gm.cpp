@@ -97,6 +97,37 @@ void walk(const Board& board, MoveSet& result, Coordinates coords, int dx, int d
     }
 }
 
+void walk_dangerously(const Board& board, DangerZone& result, unsigned int x, unsigned int y, int dx, int dy, Team current)
+{
+    auto other_team = current == Team::White ? Team::Black : Team::White;
+    auto size = constants::board_width > constants::board_height ? constants::board_width : constants::board_height;
+
+    for (int i = 1; i < size; ++i) {
+        auto target_coords = Coordinates::create(x + i * dx, y + i * dy);
+
+        if (!target_coords.has_value()) {
+            break;
+        }
+
+        auto index = target_coords->y() * constants::board_width + target_coords->x();
+        auto target = board.pieces().at(index);
+
+        if (target.team() == Team::None) {
+            result[index] = true;
+
+            continue;
+        }
+
+        result[index] = true;
+
+        if (target.type() == PieceType::King && target.team() == other_team) {
+            continue;
+        }
+
+        break;
+    }
+}
+
 MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
 {
     MoveSet result;
@@ -509,11 +540,10 @@ DangerZone generate_danger_zone(const Board& board, Team team)
         auto attacker = board.pieces().at(pair.first);
 
         auto x = pair.first % constants::board_width;
-        auto y = (int)trunc((float)pair.first / constants::board_width);
+        auto y = pair.first / constants::board_width;
 
-        // We do not care about Pawn advances, just Pawn captures. The current MoveSet doesn't help us here,
-        // so we roll our own logic!
-        if (attacker.type() == PieceType::Pawn) {
+        switch (attacker.type()) {
+        case PieceType::Pawn: {
             std::optional<Coordinates> left = std::nullopt;
             std::optional<Coordinates> right = std::nullopt;
 
@@ -534,22 +564,99 @@ DangerZone generate_danger_zone(const Board& board, Team team)
 
             if (left.has_value()) {
                 auto index = left->y() * constants::board_width + left->x();
+
                 result[index] = true;
             }
             if (right.has_value()) {
                 auto index = right->y() * constants::board_width + right->x();
+
                 result[index] = true;
             }
 
-            // HEY! Notice me! I exist to prevent unnecessary nesting.
-            continue;
+            break;
         }
+        case PieceType::Knight: {
+            auto valid_coords = [](unsigned int x, unsigned int y) {
+                return x >= 0 && x < constants::board_width && y >= 0 && y < constants::board_height;
+            };
+            auto coords_to_index = [](unsigned int x, unsigned int y) {
+                return y * constants::board_width + x;
+            };
+            auto setup = [&](unsigned int x, unsigned int y) {
+                if (valid_coords(x, y)) {
+                    auto index = coords_to_index(x, y);
 
-        // Once Pawns are out of the equation, every potential move is considered dangerous!
-        for (const auto& entry : pair.second) {
-            auto coords = Coordinates::from_string(entry.substr(2, 2)).value();
-            auto index = coords.y() * constants::board_width + coords.x();
-            result[index] = true;
+                    result[index] = true;
+                }
+            };
+
+            setup(x + 1, y - 2);
+            setup(x + 2, y - 1);
+            setup(x + 2, y + 1);
+            setup(x + 1, y + 2);
+            setup(x - 1, y + 2);
+            setup(x - 2, y + 1);
+            setup(x - 2, y - 1);
+            setup(x - 1, y - 2);
+
+            break;
+        }
+        case PieceType::Bishop: {
+            walk_dangerously(board, result, x, y, 1, -1, attacker.team());
+            walk_dangerously(board, result, x, y, 1, 1, attacker.team());
+            walk_dangerously(board, result, x, y, -1, 1, attacker.team());
+            walk_dangerously(board, result, x, y, -1, -1, attacker.team());
+
+            break;
+        }
+        case PieceType::Rook: {
+            walk_dangerously(board, result, x, y, 0, -1, attacker.team());
+            walk_dangerously(board, result, x, y, 1, 0, attacker.team());
+            walk_dangerously(board, result, x, y, 0, 1, attacker.team());
+            walk_dangerously(board, result, x, y, -1, 0, attacker.team());
+
+            break;
+        }
+        case PieceType::Queen: {
+            walk_dangerously(board, result, x, y, 1, -1, attacker.team());
+            walk_dangerously(board, result, x, y, 1, 1, attacker.team());
+            walk_dangerously(board, result, x, y, -1, 1, attacker.team());
+            walk_dangerously(board, result, x, y, -1, -1, attacker.team());
+            walk_dangerously(board, result, x, y, 0, -1, attacker.team());
+            walk_dangerously(board, result, x, y, 1, 0, attacker.team());
+            walk_dangerously(board, result, x, y, 0, 1, attacker.team());
+            walk_dangerously(board, result, x, y, -1, 0, attacker.team());
+
+            break;
+        }
+        case PieceType::King: {
+            auto valid_coords = [](unsigned int x, unsigned int y) {
+                return x >= 0 && x < constants::board_width && y >= 0 && y < constants::board_height;
+            };
+            auto coords_to_index = [](unsigned int x, unsigned int y) {
+                return y * constants::board_width + x;
+            };
+            auto setup = [&](unsigned int x, unsigned int y) {
+                if (valid_coords(x, y)) {
+                    auto index = coords_to_index(x, y);
+
+                    result[index] = true;
+                }
+            };
+
+            setup(x + 1, y - 1);
+            setup(x + 1, y);
+            setup(x + 1, y + 1);
+            setup(x, y + 1);
+            setup(x - 1, y + 1);
+            setup(x - 1, y);
+            setup(x - 1, y - 1);
+            setup(x, y - 1);
+
+            break;
+        }
+        default:
+            break;
         }
     }
 
