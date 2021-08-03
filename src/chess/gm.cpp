@@ -1,4 +1,3 @@
-#include <cmath>
 #include <queue>
 #include <vector>
 #include "gm.hpp"
@@ -462,7 +461,7 @@ bool being_attacked(const Board& board, unsigned int target_index)
     for (const auto& pair : opponents_moves) {
         auto attacker = board.pieces().at(pair.first);
         auto x = pair.first % constants::board_width;
-        auto y = (int)trunc((float)pair.first / constants::board_width);
+        auto y = pair.first / constants::board_width;
 
         // We do not care about Pawn advances, just Pawn captures. The current MoveSet doesn't help us here,
         // so we roll our own logic!
@@ -876,7 +875,7 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
     }
 
     auto no_moves = !can_move(moves);
-    auto king_location = Coordinates::create(king_index.value() % constants::board_width, (unsigned int)trunc((float)king_index.value() / constants::board_width)).value();
+    auto king_location = Coordinates::create(king_index.value() % constants::board_width, king_index.value() / constants::board_width).value();
     auto king_safety = gm::KingSafety::Safe;
 
     if (danger_zone[king_index.value()]) {
