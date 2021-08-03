@@ -147,6 +147,10 @@ void Chess::update_input(dam::Context& ctx)
         board_flipped = !board_flipped;
     }
 
+    if (Keyboard::pressed(ctx, Key::F1)) {
+        m_debug_danger_zone = !m_debug_danger_zone;
+    }
+
     if (Mouse::get_scroll_stride(ctx) > 0) {
         match.redo();
         reset_selection();
@@ -426,6 +430,28 @@ void Chess::draw_coordinates(dam::Context& ctx)
     }
 }
 
+void Chess::draw_danger_zone(dam::Context& ctx)
+{
+    if (!m_debug_danger_zone) {
+        return;
+    }
+
+    auto danger_zone = match.analysis().danger_zone();
+
+    for (int y = 0; y < constants::board_height; ++y) {
+        for (int x = 0; x < constants::board_height; ++x) {
+            if (danger_zone[y * constants::board_height + x]) {
+                auto params = dam::graphics::DrawParams()
+                              .set_position(board_offset.x() + x * square_size, board_offset.y() + y * square_size)
+                              .set_scale(square_size, square_size)
+                              .set_tint(dam::graphics::Color(0xff0000, 0.3));
+
+                draw_rectangle(ctx, params);
+            }
+        }
+    }
+}
+
 void Chess::draw_recent_move_indicator(dam::Context& ctx)
 {
     using namespace dam::graphics;
@@ -700,6 +726,7 @@ void Chess::draw(dam::Context& ctx)
 
     draw_board(ctx);
     draw_coordinates(ctx);
+    draw_danger_zone(ctx);
     draw_recent_move_indicator(ctx);
     draw_king_safety(ctx);
     draw_selection(ctx);

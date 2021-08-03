@@ -28,6 +28,8 @@ private:
     bool board_flipped { false };
     bool selected { false };
 
+    bool m_debug_danger_zone { false };
+
     dam::graphics::Color board_light_color { dam::graphics::Color(0xdee3e6) };
     dam::graphics::Color board_dark_color { dam::graphics::Color(0x8ca2ad) };
 
@@ -63,6 +65,7 @@ private:
 
     void draw_board(dam::Context& ctx);
     void draw_coordinates(dam::Context& ctx);
+    void draw_danger_zone(dam::Context& ctx);
     void draw_recent_move_indicator(dam::Context& ctx);
     void draw_king_safety(dam::Context& ctx);
     void draw_selection(dam::Context& ctx);
