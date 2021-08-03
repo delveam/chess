@@ -5,6 +5,16 @@
 
 const MoveSet castle_set = MoveSet { "e1g1", "e1c1", "e8g8", "e8c8" };
 const std::array<std::string, 4> promotion_array = std::array<std::string, 4> { "b", "n", "r", "q" };
+const std::array<std::string, constants::board_size> coords_to_string_array = {
+    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
+};
 
 bool target_is(const Board& board, unsigned int x, unsigned int y, Team team)
 {
@@ -67,10 +77,9 @@ CastlingRights remove_castling_right(CastlingRights a, CastlingRights b)
     return a;
 }
 
-void walk(const Board& board, MoveSet& result, Coordinates coords, int dx, int dy, Team current)
+void walk(const Board& board, MoveSet& result, unsigned int x, unsigned int y, int dx, int dy, Team current)
 {
-    auto x = coords.x();
-    auto y = coords.y();
+    auto coords = coords_to_string_array.at(y * constants::board_width + x);
     auto other_team = current == Team::White ? Team::Black : Team::White;
     auto size = constants::board_width > constants::board_height ? constants::board_width : constants::board_height;
 
@@ -84,12 +93,13 @@ void walk(const Board& board, MoveSet& result, Coordinates coords, int dx, int d
         auto target = board.pieces().at(index);
 
         if (target.team() == Team::None) {
-            result.insert(coords.to_string() + target_coords->to_string());
+            result.insert(coords + target_coords->to_string());
+
             continue;
         }
 
         if (target.team() == other_team) {
-            result.insert(coords.to_string() + target_coords->to_string());
+            result.insert(coords + target_coords->to_string());
         }
 
         break;
@@ -127,34 +137,35 @@ void walk_dangerously(const Board& board, DangerZone& result, unsigned int x, un
     }
 }
 
-MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
+MoveSet generate_pawn_moves(const Board& board, unsigned int x, unsigned int y)
 {
     MoveSet result;
 
-    auto x = coords.x();
-    auto y = coords.y();
     auto index = y * constants::board_width + x;
+    auto coords = coords_to_string_array.at(index);
     auto current = board.pieces().at(index);
+    auto team = current.team();
 
-    if (current.team() == Team::None) {
+    if (team == Team::None) {
         return result;
     }
 
     auto register_move = [&](unsigned int x, unsigned int y) {
-        auto lan = coords.to_string() + Coordinates::create(x, y)->to_string();
+        auto lan = coords + Coordinates::create(x, y)->to_string();
 
         // If a pawn is at the very top or bottom of the board then we must append all possible promotions to the lan.
         if (y == 0 || y == constants::board_height - 1) {
             for (int i = 0; i < (int)promotion_array.size(); ++i) {
                 result.insert(lan + promotion_array[i]);
             }
+
             return;
         }
 
         result.insert(lan);
     };
 
-    switch (current.team()) {
+    switch (team) {
     case Team::White: {
         // Handle advancing one square.
         if (target_is(board, x, y - 1, Team::None)) {
@@ -175,8 +186,9 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
         // Handle en passant.
         if (y == 3 && board.en_passant_target().has_value()) {
             auto temp = Coordinates::from_string(board.en_passant_target().value()).value();
+
             if ((temp.x() - 1 == x && temp.y() + 1 == y) || (temp.x() + 1 == x && temp.y() + 1 == y)) {
-                result.insert(coords.to_string() + board.en_passant_target().value());
+                result.insert(coords + board.en_passant_target().value());
             }
         }
         break;
@@ -201,8 +213,9 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
         // Handle en passant.
         if (y == 4 && board.en_passant_target().has_value()) {
             auto temp = Coordinates::from_string(board.en_passant_target().value()).value();
+
             if ((temp.x() - 1 == x && temp.y() - 1 == y) || (temp.x() + 1 == x && temp.y() - 1 == y)) {
-                result.insert(coords.to_string() + board.en_passant_target().value());
+                result.insert(coords + board.en_passant_target().value());
             }
         }
         break;
@@ -214,13 +227,12 @@ MoveSet generate_pawn_moves(const Board& board, Coordinates coords)
     return result;
 }
 
-MoveSet generate_knight_moves(const Board& board, Coordinates coords)
+MoveSet generate_knight_moves(const Board& board, unsigned int x, unsigned int y)
 {
     MoveSet result;
 
-    auto x = coords.x();
-    auto y = coords.y();
     auto index = y * constants::board_width + x;
+    auto coords = coords_to_string_array.at(index);
     auto current = board.pieces().at(index);
     auto team = current.team();
 
@@ -229,7 +241,8 @@ MoveSet generate_knight_moves(const Board& board, Coordinates coords)
     }
 
     auto register_move = [&](unsigned int x, unsigned int y) {
-        auto lan = coords.to_string() + Coordinates::create(x, y)->to_string();
+        auto lan = coords + Coordinates::create(x, y)->to_string();
+
         result.insert(lan);
     };
 
@@ -261,12 +274,10 @@ MoveSet generate_knight_moves(const Board& board, Coordinates coords)
     return result;
 }
 
-MoveSet generate_bishop_moves(const Board& board, Coordinates coords)
+MoveSet generate_bishop_moves(const Board& board, unsigned int x, unsigned int y)
 {
     MoveSet result;
 
-    auto x = coords.x();
-    auto y = coords.y();
     auto index = y * constants::board_width + x;
     auto current = board.pieces().at(index);
     auto team = current.team();
@@ -275,20 +286,18 @@ MoveSet generate_bishop_moves(const Board& board, Coordinates coords)
         return result;
     }
 
-    walk(board, result, coords, 1, -1, team);
-    walk(board, result, coords, 1, 1, team);
-    walk(board, result, coords, -1, 1, team);
-    walk(board, result, coords, -1, -1, team);
+    walk(board, result, x, y, 1, -1, team);
+    walk(board, result, x, y, 1, 1, team);
+    walk(board, result, x, y, -1, 1, team);
+    walk(board, result, x, y, -1, -1, team);
 
     return result;
 }
 
-MoveSet generate_rook_moves(const Board& board, Coordinates coords)
+MoveSet generate_rook_moves(const Board& board, unsigned int x, unsigned int y)
 {
     MoveSet result;
 
-    auto x = coords.x();
-    auto y = coords.y();
     auto index = y * constants::board_width + x;
     auto current = board.pieces().at(index);
     auto team = current.team();
@@ -297,20 +306,18 @@ MoveSet generate_rook_moves(const Board& board, Coordinates coords)
         return result;
     }
 
-    walk(board, result, coords, 0, -1, team);
-    walk(board, result, coords, 1, 0, team);
-    walk(board, result, coords, 0, 1, team);
-    walk(board, result, coords, -1, 0, team);
+    walk(board, result, x, y, 0, -1, team);
+    walk(board, result, x, y, 1, 0, team);
+    walk(board, result, x, y, 0, 1, team);
+    walk(board, result, x, y, -1, 0, team);
 
     return result;
 }
 
-MoveSet generate_queen_moves(const Board& board, Coordinates coords)
+MoveSet generate_queen_moves(const Board& board, unsigned int x, unsigned int y)
 {
     MoveSet result;
 
-    auto x = coords.x();
-    auto y = coords.y();
     auto index = y * constants::board_width + x;
     auto current = board.pieces().at(index);
     auto team = current.team();
@@ -319,25 +326,24 @@ MoveSet generate_queen_moves(const Board& board, Coordinates coords)
         return result;
     }
 
-    walk(board, result, coords, 1, -1, team);
-    walk(board, result, coords, 1, 1, team);
-    walk(board, result, coords, -1, 1, team);
-    walk(board, result, coords, -1, -1, team);
-    walk(board, result, coords, 0, -1, team);
-    walk(board, result, coords, 1, 0, team);
-    walk(board, result, coords, 0, 1, team);
-    walk(board, result, coords, -1, 0, team);
+    walk(board, result, x, y, 1, -1, team);
+    walk(board, result, x, y, 1, 1, team);
+    walk(board, result, x, y, -1, 1, team);
+    walk(board, result, x, y, -1, -1, team);
+    walk(board, result, x, y, 0, -1, team);
+    walk(board, result, x, y, 1, 0, team);
+    walk(board, result, x, y, 0, 1, team);
+    walk(board, result, x, y, -1, 0, team);
 
     return result;
 }
 
-MoveSet generate_king_moves(const Board& board, Coordinates coords)
+MoveSet generate_king_moves(const Board& board, unsigned int x, unsigned int y)
 {
     MoveSet result;
 
-    auto x = coords.x();
-    auto y = coords.y();
     auto index = y * constants::board_width + x;
+    auto coords = coords_to_string_array.at(index);
     auto current = board.pieces().at(index);
     auto team = current.team();
 
@@ -346,7 +352,7 @@ MoveSet generate_king_moves(const Board& board, Coordinates coords)
     }
 
     auto register_move = [&](unsigned int x, unsigned int y) {
-        auto lan = coords.to_string() + Coordinates::create(x, y)->to_string();
+        auto lan = coords + Coordinates::create(x, y)->to_string();
         result.insert(lan);
     };
 
@@ -407,28 +413,26 @@ Moves generate_move_canidates(const Board& board, Team team)
                 continue;
             }
 
-            auto coords = Coordinates::create(x, y).value();
-
             MoveSet moves;
 
             switch (target.type()) {
             case PieceType::Pawn:
-                moves = generate_pawn_moves(board, coords);
+                moves = generate_pawn_moves(board, x, y);
                 break;
             case PieceType::Knight:
-                moves = generate_knight_moves(board, coords);
+                moves = generate_knight_moves(board, x, y);
                 break;
             case PieceType::Bishop:
-                moves = generate_bishop_moves(board, coords);
+                moves = generate_bishop_moves(board, x, y);
                 break;
             case PieceType::Rook:
-                moves = generate_rook_moves(board, coords);
+                moves = generate_rook_moves(board, x, y);
                 break;
             case PieceType::Queen:
-                moves = generate_queen_moves(board, coords);
+                moves = generate_queen_moves(board, x, y);
                 break;
             case PieceType::King:
-                moves = generate_king_moves(board, coords);
+                moves = generate_king_moves(board, x, y);
                 break;
             default:
                 break;
@@ -445,6 +449,7 @@ std::optional<unsigned int> find_king(const Board& board, Team team)
 {
     for (int i = 0; i < (int)board.pieces().size(); ++i) {
         auto target = board.pieces()[i];
+
         if (target.type() == PieceType::King && target.team() == team) {
             return i;
         }
