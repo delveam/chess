@@ -717,21 +717,25 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
                 // Make sure the King can not castle through or into a check.
                 auto king_side = team == Team::White ? CastlingRights::WhiteKingSide : CastlingRights::BlackKingSide;
                 auto queen_side = team == Team::White ? CastlingRights::WhiteQueenSide : CastlingRights::BlackQueenSide;
+                auto king_side_move = team == Team::White ? "e1g1" : "e8g8";
+                auto queen_side_move = team == Team::White ? "e1c1" : "e8c8";
 
                 auto x = pair.first % constants::board_width;
                 auto y = pair.first / constants::board_width;
 
+                // This does not explicitly check if x or y is out of bounds; however, verifying the board's CastlingRights beforehand
+                // guarantees the index will be valid.
                 auto coords_to_index = [](unsigned int x, unsigned int y) {
                     return y * constants::board_width + x;
                 };
 
-                if (contains_castling_right(board.castling_rights(), king_side)) {
+                if (contains_castling_right(board.castling_rights(), king_side) && move == king_side_move) {
                     if (danger_zone[coords_to_index(x + 1, y)] || danger_zone[coords_to_index(x + 2, y)]) {
                         move_deletion.push(move);
                     }
                 }
 
-                if (contains_castling_right(board.castling_rights(), queen_side)) {
+                if (contains_castling_right(board.castling_rights(), queen_side) && move == queen_side_move) {
                     if (danger_zone[coords_to_index(x - 1, y)] || danger_zone[coords_to_index(x - 2, y)] || danger_zone[coords_to_index(x - 3, y)]) {
                         move_deletion.push(move);
                     }
