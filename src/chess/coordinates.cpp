@@ -22,9 +22,7 @@ std::optional<Coordinates> Coordinates::create(unsigned int x, unsigned int y)
 
 std::optional<Coordinates> Coordinates::from_string(std::string notation)
 {
-    static const auto regex = std::regex("[a-h][1-8]");
-
-    if (!std::regex_match(notation, regex)) {
+    if (notation.length() != 2) {
         return std::nullopt;
     }
 
