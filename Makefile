@@ -1,7 +1,7 @@
 EXC := chess
 CC := g++
 FLAGS := -std=c++17 -Wall
-DEBUG_FLAGS := -g -O0
+DEBUG_FLAGS := -pg -O0
 RELEASE_FLAGS := -O3
 INCLUDE_FLAGS := -Ibuild/deps/allegro5/include
 LIBRARY_FLAGS := -lm -Lbuild/deps/allegro5/lib -lallegro -lallegro_primitives -lallegro_font -lallegro_audio -lallegro_ttf -lallegro_image -lallegro_acodec -lallegro_color -Wl,-rpath,./deps/allegro5
@@ -115,6 +115,7 @@ release: bin/release/$(EXC)
 
 dev: bin/debug/$(EXC)
 	cd bin/debug; ./$(EXC)
+	gprof bin/debug/chess bin/debug/gmon.out > bin/debug/profile
 
 format:
 	astyle --style=stroustrup -n --recursive src/*.cpp,*.hpp
