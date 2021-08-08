@@ -1,18 +1,24 @@
-#include <regex>
 #include "move.hpp"
 
 const Move& Move::nullmove = Move { "0000", Coordinates::create(0, 0).value(), Coordinates::create(0, 0).value(), std::nullopt };
 
 std::optional<Move> Move::create(std::string lan)
 {
-    static const auto regex = std::regex("^([a-h]{1}[1-8]{1}){2}[bnrq]?$");
-
-    if (!std::regex_match(lan, regex)) {
+    if (lan.length() > 5) {
         return std::nullopt;
     }
 
-    auto start = Coordinates::from_string(lan.substr(0, 2)).value();
-    auto end = Coordinates::from_string(lan.substr(2, 2)).value();
+    auto start = Coordinates::from_string(lan.substr(0, 2));
+
+    if (!start.has_value()) {
+        return std::nullopt;
+    }
+
+    auto end = Coordinates::from_string(lan.substr(2, 2));
+
+    if (!end.has_value()) {
+        return std::nullopt;
+    }
 
     std::optional<PieceType> promotion = std::nullopt;
 
@@ -42,5 +48,5 @@ std::optional<Move> Move::create(std::string lan)
         }
     }
 
-    return Move(lan, start, end, promotion);
+    return Move(lan, start.value(), end.value(), promotion);
 }
