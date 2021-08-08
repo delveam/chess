@@ -761,7 +761,100 @@ Board gm::apply_move(const Board& board, Move move)
     if (previous.type() == PieceType::Pawn && abs(dy) == 2) {
         auto direction = dy > 0 ? 1 : -1;
         auto temp = Coordinates::create(move.start().x(), move.start().y() + direction).value();
-        en_passant_target = temp.to_string();
+
+        // Only enable en_passant_target if an enemy pawn is in position to capture en passant.
+        std::optional<Piece> target_left = std::nullopt;
+        std::optional<Piece> target_right = std::nullopt;
+
+        auto potential_problems = 0;
+
+        if (temp.x() > 0) {
+            target_left = board.pieces().at(end_index - 1);
+        }
+        if (temp.x() < constants::board_width - 1) {
+            target_right = board.pieces().at(end_index + 1);
+        }
+
+        if (target_left.has_value()) {
+            if (target_left->team() == current_team && target_left->type() == PieceType::Pawn) {
+                en_passant_target = coords_to_string_array.at(temp.y() * constants::board_width + temp.x());
+                potential_problems += 1;
+            }
+        }
+        if (target_right.has_value()) {
+            if (target_right->team() == current_team && target_right->type() == PieceType::Pawn) {
+                en_passant_target = coords_to_string_array.at(temp.y() * constants::board_width + temp.x());
+                potential_problems += 1;
+            }
+        }
+
+        // Taking en passant could lead to a discovered check; we need to make sure that cannot happen.
+        if (potential_problems == 1) {
+            std::optional<unsigned int> king_index = std::nullopt;
+            std::vector<Piece> board_slice;
+
+            auto y = current_team == Team::White ? 3 : 4;
+
+            for (int x = 0; x < constants::board_width; ++x) {
+                auto target = board.pieces().at(y * constants::board_width + x);
+
+                if (target.team() == current_team && target.type() == PieceType::King) {
+                    king_index = y * constants::board_width + x;
+                }
+
+                board_slice.push_back(target);
+            }
+
+            if (king_index.has_value()) {
+                // Remove pawn from board slice (en passant).
+                auto x = end_index % constants::board_width;
+
+                if (x < constants::board_width - 1) {
+                    auto en_passant_victim = board_slice.at(x + 1);
+
+                    if (en_passant_victim.team() == current_team && en_passant_victim.type() == PieceType::Pawn) {
+                        board_slice.at(x + 1) = Piece();
+                    }
+                }
+                if (x > 0) {
+                    auto en_passant_victim = board_slice.at(x - 1);
+
+                    if (en_passant_victim.team() == current_team && en_passant_victim.type() == PieceType::Pawn) {
+                        board_slice.at(x - 1) = Piece();
+                    }
+                }
+
+                // Get direction to walk King in.
+                auto king_x = king_index.value() % constants::board_width;
+                auto dir_x = x > king_x ? 1 : -1;
+
+                king_x += dir_x;
+
+                // Walk King and check if a Rook or Queen is in its line of sight.
+                auto danger = false;
+
+                while (king_x >= 0 && king_x < constants::board_width) {
+                    auto temp = board_slice.at(king_x);
+
+                    if (temp.team() == board.current_team()) {
+                        if (temp.type() == PieceType::Rook || temp.type() == PieceType::Queen) {
+                            danger = true;
+                        }
+                        break;
+                    }
+                    if (temp.team() == current_team) {
+                        break;
+                    }
+
+                    king_x += dir_x;
+                }
+
+                // Taking en passant would have resulted in a discovered check; en_passant_target should be disabled.
+                if (danger) {
+                    en_passant_target = std::nullopt;
+                }
+            }
+        }
     }
 
     // Deal with an en passant (Holy hell).
