@@ -16,6 +16,14 @@ const std::array<std::string, constants::board_size> coords_to_string_array = {
     "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
 };
 
+unsigned int coords_to_uint(std::string coords)
+{
+    int x = (char)coords.substr(0, 1).c_str()[0] - 'a';
+    int y = constants::board_height - std::stoi(coords.substr(1, 1));
+
+    return y * constants::board_width + x;
+}
+
 bool target_is(const Board& board, unsigned int x, unsigned int y, Team team)
 {
     auto target = board.get(x, y);
@@ -151,7 +159,7 @@ MoveSet generate_pawn_moves(const Board& board, unsigned int x, unsigned int y)
     }
 
     auto register_move = [&](unsigned int x, unsigned int y) {
-        auto lan = coords + Coordinates::create(x, y)->to_string();
+        auto lan = coords + coords_to_string_array.at(y * constants::board_width + x);
 
         // If a pawn is at the very top or bottom of the board then we must append all possible promotions to the lan.
         if (y == 0 || y == constants::board_height - 1) {
@@ -186,7 +194,6 @@ MoveSet generate_pawn_moves(const Board& board, unsigned int x, unsigned int y)
         // Handle en passant.
         if (y == 3 && board.en_passant_target().has_value()) {
             auto temp = Coordinates::from_string(board.en_passant_target().value()).value();
-
             if ((temp.x() - 1 == x && temp.y() + 1 == y) || (temp.x() + 1 == x && temp.y() + 1 == y)) {
                 result.insert(coords + board.en_passant_target().value());
             }
@@ -241,7 +248,7 @@ MoveSet generate_knight_moves(const Board& board, unsigned int x, unsigned int y
     }
 
     auto register_move = [&](unsigned int x, unsigned int y) {
-        auto lan = coords + Coordinates::create(x, y)->to_string();
+        auto lan = coords + coords_to_string_array.at(y * constants::board_width + x);
 
         result.insert(lan);
     };
@@ -352,7 +359,7 @@ MoveSet generate_king_moves(const Board& board, unsigned int x, unsigned int y)
     }
 
     auto register_move = [&](unsigned int x, unsigned int y) {
-        auto lan = coords + Coordinates::create(x, y)->to_string();
+        auto lan = coords + coords_to_string_array.at(y * constants::board_width + x);
         result.insert(lan);
     };
 
@@ -458,65 +465,133 @@ std::optional<unsigned int> find_king(const Board& board, Team team)
     return std::nullopt;
 }
 
-bool being_attacked(const Board& board, unsigned int target_index)
+std::optional<std::set<std::string>> find_pins(const Board& board, Team team)
 {
-    auto other_team = board.pieces().at(target_index).team() == Team::White ? Team::Black : Team::White;
-    auto opponents_moves = generate_move_canidates(board, other_team);
+    auto king_index = find_king(board, team);
 
-    for (const auto& pair : opponents_moves) {
-        auto attacker = board.pieces().at(pair.first);
-        auto x = pair.first % constants::board_width;
-        auto y = pair.first / constants::board_width;
+    if (!king_index.has_value()) {
+        return std::nullopt;
+    }
 
-        // We do not care about Pawn advances, just Pawn captures. The current MoveSet doesn't help us here,
-        // so we roll our own logic!
-        if (attacker.type() == PieceType::Pawn) {
-            std::optional<Coordinates> left = std::nullopt;
-            std::optional<Coordinates> right = std::nullopt;
+    std::set<std::string> result;
 
-            switch (attacker.team()) {
-            case Team::White: {
-                left = Coordinates::create(x - 1, y - 1);
-                right = Coordinates::create(x + 1, y - 1);
-                break;
-            }
-            case Team::Black: {
-                left = Coordinates::create(x - 1, y + 1);
-                right = Coordinates::create(x + 1, y + 1);
-                break;
-            }
-            default:
-                break;
-            }
+    auto king_x = king_index.value() % constants::board_width;
+    auto king_y = king_index.value() / constants::board_width;
 
-            if (left.has_value()) {
-                auto index = left->y() * constants::board_width + left->x();
-                if (index == target_index) {
-                    return true;
+    auto opponent = team == Team::White ? Team::Black : Team::White;
+
+    for (int y = 0; y < constants::board_height; ++y) {
+        for (int x = 0; x < constants::board_width; ++x) {
+            unsigned int index = y * constants::board_width + x;
+            auto target = board.pieces().at(index);
+            auto target_x = index % constants::board_width;
+            auto target_y = index / constants::board_width;
+
+            if (target.team() == opponent) {
+                int dir_x = 0;
+                int dir_y = 0;
+
+                switch (target.type()) {
+                case PieceType::Bishop: {
+                    if (target_x == king_x || target_y == king_y) {
+                        continue;
+                    }
+
+                    auto difference_x = (int)king_x - (int)target_x;
+                    auto difference_y = (int)king_y - (int)target_y;
+
+                    if (abs(difference_x) != abs(difference_y)) {
+                        continue;
+                    }
+
+                    dir_x = target_x > king_x ? -1 : 1;
+                    dir_y = target_y > king_y ? -1 : 1;
+
+                    break;
                 }
-            }
-            if (right.has_value()) {
-                auto index = right->y() * constants::board_width + right->x();
-                if (index == target_index) {
-                    return true;
+                case PieceType::Rook: {
+                    if (target_x != king_x && target_y != king_y) {
+                        continue;
+                    }
+
+                    dir_x = target_y != king_y ? 0 : (target_x > king_x ? -1 : 1);
+                    dir_y = target_x != king_x ? 0 : (target_y > king_y ? -1 : 1);
+
+                    break;
                 }
-            }
+                case PieceType::Queen: {
+                    dir_x = target_y != king_y ? 0 : (target_x > king_x ? -1 : 1);
+                    dir_y = target_x != king_x ? 0 : (target_y > king_y ? -1 : 1);
 
-            // HEY! Notice me! I exist to prevent unnecessary nesting.
-            continue;
-        }
+                    if (target_x != king_x && target_y != king_y) {
+                        auto difference_x = (int)king_x - (int)target_x;
+                        auto difference_y = (int)king_y - (int)target_y;
 
-        // Once Pawns are out of the equation, every potential move is considered dangerous!
-        for (const auto& entry : pair.second) {
-            auto coords = Coordinates::from_string(entry.substr(2, 2)).value();
-            auto index = coords.y() * constants::board_width + coords.x();
-            if (index == target_index) {
-                return true;
+                        if (abs(difference_x) != abs(difference_y)) {
+                            continue;
+                        }
+
+                        dir_x = target_x > king_x ? -1 : 1;
+                        dir_y = target_y > king_y ? -1 : 1;
+                    }
+
+                    break;
+                }
+                default:
+                    continue;;
+                }
+
+                auto current_x = target_x;
+                auto current_y = target_y;
+
+                auto has_line_of_sight = false;
+                std::optional<std::string> potential_pin = std::nullopt;
+
+                current_x += dir_x;
+                current_y += dir_y;
+                auto temp = Coordinates::create(current_x, current_y);
+
+                while (temp.has_value()) {
+                    auto temp_index = temp.value().y() * constants::board_width + temp.value().x();
+                    auto temp_target = board.pieces().at(temp_index);
+
+                    current_x += dir_x;
+                    current_y += dir_y;
+                    temp = Coordinates::create(current_x, current_y);
+
+                    if (temp_target.team() == team) {
+                        if (temp_target.type() == PieceType::King) {
+                            has_line_of_sight = true;
+                            break;
+                        }
+                        else {
+                            if (!potential_pin.has_value()) {
+                                potential_pin = coords_to_string_array.at(temp_index);
+                                continue;
+                            }
+
+                            if (potential_pin.has_value()) {
+                                break;
+                            }
+                        }
+                    }
+                    else if (temp_target.team() == opponent) {
+                        break;
+                    }
+
+                    if ((dir_x > 0 && current_x > king_x) || (dir_x < 0 && current_x < king_x) || (dir_y > 0 && current_y > king_y) || (dir_y < 0 && current_y < king_y)) {
+                        break;
+                    }
+                }
+
+                if (has_line_of_sight && potential_pin.has_value()) {
+                    result.insert(potential_pin.value());
+                }
             }
         }
     }
 
-    return false;
+    return result;
 }
 
 bool can_move(const Moves& moves)
@@ -661,6 +736,190 @@ DangerZone generate_danger_zone(const Board& board, Team team)
         }
         default:
             break;
+        }
+    }
+
+    return result;
+}
+
+std::pair<std::set<std::string>, DangerZone> find_attackers(const Board& board, const DangerZone& danger_zone, unsigned int x, unsigned int y)
+{
+    std::pair<std::set<std::string>, DangerZone> result;
+
+    int index = y * constants::board_width + x;
+    auto target = board.pieces().at(index);
+
+    if (target.type() == PieceType::None || !danger_zone[index]) {
+        return result;
+    }
+
+    auto target_x = index % constants::board_width;
+    auto target_y = index / constants::board_width;
+    auto coords_as_string = coords_to_string_array.at(index);
+    auto team = target.team();
+    auto opponent = team == Team::White ? Team::Black : Team::White;
+
+    // Iterate over all the pieces and find if an opponent has a line of sight to the target.
+    std::vector<unsigned int> indices;
+
+    for (int y = 0; y < constants::board_height; ++y) {
+        for (int x = 0; x < constants::board_width; ++x) {
+            int temp_index = y * constants::board_width + x;
+            auto temp_target = board.pieces().at(temp_index);
+            auto temp_target_x = temp_index % constants::board_width;
+            auto temp_target_y = temp_index / constants::board_width;
+
+            if (temp_target.team() != opponent) {
+                continue;
+            }
+
+            std::optional<MoveSet> move_set = std::nullopt;
+
+            switch (temp_target.type()) {
+            case PieceType::Pawn: {
+                if (temp_target_x == target_x) {
+                    continue;
+                }
+                if (abs(target_x - temp_target_x) > 1) {
+                    continue;
+                }
+
+                auto temp_dir = team == Team::White ? 1 : - 1;
+
+                if (temp_target_y + temp_dir != target_y) {
+                    continue;
+                }
+
+                move_set = generate_pawn_moves(board, temp_target_x, temp_target_y);
+
+                break;
+            }
+            case PieceType::Knight: {
+                move_set = generate_knight_moves(board, temp_target_x, temp_target_y);
+                break;
+            }
+            case PieceType::Bishop: {
+                auto difference_x = target_x - temp_target_x;
+                auto difference_y = target_y - temp_target_y;
+
+                if (abs(difference_x) != abs(difference_y)) {
+                    continue;
+                }
+
+                move_set = generate_bishop_moves(board, temp_target_x, temp_target_y);
+
+                break;
+            }
+            case PieceType::Rook: {
+                if (temp_target_x != target_x && temp_target_y != target_y) {
+                    continue;
+                }
+
+                move_set = generate_rook_moves(board, temp_target_x, temp_target_y);
+
+                break;
+            }
+            case PieceType::Queen: {
+                auto difference_x = target_x - temp_target_x;
+                auto difference_y = target_y - temp_target_y;
+
+                if (abs(difference_x) == abs(difference_y)) {
+                    move_set = generate_queen_moves(board, temp_target_x, temp_target_y);
+                    break;
+                }
+
+                if (temp_target_x == target_x || temp_target_y == target_y) {
+                    move_set = generate_queen_moves(board, temp_target_x, temp_target_y);
+                    break;
+                }
+
+                continue;
+            }
+            case PieceType::King: {
+                move_set = generate_king_moves(board, temp_target_x, temp_target_y);
+                break;
+            }
+            default:
+                continue;
+            }
+
+            if (!move_set.has_value()) {
+                continue;
+            }
+
+            for (const auto& move : move_set.value()) {
+                if (move.substr(2, 2) == coords_as_string) {
+                    result.first.insert(move.substr(0, 2));
+
+                    int x = (char)move.substr(0, 1).c_str()[0] - 'a';
+                    int y = constants::board_height - std::stoi(move.substr(1, 1));
+
+                    indices.push_back(y * constants::board_width + x);
+                }
+            }
+        }
+    }
+
+    // Iterate over the attackers and create a DangerZone that only includes the squares that their line of sight covers.
+    for (int i = 0; i < (int)indices.size(); ++i) {
+        int index = indices.at(i);
+        auto temp_target = board.pieces().at(index);
+        auto temp_target_x = index % constants::board_width;
+        auto temp_target_y = index / constants::board_width;
+
+        auto dir_x = 0;
+        auto dir_y = 0;
+
+        switch (temp_target.type()) {
+        case PieceType::Bishop: {
+            dir_x = temp_target_x > target_x ? -1 : 1;
+            dir_y = temp_target_y > target_y ? -1 : 1;
+
+            break;
+        }
+        case PieceType::Rook: {
+            dir_x = temp_target_y != target_y ? 0 : (temp_target_x > target_x ? -1 : 1);
+            dir_y = temp_target_x != target_x ? 0 : (temp_target_y > target_y ? -1 : 1);
+
+            break;
+        }
+        case PieceType::Queen: {
+            dir_x = temp_target_y != target_y ? 0 : (temp_target_x > target_x ? -1 : 1);
+            dir_y = temp_target_x != target_x ? 0 : (temp_target_y > target_y ? -1 : 1);
+
+            if (temp_target_x != target_x && temp_target_y != target_y) {
+                dir_x = temp_target_x > target_x ? -1 : 1;
+                dir_y = temp_target_y > target_y ? -1 : 1;
+            }
+
+            break;
+        }
+        default:
+            continue;
+        }
+
+        auto current_x = temp_target_x;
+        auto current_y = temp_target_y;
+
+        current_x += dir_x;
+        current_y += dir_y;
+        auto temp_coords = Coordinates::create(current_x, current_y);
+
+        while (temp_coords.has_value()) {
+            auto temp_temp_index = temp_coords.value().y() * constants::board_width + temp_coords.value().x();
+            auto temp_temp_target = board.pieces().at(temp_temp_index);
+
+            if (temp_temp_target.type() == PieceType::None) {
+                result.second.at(temp_temp_index) = true;
+            }
+
+            if (current_x == target_x && current_y == target_y) {
+                break;
+            }
+
+            current_x += dir_x;
+            current_y += dir_y;
+            temp_coords = Coordinates::create(current_x, current_y);
         }
     }
 
@@ -908,78 +1167,325 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
         return std::nullopt;
     }
 
+    auto king_coords = coords_to_string_array.at(king_index.value());
+    auto king_file = king_coords.substr(0, 1);
+    auto king_rank = king_coords.substr(1, 1);
+    auto king_x = king_index.value() % constants::board_width;
+    auto king_y = king_index.value() / constants::board_width;
+
+    auto opponent = team == Team::White ? Team::Black : Team::White;
+
     auto moves = generate_move_canidates(board, team);
     auto danger_zone = generate_danger_zone(board, team);
+    auto pins = find_pins(board, team).value();
+    auto attackers = find_attackers(board, danger_zone, king_x, king_y);
 
     std::queue<std::string> move_deletion;
 
     for (auto& pair : moves) {
-        // We need to make sure that each move does not cause the King to be in check; however, if we
-        // verify every move then the application slows down.
-        //
-        // We know that the King's moves should always be verified, but what about the other pieces?
-        // At the moment we only verify the other pieces if the King is currently in check or if the piece
-        // is being attacked. This seems to be working, but further testing is required.
-        if (pair.first != king_index.value() && !danger_zone[king_index.value()] && !danger_zone[pair.first]) {
-            continue;
-        }
+        auto attacker_coords = coords_to_string_array.at(pair.first);
 
-        // TODO(thismarvin): Verifying that a move is legal is expensive. We need to figure out why...
-        for (auto const& move : pair.second) {
-            if (pair.first == king_index.value() && castle_set.count(move) > 0) {
-                // If the King is in check then make sure it cannot castle.
-                if (danger_zone[pair.first]) {
-                    move_deletion.push(move);
+        // Deal with a pin.
+        if (pins.count(attacker_coords) > 0) {
+            // If the King is under attacked then we cannot move a pinned piece at all.
+            if (danger_zone[king_index.value()]) {
+                pair.second.clear();
+                continue;
+            }
+
+            auto target = board.pieces().at(pair.first);
+
+            auto x = pair.first % constants::board_width;
+            auto y = pair.first / constants::board_width;
+
+            switch (target.type()) {
+            case PieceType::Pawn: {
+                // If my x == king's x then I can only move up
+                // If my y == king's y then I cannot move at all
+                // Otherwise then I can only move if I am capturing the attacker...
+
+                if (x != king_x && y != king_y) {
+                    if (target.team() == Team::White) {
+                        if (y > king_y) {
+                            pair.second.clear();
+                            continue;
+                        }
+
+                        auto temp_dir = x > king_x ? 1 : -1;
+                        auto temp_index = (y - 1) * constants::board_width + (x + temp_dir);
+
+                        auto temp_target = board.pieces().at(temp_index);
+
+                        if (temp_target.team() == opponent) {
+                            auto temp_coords = coords_to_string_array.at(temp_index);
+
+                            for (const auto& move : pair.second) {
+                                if (move.substr(2, 2) != temp_coords) {
+                                    move_deletion.push(move);
+                                }
+                            }
+                            break;
+                        }
+                        else {
+                            pair.second.clear();
+                            continue;
+                        }
+                    }
+                    else if (target.team() == Team::Black) {
+                        if (y < king_y) {
+                            pair.second.clear();
+                            continue;
+                        }
+
+                        auto temp_dir = x > king_x ? 1 : -1;
+                        auto temp_index = (y + 1) * constants::board_width + (x + temp_dir);
+
+                        auto temp_target = board.pieces().at(temp_index);
+
+                        if (temp_target.team() == opponent) {
+                            auto temp_coords = coords_to_string_array.at(temp_index);
+
+                            for (const auto& move : pair.second) {
+                                if (move.substr(2, 2) != temp_coords) {
+                                    move_deletion.push(move);
+                                }
+                            }
+                            break;
+                        }
+                        else {
+                            pair.second.clear();
+                            continue;
+                        }
+                    }
+                }
+
+                if (y == king_y) {
+                    pair.second.clear();
+                }
+
+                for (auto& move : pair.second) {
+                    auto file = move.substr(2, 1);
+                    auto rank = move.substr(3, 1);
+
+                    if (x == king_x && file != king_file) {
+                        move_deletion.push(move);
+                    }
+                }
+
+                break;
+            }
+            case PieceType::Bishop: {
+                // If my x == king's x then I cannot move at all
+                // If my y == king's y then I cannot move at all
+                // Otherwise then I can only move along the King's diagonal
+
+                if (x == king_x || y == king_y) {
+                    pair.second.clear();
                     continue;
                 }
 
-                // Make sure the King can not castle through or into a check.
-                auto king_side = team == Team::White ? CastlingRights::WhiteKingSide : CastlingRights::BlackKingSide;
-                auto queen_side = team == Team::White ? CastlingRights::WhiteQueenSide : CastlingRights::BlackQueenSide;
-                auto king_side_move = team == Team::White ? "e1g1" : "e8g8";
-                auto queen_side_move = team == Team::White ? "e1c1" : "e8c8";
-
-                auto x = pair.first % constants::board_width;
-                auto y = pair.first / constants::board_width;
-
-                // This does not explicitly check if x or y is out of bounds; however, verifying the board's CastlingRights beforehand
-                // guarantees the index will be valid.
-                auto coords_to_index = [](unsigned int x, unsigned int y) {
-                    return y * constants::board_width + x;
+                auto is_valid = [](unsigned int x, unsigned int y) {
+                    return x >= 0 && x < constants::board_width && y >= 0 && y < constants::board_height;
                 };
 
-                if (contains_castling_right(board.castling_rights(), king_side) && move == king_side_move) {
-                    if (danger_zone[coords_to_index(x + 1, y)] || danger_zone[coords_to_index(x + 2, y)]) {
+                auto dir_x = x > king_x ? 1 : -1;
+                auto dir_y = y > king_y ? 1 : -1;
+
+                // Get all coords from King to my position.
+                std::set<std::string> valid_coords;
+
+                auto start_x = king_x;
+                auto start_y = king_y;
+
+                while (is_valid(start_x + dir_x, start_y + dir_y)) {
+                    start_x += dir_x;
+                    start_y += dir_y;
+
+                    auto temp_index = start_y * constants::board_width + start_x;
+
+                    valid_coords.insert(coords_to_string_array.at(temp_index));
+                }
+
+                // Discard any moves that are outside of the King's diagonal.
+                for (const auto& move : pair.second) {
+                    if (valid_coords.count(move.substr(2, 2)) == 0) {
                         move_deletion.push(move);
                     }
                 }
 
-                if (contains_castling_right(board.castling_rights(), queen_side) && move == queen_side_move) {
-                    if (danger_zone[coords_to_index(x - 1, y)] || danger_zone[coords_to_index(x - 2, y)] || danger_zone[coords_to_index(x - 3, y)]) {
+                break;
+            }
+            case PieceType::Rook: {
+                // If my x == king's x then I cannot move in the y direction
+                // If my y == king's y then I cannot move in the x direction
+                // Otherwise I cannot move at all
+
+                if (x != king_x && y != king_y) {
+                    pair.second.clear();
+                    continue;
+                }
+
+                for (auto& move : pair.second) {
+                    auto file = move.substr(2, 1);
+                    auto rank = move.substr(3, 1);
+
+                    if ((x == king_x && file != king_file) || (y == king_y && rank != king_rank)) {
                         move_deletion.push(move);
                     }
                 }
 
-                continue;
+                break;
+            }
+            case PieceType::Queen: {
+                // If my x == king's x then I cannot move in the y direction
+                // If my y == king's y then I cannot move in the x direction
+                // Otherwise then I can only move along the king's diagonal
+
+                if (x == king_x || y == king_y) {
+                    for (auto& move : pair.second) {
+                        auto file = move.substr(2, 1);
+                        auto rank = move.substr(3, 1);
+
+                        if ((x == king_x && file != king_file) || (y == king_y && rank != king_rank)) {
+                            move_deletion.push(move);
+                        }
+                    }
+                    break;
+                }
+
+                auto is_valid = [](unsigned int x, unsigned int y) {
+                    return x >= 0 && x < constants::board_width && y >= 0 && y < constants::board_height;
+                };
+
+                auto dir_x = x > king_x ? 1 : -1;
+                auto dir_y = y > king_y ? 1 : -1;
+
+                // Get all coords from King to my position.
+                std::set<std::string> valid_coords;
+
+                auto start_x = king_x;
+                auto start_y = king_y;
+
+                while (is_valid(start_x + dir_x, start_y + dir_y)) {
+                    start_x += dir_x;
+                    start_y += dir_y;
+
+                    auto temp_index = start_y * constants::board_width + start_x;
+
+                    valid_coords.insert(coords_to_string_array.at(temp_index));
+                }
+
+                // Discard any moves that are outside of the King's diagonal.
+                for (const auto& move : pair.second) {
+                    if (valid_coords.count(move.substr(2, 2)) == 0) {
+                        move_deletion.push(move);
+                    }
+                }
+
+                break;
+            }
+            default:
+                // Knights should not be able to move at all.
+                pair.second.clear();
+                break;
             }
 
-            auto temp_board = gm::apply_move(board, Move::create(move).value());
+            while (move_deletion.size() > 0) {
+                auto target = move_deletion.front();
+                pair.second.erase(target);
+                move_deletion.pop();
+            }
 
-            // Now that we have applied the move to the board, we need to make sure the King is not in check.
-            // If we happen to have moved the King then we need to recalculate their index.
-            if (pair.first == king_index.value()) {
-                auto new_king_index = find_king(temp_board, team).value();
+            continue;
+        }
 
-                // I do not think we need to recalculate the DangerZone if the King is moving.
+        if (pair.first == king_index.value()) {
+            for (const auto& move : pair.second) {
+                if (castle_set.count(move) > 0) {
+                    // If the King is in check then make sure it cannot castle.
+                    if (danger_zone[pair.first]) {
+                        move_deletion.push(move);
+                        continue;
+                    }
+
+                    // Make sure the King can not castle through or into a check.
+                    auto king_side = team == Team::White ? CastlingRights::WhiteKingSide : CastlingRights::BlackKingSide;
+                    auto queen_side = team == Team::White ? CastlingRights::WhiteQueenSide : CastlingRights::BlackQueenSide;
+                    auto king_side_move = team == Team::White ? "e1g1" : "e8g8";
+                    auto queen_side_move = team == Team::White ? "e1c1" : "e8c8";
+
+                    auto x = pair.first % constants::board_width;
+                    auto y = pair.first / constants::board_width;
+
+                    // This does not explicitly check if x or y is out of bounds; however, verifying the board's CastlingRights beforehand
+                    // guarantees the index will be valid.
+                    auto coords_to_index = [](unsigned int x, unsigned int y) {
+                        return y * constants::board_width + x;
+                    };
+
+                    if (contains_castling_right(board.castling_rights(), king_side) && move == king_side_move) {
+                        if (danger_zone[coords_to_index(x + 1, y)] || danger_zone[coords_to_index(x + 2, y)]) {
+                            move_deletion.push(move);
+                        }
+                    }
+
+                    if (contains_castling_right(board.castling_rights(), queen_side) && move == queen_side_move) {
+                        if (danger_zone[coords_to_index(x - 1, y)] || danger_zone[coords_to_index(x - 2, y)]) {
+                            move_deletion.push(move);
+                        }
+                    }
+
+                    continue;
+                }
+
+                auto new_king_index = coords_to_uint(move.substr(2, 2));
+
                 if (danger_zone[new_king_index]) {
                     move_deletion.push(move);
                 }
+            }
+        }
 
+        if (pair.first != king_index) {
+            if (!danger_zone[king_index.value()]) {
                 continue;
             }
 
-            if (being_attacked(temp_board, king_index.value())) {
-                move_deletion.push(move);
+            auto pawn_can_attack_en_passant = false;
+
+            if (board.en_passant_target().has_value()) {
+                for (const auto& attacker : attackers.first) {
+                    auto temp = coords_to_uint(attacker);
+                    auto target = board.pieces().at(temp);
+
+                    if (target.type() == PieceType::Pawn) {
+                        pawn_can_attack_en_passant = true;
+                        break;
+                    }
+                }
+            }
+
+            if (attackers.first.size() > 1) {
+                pair.second.clear();
+            }
+            else {
+                for (const auto& move : pair.second) {
+                    auto end = move.substr(2, 2);
+
+                    if (attackers.first.count(end) > 0 || attackers.second[coords_to_uint(end)]) {
+                        continue;
+                    }
+
+                    if (end == board.en_passant_target() && pawn_can_attack_en_passant) {
+                        auto target = board.pieces().at(pair.first);
+
+                        if (target.type() == PieceType::Pawn) {
+                            continue;
+                        }
+                    }
+
+                    move_deletion.push(move);
+                }
             }
         }
 
@@ -1055,4 +1561,3 @@ std::optional<Board> gm::board_from_sequence(std::string fen, std::string moves)
 
     return board;
 }
-
