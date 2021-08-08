@@ -757,6 +757,21 @@ Board gm::apply_move(const Board& board, Move move)
         }
     }
 
+    // Capturing a rook on either corner should disable castling on that side.
+    auto king_side = current_team == Team::White ? CastlingRights::WhiteKingSide : CastlingRights::BlackKingSide;
+    auto king_side_rook_index = current_team == Team::White ? 63 : 7;
+
+    if ((int)end_index == king_side_rook_index && contains_castling_right(castling_rights, king_side)) {
+        castling_rights = remove_castling_right(castling_rights, king_side);
+    }
+
+    auto queen_side = current_team == Team::White ? CastlingRights::WhiteQueenSide : CastlingRights::BlackQueenSide;
+    auto queen_side_rook_index = current_team == Team::White ? 56 : 0;
+
+    if ((int)end_index == queen_side_rook_index && contains_castling_right(castling_rights, queen_side)) {
+        castling_rights = remove_castling_right(castling_rights, queen_side);
+    }
+
     // Handle setting up a potential en passant.
     if (previous.type() == PieceType::Pawn && abs(dy) == 2) {
         auto direction = dy > 0 ? 1 : -1;
