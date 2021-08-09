@@ -4,7 +4,7 @@ FLAGS := -std=c++17 -Wall -Wextra -Wpedantic
 DEBUG_FLAGS := -g -pg -O0
 RELEASE_FLAGS := -O3
 INCLUDE_FLAGS := -Ibuild/deps/allegro5/include
-LIBRARY_FLAGS := -lm -Lbuild/deps/allegro5/lib -lallegro -lallegro_primitives -lallegro_font -lallegro_audio -lallegro_ttf -lallegro_image -lallegro_acodec -lallegro_color -Wl,-rpath,./deps/allegro5
+LIBRARY_FLAGS := -lm -lpthread -Lbuild/deps/allegro5/lib -lallegro -lallegro_primitives -lallegro_font -lallegro_audio -lallegro_ttf -lallegro_image -lallegro_acodec -lallegro_color -Wl,-rpath,./deps/allegro5
 
 DAM_SOURCES := $(shell find src/dam -name "*.cpp")
 DAM_HEADERS := $(shell find src/dam -name "*.hpp")
