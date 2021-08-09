@@ -24,6 +24,11 @@ unsigned int coords_to_uint(std::string coords)
     return y * constants::board_width + x;
 }
 
+bool coords_are_valid(unsigned int x, unsigned int y)
+{
+    return x < constants::board_width && y < constants::board_height;
+}
+
 bool target_is(const Board& board, unsigned int x, unsigned int y, Team team)
 {
     auto target = board.get(x, y);
@@ -655,14 +660,11 @@ DangerZone generate_danger_zone(const Board& board, Team team)
             break;
         }
         case PieceType::Knight: {
-            auto valid_coords = [](unsigned int x, unsigned int y) {
-                return x >= 0 && x < constants::board_width && y >= 0 && y < constants::board_height;
-            };
             auto coords_to_index = [](unsigned int x, unsigned int y) {
                 return y * constants::board_width + x;
             };
             auto setup = [&](unsigned int x, unsigned int y) {
-                if (valid_coords(x, y)) {
+                if (coords_are_valid(x, y)) {
                     auto index = coords_to_index(x, y);
 
                     result[index] = true;
@@ -709,14 +711,11 @@ DangerZone generate_danger_zone(const Board& board, Team team)
             break;
         }
         case PieceType::King: {
-            auto valid_coords = [](unsigned int x, unsigned int y) {
-                return x >= 0 && x < constants::board_width && y >= 0 && y < constants::board_height;
-            };
             auto coords_to_index = [](unsigned int x, unsigned int y) {
                 return y * constants::board_width + x;
             };
             auto setup = [&](unsigned int x, unsigned int y) {
-                if (valid_coords(x, y)) {
+                if (coords_are_valid(x, y)) {
                     auto index = coords_to_index(x, y);
 
                     result[index] = true;
@@ -1102,7 +1101,7 @@ Board gm::apply_move(const Board& board, Move move)
                 // Walk King and check if a Rook or Queen is in its line of sight.
                 auto danger = false;
 
-                while (king_x >= 0 && king_x < constants::board_width) {
+                while (king_x < constants::board_width) {
                     auto temp = board_slice.at(king_x);
 
                     if (temp.team() == board.current_team()) {
@@ -1279,10 +1278,6 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
                     continue;
                 }
 
-                auto is_valid = [](unsigned int x, unsigned int y) {
-                    return x >= 0 && x < constants::board_width && y >= 0 && y < constants::board_height;
-                };
-
                 auto dir_x = x > king_x ? 1 : -1;
                 auto dir_y = y > king_y ? 1 : -1;
 
@@ -1292,7 +1287,7 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
                 auto start_x = king_x;
                 auto start_y = king_y;
 
-                while (is_valid(start_x + dir_x, start_y + dir_y)) {
+                while (coords_are_valid(start_x + dir_x, start_y + dir_y)) {
                     start_x += dir_x;
                     start_y += dir_y;
 
@@ -1348,10 +1343,6 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
                     break;
                 }
 
-                auto is_valid = [](unsigned int x, unsigned int y) {
-                    return x >= 0 && x < constants::board_width && y >= 0 && y < constants::board_height;
-                };
-
                 auto dir_x = x > king_x ? 1 : -1;
                 auto dir_y = y > king_y ? 1 : -1;
 
@@ -1361,7 +1352,7 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
                 auto start_x = king_x;
                 auto start_y = king_y;
 
-                while (is_valid(start_x + dir_x, start_y + dir_y)) {
+                while (coords_are_valid(start_x + dir_x, start_y + dir_y)) {
                     start_x += dir_x;
                     start_y += dir_y;
 
