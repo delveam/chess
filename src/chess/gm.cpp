@@ -994,41 +994,36 @@ Board gm::apply_move(const Board& board, Move move)
 
     // Make sure that moving a rook affects the king's ability to castle.
     if (previous.type() == PieceType::Rook) {
-        switch (previous.team()) {
-        case Team::White: {
-            if (start_index == get_significant_rook_index(CastlingRights::WhiteKingSide)) {
-                castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteKingSide);
-            }
-            else if (start_index == get_significant_rook_index(CastlingRights::WhiteQueenSide)) {
-                castling_rights = remove_castling_right(castling_rights, CastlingRights::WhiteQueenSide);
-            }
+        auto king_side = board.current_team() == Team::White ? CastlingRights::WhiteKingSide : CastlingRights::BlackKingSide;
+        auto king_side_index = get_significant_rook_index(king_side).value();
+
+        if (start_index == king_side_index) {
+            castling_rights = remove_castling_right(castling_rights, king_side);
         }
-        case Team::Black: {
-            if (start_index == get_significant_rook_index(CastlingRights::BlackKingSide)) {
-                castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackKingSide);
-            }
-            else if (start_index == get_significant_rook_index(CastlingRights::BlackQueenSide)) {
-                castling_rights = remove_castling_right(castling_rights, CastlingRights::BlackQueenSide);
-            }
-        }
-        default:
-            break;
+
+        auto queen_side = board.current_team() == Team::White ? CastlingRights::WhiteQueenSide : CastlingRights::BlackQueenSide;
+        auto queen_side_index = get_significant_rook_index(queen_side).value();
+
+        if (start_index == queen_side_index) {
+            castling_rights = remove_castling_right(castling_rights, queen_side);
         }
     }
 
-    // Capturing a rook on either corner should disable castling on that side.
-    auto king_side = current_team == Team::White ? CastlingRights::WhiteKingSide : CastlingRights::BlackKingSide;
-    auto king_side_rook_index = current_team == Team::White ? 63 : 7;
+    {
+        // Capturing a rook on either corner should disable castling on that side.
+        auto king_side = current_team == Team::White ? CastlingRights::WhiteKingSide : CastlingRights::BlackKingSide;
+        auto king_side_rook_index = get_significant_rook_index(king_side).value();
 
-    if ((int)end_index == king_side_rook_index && contains_castling_right(castling_rights, king_side)) {
-        castling_rights = remove_castling_right(castling_rights, king_side);
-    }
+        if (end_index == king_side_rook_index && contains_castling_right(castling_rights, king_side)) {
+            castling_rights = remove_castling_right(castling_rights, king_side);
+        }
 
-    auto queen_side = current_team == Team::White ? CastlingRights::WhiteQueenSide : CastlingRights::BlackQueenSide;
-    auto queen_side_rook_index = current_team == Team::White ? 56 : 0;
+        auto queen_side = current_team == Team::White ? CastlingRights::WhiteQueenSide : CastlingRights::BlackQueenSide;
+        auto queen_side_rook_index = get_significant_rook_index(queen_side).value();
 
-    if ((int)end_index == queen_side_rook_index && contains_castling_right(castling_rights, queen_side)) {
-        castling_rights = remove_castling_right(castling_rights, queen_side);
+        if (end_index == queen_side_rook_index && contains_castling_right(castling_rights, queen_side)) {
+            castling_rights = remove_castling_right(castling_rights, queen_side);
+        }
     }
 
     // Handle setting up a potential en passant.

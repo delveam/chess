@@ -4,7 +4,7 @@
 
 std::optional<Piece> Board::get(unsigned int x, unsigned int y) const
 {
-    if (x < 0 || x >= constants::board_width || y < 0 || y >= constants::board_height) {
+    if (x >= constants::board_width || y >= constants::board_height) {
         return std::nullopt;
     }
 
