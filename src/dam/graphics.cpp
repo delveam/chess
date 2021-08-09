@@ -34,6 +34,7 @@ void dam::graphics::clear(Color color)
 
 void dam::graphics::draw_rectangle(Context& ctx, DrawParams params)
 {
+    (void)ctx;
     auto x = params.position().x();
     auto y = params.position().y();
     auto width = params.scale().x();
@@ -46,6 +47,7 @@ void dam::graphics::draw_rectangle(Context& ctx, DrawParams params)
 // FIXME(thismarvin): I have no idea why the rectangle is bigger than you would expect??
 void dam::graphics::draw_rectangle_but_not_filled(Context& ctx, DrawParams params, unsigned int line_width)
 {
+    (void)ctx;
     auto x = params.position().x();
     auto y = params.position().y();
     auto width = params.scale().x();
@@ -57,6 +59,7 @@ void dam::graphics::draw_rectangle_but_not_filled(Context& ctx, DrawParams param
 
 void dam::graphics::draw_circle(Context& ctx, DrawParams params)
 {
+    (void)ctx;
     auto width = params.scale().x();
     auto x = params.position().x() + width * 0.5;
     auto y = params.position().y() + width * 0.5;
@@ -67,6 +70,7 @@ void dam::graphics::draw_circle(Context& ctx, DrawParams params)
 
 void dam::graphics::draw_texture(Context& ctx, Texture* texture, ImageRegion region, DrawParams params)
 {
+    (void)ctx;
     auto subregion_x = region.x();
     auto subregion_y = region.y();
     auto subregion_width = region.width();
@@ -94,6 +98,7 @@ void dam::graphics::draw_texture(Context& ctx, Texture* texture, ImageRegion reg
 
 void dam::graphics::draw_text(Context& ctx, std::string text, Font* font, DrawParams params)
 {
+    (void)ctx;
     auto x = params.position().x();
     auto y = params.position().y();
     auto tint = convert_dam_color(params.tint());

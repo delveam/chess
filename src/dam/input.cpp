@@ -2,6 +2,7 @@
 
 dam::input::KeyboardState dam::input::Keyboard::get_state(dam::Context& ctx)
 {
+    (void)ctx;
     return dam::input::KeyboardState();
 }
 
@@ -17,6 +18,7 @@ bool dam::input::Keyboard::pressed(dam::Context& ctx, dam::input::Key key)
 
 dam::input::MouseState dam::input::Mouse::get_state(dam::Context& ctx)
 {
+    (void)ctx;
     return dam::input::MouseState();
 }
 
