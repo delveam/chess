@@ -11,6 +11,7 @@ public:
     Color() = default;
     // FIXME(thismarvin): Should Color just have a single `uint hex` property so we can use a member initialization list here?
     Color(unsigned int hexadecimal, float alpha=1);
+    Color(Color color, float alpha);
 
     unsigned int r() const
     {

@@ -10,6 +10,16 @@ dam::graphics::Color::Color(unsigned int hexadecimal, float alpha)
     multiply(alpha);
 }
 
+dam::graphics::Color::Color(Color color, float alpha)
+{
+    m_r = color.r();
+    m_g = color.g();
+    m_b = color.b();
+    m_a = 1;
+
+    multiply(alpha);
+}
+
 void dam::graphics::Color::multiply(float value)
 {
     m_r *= value;
