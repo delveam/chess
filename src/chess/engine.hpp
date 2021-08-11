@@ -6,41 +6,6 @@
 #include "board.hpp"
 #include "move.hpp"
 
-// uci protocol:
-// > uci
-// > ucinewgame
-// > position startpos
-// > go movetime 1000
-// > info ...
-// > "
-// > bestmove d2d4 ponder d7d5
-//
-// Data Structures Planning:
-// - MovePair(Move, Move)
-// - UCI (namespace?)
-// - Analysis?
-//   - MovePair?
-//   - Evaluation
-// - Worker
-//   - Properties:
-//     - Options?
-//     - Board
-//     - Cache : HashMap<"FEN + LAN", Evaluation>????
-//   - Methods:
-//     - Worker create()
-//     - O<Worker> from_position(fen)
-//     - O<Worker> from_sequence(fen, moves)
-//     - Worker& set_option?
-//     - Worker& position(fen, moves?)
-//     - MovePair go(depth | move_time)
-//     - Analysis eval()
-// - Command (std::variant?)
-//   - uci
-//   - ucinewgame
-//   - position
-//   - go
-//   - eval
-
 namespace engine {
 class Depth;
 class Millisecond;
