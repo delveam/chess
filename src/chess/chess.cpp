@@ -49,8 +49,12 @@ void Chess::handle_resize(dam::Context& ctx)
 
     sprite_scale = (float)square_size / sprite_size;
 
-    dam::graphics::unload_font(font);
+    if (m_loaded_font) {
+        dam::graphics::unload_font(font);
+    }
+
     font = dam::graphics::load_font("./content/fonts/FiraCode-SemiBold.ttf", square_size * 0.22);
+    m_loaded_font = true;
 }
 
 void Chess::reset_selection()

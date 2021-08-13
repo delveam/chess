@@ -20,6 +20,8 @@ public:
 private:
     dam::graphics::Font* font;
     dam::graphics::Texture* pieces;
+    bool m_loaded_font { false };
+
     int sprite_size { 32 };
     int square_size;
     float sprite_scale;
