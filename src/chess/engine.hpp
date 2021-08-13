@@ -7,6 +7,15 @@
 #include "move.hpp"
 
 namespace engine {
+enum class CommandType {
+    None,
+    uci,
+    ucinewgame,
+    isready,
+    position,
+    go,
+    quit
+};
 class Depth;
 class Millisecond;
 class Suggestion;
@@ -14,6 +23,32 @@ class Suggestion;
 class Fisher;
 class Pescado;
 }
+
+class engine::Command {
+public:
+    Command() = default;
+    Command(CommandType type) :
+        m_type(type)
+    {
+    }
+    Command(CommandType type, std::string data) :
+        m_type(type),
+        m_data(data)
+    {
+    }
+
+    CommandType type() const
+    {
+        return m_type;
+    }
+    std::string data() const
+    {
+        return m_data;
+    }
+private:
+    CommandType m_type { CommandType::None };
+    std::string m_data { "" };
+};
 
 class engine::Depth {
 public:
