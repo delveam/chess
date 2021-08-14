@@ -2,17 +2,14 @@
 #include <allegro5/allegro_font.h>
 #include <iostream>
 #include <memory>
+#include <regex>
 #include "chess.hpp"
 #include "coordinates.hpp"
-#include "../dam/graphics.hpp"
+#include "engine.hpp"
+#include "utils.hpp"
 #include "../dam/input.hpp"
 #include "../dam/palette.hpp"
 #include "../dam/window.hpp"
-
-int random_range(int min, int max)
-{
-    return min + rand() % (max - min);
-}
 
 std::optional<CastlingRights> lan_as_castling_rights(std::string lan)
 {
@@ -63,11 +60,80 @@ void Chess::reset_selection()
     initial_selection = std::nullopt;
 }
 
+void Chess::reset_promotion()
+{
+    m_promoting = false;
+    m_promoting_debounce = false;
+    m_promotion_lan = std::nullopt;
+    m_promotion_file = std::nullopt;
+    m_promotion_team = std::nullopt;
+}
+
 void Chess::queue_move(std::string lan)
 {
     auto move = Move::create(lan);
 
     if (!move.has_value()) {
+        return;
+    }
+
+    auto move_start_index = move->start().y() * constants::board_width + move->start().x();
+
+    std::optional<CastlingRights> castling_rights = std::nullopt;
+
+    if (match.board().pieces().at(move_start_index).type() == PieceType::King) {
+        castling_rights = lan_as_castling_rights(move->lan());
+    }
+
+    if (castling_rights.has_value()) {
+        dam::Vector2F king_start;
+        dam::Vector2F king_end;
+        dam::Vector2F rook_start;
+        dam::Vector2F rook_end;
+
+        switch (castling_rights.value()) {
+        case CastlingRights::WhiteKingSide: {
+            king_start = dam::Vector2F(4, 7);
+            king_end = dam::Vector2F(6, 7);
+            rook_start = dam::Vector2F(7, 7);
+            rook_end = dam::Vector2F(5, 7);
+            break;
+        }
+        case CastlingRights::WhiteQueenSide: {
+            king_start = dam::Vector2F(4, 7);
+            king_end = dam::Vector2F(2, 7);
+            rook_start = dam::Vector2F(0, 7);
+            rook_end = dam::Vector2F(3, 7);
+            break;
+        }
+        case CastlingRights::BlackKingSide: {
+            king_start = dam::Vector2F(4, 0);
+            king_end = dam::Vector2F(6, 0);
+            rook_start = dam::Vector2F(7, 0);
+            rook_end = dam::Vector2F(5, 0);
+            break;
+        }
+        case CastlingRights::BlackQueenSide: {
+            king_start = dam::Vector2F(4, 0);
+            king_end = dam::Vector2F(2, 0);
+            rook_start = dam::Vector2F(0, 0);
+            rook_end = dam::Vector2F(3, 0);
+            break;
+        }
+        default:
+            break;
+        }
+
+        move_was_queued = true;
+        queued_move = move;
+
+        rook_index = rook_start.y() * constants::board_width + rook_start.x();
+
+        primary_renderable.set(king_start);
+
+        primary_mover = Tweenable(king_start, king_end, move_duration);
+        secondary_mover = Tweenable(rook_start, rook_end, move_duration);
+
         return;
     }
 
@@ -82,61 +148,14 @@ void Chess::queue_move(std::string lan)
     primary_mover = Tweenable(start, end, move_duration);
 }
 
-void Chess::queue_castle(std::string lan, CastlingRights castling_rights)
+void Chess::submit_move(std::string lan)
 {
-    auto move = Move::create(lan);
+    move_was_queued = false;
+    match.submit_move(lan);
+    reset_selection();
 
-    if (!move.has_value()) {
-        return;
-    }
-
-    queued_move = move.value();
-
-    dam::Vector2F king_start;
-    dam::Vector2F king_end;
-    dam::Vector2F rook_start;
-    dam::Vector2F rook_end;
-
-    switch (castling_rights) {
-    case CastlingRights::WhiteKingSide: {
-        king_start = dam::Vector2F(4, 7);
-        king_end = dam::Vector2F(6, 7);
-        rook_start = dam::Vector2F(7, 7);
-        rook_end = dam::Vector2F(5, 7);
-        break;
-    }
-    case CastlingRights::WhiteQueenSide: {
-        king_start = dam::Vector2F(4, 7);
-        king_end = dam::Vector2F(2, 7);
-        rook_start = dam::Vector2F(0, 7);
-        rook_end = dam::Vector2F(3, 7);
-        break;
-    }
-    case CastlingRights::BlackKingSide: {
-        king_start = dam::Vector2F(4, 0);
-        king_end = dam::Vector2F(6, 0);
-        rook_start = dam::Vector2F(7, 0);
-        rook_end = dam::Vector2F(5, 0);
-        break;
-    }
-    case CastlingRights::BlackQueenSide: {
-        king_start = dam::Vector2F(4, 0);
-        king_end = dam::Vector2F(2, 0);
-        rook_start = dam::Vector2F(0, 0);
-        rook_end = dam::Vector2F(3, 0);
-        break;
-    }
-    default:
-        break;
-    }
-
-    move_was_queued = true;
-
-    primary_renderable.set(king_start);
-
-    primary_mover = Tweenable(king_start, king_end, move_duration);
-    secondary_mover = Tweenable(rook_start, rook_end, move_duration);
-    rook_index = rook_start.y() * constants::board_width + rook_start.x();
+    queue_command("position fen " + Board::into_fen(match.board()).value());
+    m_sent_go_command = false;
 }
 
 void Chess::update_input(dam::Context& ctx)
@@ -144,10 +163,11 @@ void Chess::update_input(dam::Context& ctx)
     using namespace dam::input;
 
     if (Keyboard::pressed(ctx, Key::Escape)) {
+        std::cout << "\n" << match.get_moves() << "\n";
         loop = false;
     }
 
-    if (Keyboard::pressed(ctx, Key::F)) {
+    if ( Keyboard::pressed(ctx, Key::F)) {
         board_flipped = !board_flipped;
     }
 
@@ -155,13 +175,15 @@ void Chess::update_input(dam::Context& ctx)
         m_debug_danger_zone = !m_debug_danger_zone;
     }
 
-    if (Mouse::get_scroll_stride(ctx) > 0) {
-        match.redo();
-        reset_selection();
-    }
-    if (Mouse::get_scroll_stride(ctx) < 0) {
-        match.undo();
-        reset_selection();
+    if (!m_promoting) {
+        if (Mouse::get_scroll_stride(ctx) > 0) {
+            match.redo();
+            reset_selection();
+        }
+        if (Mouse::get_scroll_stride(ctx) < 0) {
+            match.undo();
+            reset_selection();
+        }
     }
 
     if (selected && Mouse::pressed(ctx, MouseButton::Right)) {
@@ -240,22 +262,12 @@ void Chess::update_input(dam::Context& ctx)
 
                 // Check if we are about to promote a pawn.
                 if ((int)initial_selection->y() == start_y && y == end_y) {
-                    // TODO(thismarvin): Instead of automatically promoting to a queen, implement a UI that allows the player to choose what piece to promote to.
+                    // Note that this is just a dummy lan; the player will get to choose what piece to promote to once the move is complete.
                     lan += "q";
                 }
             }
 
             if (match.analysis().contains_move(lan)) {
-                // Castling requires that two pieces move simultaneously; however, `queue_move` only supports moving one piece.
-                // The following makes sure we use `queue_castling` (which supports moving two pieces) instead of `queue_move` when necessary.
-                if (initial_piece.type() == PieceType::King) {
-                    auto temp = lan_as_castling_rights(lan);
-                    if (temp.has_value()) {
-                        queue_castle(lan, temp.value());
-                        return;
-                    }
-                }
-
                 queue_move(lan);
             }
             else {
@@ -265,9 +277,100 @@ void Chess::update_input(dam::Context& ctx)
     }
 }
 
-void Chess::update_ai(dam::Context& ctx)
+void Chess::update_promotion(dam::Context& ctx)
 {
-    if (move_was_queued) {
+    if (!m_promoting) {
+        return;
+    }
+
+    if (m_promoting_debounce && !dam::input::Mouse::pressing(ctx, dam::input::MouseButton::Left)) {
+        m_promoting_debounce = false;
+    }
+
+    if (m_promoting_debounce) {
+        return;
+    }
+
+    auto mouse_position = dam::input::Mouse::get_position(ctx);
+    auto mouse_x = (int)((mouse_position.x() - board_offset.x()) / square_size);
+    auto mouse_y = (int)((mouse_position.y() - board_offset.y()) / square_size);
+
+    if (board_flipped) {
+        mouse_x = constants::board_width - mouse_x - 1;
+        mouse_y = constants::board_height - mouse_y - 1;
+    }
+
+    if (mouse_x == m_promotion_file) {
+        if ((m_promotion_team == Team::White && mouse_y < (int)m_promotion_pieces.size()) || (m_promotion_team == Team::Black && mouse_y >= constants::board_height - (int)m_promotion_pieces.size())) {
+            if (dam::input::Mouse::pressed(ctx, dam::input::MouseButton::Left)) {
+
+                auto promotion = "q";
+
+                switch (m_promotion_team.value()) {
+                case Team::White: {
+                    switch (mouse_y) {
+                    case 0: {
+                        promotion = "q";
+                        break;
+                    }
+                    case 1: {
+                        promotion = "n";
+                        break;
+                    }
+                    case 2: {
+                        promotion = "r";
+                        break;
+                    }
+                    case 3: {
+                        promotion = "b";
+                        break;
+                    }
+                    }
+                    break;
+                }
+                case Team::Black: {
+                    switch (mouse_y) {
+                    case 4: {
+                        promotion = "b";
+                        break;
+                    }
+                    case 5: {
+                        promotion = "r";
+                        break;
+                    }
+                    case 6: {
+                        promotion = "n";
+                        break;
+                    }
+                    case 7: {
+                        promotion = "q";
+                        break;
+                    }
+                    }
+                    break;
+                }
+                default:
+                    break;
+                }
+
+                submit_move(m_promotion_lan.value() + promotion);
+                reset_promotion();
+            }
+        }
+    }
+}
+
+void Chess::update_ai()
+{
+    if (!m_ai_enabled) {
+        return;
+    }
+
+    if (!m_uci_ready) {
+        return;
+    }
+
+    if (m_sent_go_command) {
         return;
     }
 
@@ -279,48 +382,13 @@ void Chess::update_ai(dam::Context& ctx)
         return;
     }
 
-    engine_delay_timer += ctx.delta_time;
-
-    if (engine_delay_timer >= ai_delay_duration) {
-        // Random AI
-        std::vector<unsigned int> potential_pieces;
-        for (auto const& pair : match.analysis().moves()) {
-            potential_pieces.push_back(pair.first);
-        }
-
-        std::optional<unsigned int> piece_index = std::nullopt;
-        std::optional<std::string> move = std::nullopt;
-
-        while (!move.has_value()) {
-            piece_index = potential_pieces[random_range(0, (int)potential_pieces.size())];
-            MoveSet move_set = match.analysis().moves().at(piece_index.value());
-
-            if (move_set.size() == 0) {
-                continue;
-            }
-
-            int temp = random_range(0, (int)move_set.size());
-
-            int i = 0;
-            for (const auto& entry : move_set) {
-                if (i == temp) {
-                    move = entry;
-                    break;
-                }
-
-                i += 1;
-            }
-        }
-
-        queue_move(move.value());
-
-        engine_delay_timer = 0;
-    }
+    queue_command("go depth " + std::to_string(m_search_depth));
+    m_sent_go_command = true;
 }
 
 void Chess::update_tweening(dam::Context& ctx)
 {
-    if (!move_was_queued) {
+    if (!move_was_queued || m_promoting) {
         return;
     }
 
@@ -333,11 +401,48 @@ void Chess::update_tweening(dam::Context& ctx)
     }
 
     if (primary_mover.done()) {
-        move_was_queued = false;
-        match.submit_move(queued_move->lan());
-        reset_selection();
         secondary_mover = std::nullopt;
+
+        // If the AI made a move then simply submit the move.
+        if (m_ai_enabled && match.board().current_team() == ai_team) {
+            submit_move(queued_move->lan());
+
+            return;
+        }
+
+        // If the player is about to promote a piece then enable the promotion UI.
+        if (queued_move->promotion().has_value()) {
+            m_promoting = true;
+            m_promoting_debounce = true;
+            m_promotion_lan = queued_move->lan().substr(0, 4);
+            m_promotion_file = m_promotion_lan->substr(2, 1).c_str()[0] - 'a';
+            m_promotion_team = match.board().current_team();
+
+            return;
+        }
+
+        // We are not dealing with anything fancy at this point; just submit the move.
+        submit_move(queued_move->lan());
     }
+}
+
+void Chess::update_uci()
+{
+    while (m_commands.size() > 0) {
+        auto command = m_commands.front();
+
+        std::cout << "==> " << command << "\n";
+
+        if (command == "isready") {
+            m_uci_ready = false;
+        }
+
+        m_uci.submit(command);
+
+        m_commands.pop();
+    }
+
+    m_uci.update();
 }
 
 dam::Vector2F Chess::calculate_draw_position(float x, float y)
@@ -525,7 +630,7 @@ void Chess::draw_selection(dam::Context& ctx)
     auto params = dam::graphics::DrawParams()
                   .set_position(draw_position.x(), draw_position.y())
                   .set_scale(square_size, square_size)
-                  .set_tint(dam::graphics::Color(0x547c64, 0.8));
+                  .set_tint(dam::graphics::Color(board_selection_color, 0.8));
 
     draw_rectangle(ctx, params);
 }
@@ -591,7 +696,7 @@ void Chess::draw_moves(dam::Context& ctx)
             auto temp_params = DrawParams()
                                .set_position(temp_draw_x + square_size * 0.5 - radius, temp_draw_y + square_size * 0.5 - radius)
                                .set_scale(radius * 2, radius * 2)
-                               .set_tint(Color(0x547c64, alpha));
+                               .set_tint(Color(board_selection_color, alpha));
 
             draw_circle(ctx, temp_params);
         }
@@ -695,6 +800,143 @@ void Chess::draw_move_animation(dam::Context& ctx)
     draw_texture(ctx, pieces, region, params);
 }
 
+void Chess::draw_promotion(dam::Context& ctx)
+{
+    if (!m_promoting) {
+        return;
+    }
+
+    auto promotion_background_x = board_offset.x() + square_size * m_promotion_file.value();
+    auto promotion_background_y = board_offset.y();
+
+    if (m_promotion_team == Team::Black) {
+        promotion_background_y += square_size * (constants::board_height - (int)m_promotion_pieces.size());
+    }
+
+    if (board_flipped) {
+        promotion_background_x = board_offset.x() + square_size * (constants::board_width - m_promotion_file.value() - 1);
+        promotion_background_y = dam::window::get_height(ctx) - board_offset.y() - square_size * (int)m_promotion_pieces.size();
+
+        if (m_promotion_team == Team::Black) {
+            promotion_background_y = board_offset.y();
+        }
+    }
+
+    // draw opaque square around board.
+    auto shadow_offset = square_size * 0.1;
+    auto params_shadow = dam::graphics::DrawParams()
+                         .set_position(promotion_background_x + shadow_offset, promotion_background_y + shadow_offset)
+                         .set_scale(square_size, square_size * (int)m_promotion_pieces.size())
+                         .set_tint(dam::graphics::Color(0x000000, 0.1));
+
+    draw_rectangle(ctx, params_shadow);
+
+    auto params_background = dam::graphics::DrawParams()
+                             .set_position(board_offset.x(), board_offset.y())
+                             .set_scale(square_size * constants::board_width, square_size * constants::board_height)
+                             .set_tint(dam::graphics::Color(0x000000, 0.4));
+
+    draw_rectangle(ctx, params_background);
+
+    // draw regular background around promotion file
+    auto params_file = dam::graphics::DrawParams()
+                       .set_position(promotion_background_x, promotion_background_y)
+                       .set_scale(square_size, square_size * (int)m_promotion_pieces.size())
+                       .set_tint(board_light_color);
+
+    params_file.set_position(promotion_background_x, promotion_background_y);
+
+    draw_rectangle(ctx, params_file);
+
+    // draw some sort of indicator around the piece that the mouse is over
+    auto mouse_position = dam::input::Mouse::get_position(ctx);
+    auto mouse_x = (int)((mouse_position.x() - board_offset.x()) / square_size);
+    auto mouse_y = (int)((mouse_position.y() - board_offset.y()) / square_size);
+
+    if (board_flipped) {
+        mouse_x = constants::board_width - mouse_x - 1;
+        mouse_y = constants::board_height - mouse_y - 1;
+    }
+
+    if (mouse_x == m_promotion_file) {
+        if ((m_promotion_team == Team::White && mouse_y < (int)m_promotion_pieces.size()) || (m_promotion_team == Team::Black && mouse_y >= constants::board_height - (int)m_promotion_pieces.size())) {
+            auto params_selection = dam::graphics::DrawParams()
+                                    .set_position(promotion_background_x, promotion_background_y + mouse_y * square_size)
+                                    .set_scale(square_size, square_size)
+                                    .set_tint(dam::graphics::Color(board_selection_color, 0.5));
+
+            if (m_promotion_team == Team::Black) {
+                params_selection.set_position(promotion_background_x, promotion_background_y + (mouse_y - (int)m_promotion_pieces.size()) * square_size);
+            }
+
+            if (board_flipped) {
+                switch (m_promotion_team.value()) {
+                case Team::White: {
+                    params_selection.set_position(promotion_background_x, promotion_background_y + ((int)m_promotion_pieces.size() - mouse_y - 1) * square_size);
+                    break;
+                }
+                case Team::Black: {
+                    params_selection.set_position(promotion_background_x, promotion_background_y + (constants::board_height - mouse_y - 1) * square_size);
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+
+            draw_rectangle(ctx, params_selection);
+        }
+    }
+
+    // draw four pieces in the center
+    for (int i = 0; i < (int)m_promotion_pieces.size(); ++i) {
+        auto params = dam::graphics::DrawParams()
+                      .set_position(promotion_background_x, promotion_background_y + square_size * i)
+                      .set_scale(sprite_scale, sprite_scale);
+        auto region = m_promotion_team == Team::White
+                      ? image_region_from_piece(Piece(m_promotion_pieces.at(i), m_promotion_team.value())).value()
+                      : image_region_from_piece(Piece(m_promotion_pieces.at(m_promotion_pieces.size() - i - 1), m_promotion_team.value())).value();
+
+        if (board_flipped) {
+            region = m_promotion_team == Team::White
+                     ? image_region_from_piece(Piece(m_promotion_pieces.at(m_promotion_pieces.size() - i - 1), m_promotion_team.value())).value()
+                     : image_region_from_piece(Piece(m_promotion_pieces.at(i), m_promotion_team.value())).value();
+        }
+
+        draw_texture(ctx, pieces, region, params);
+    }
+}
+
+void Chess::on_event(std::string event)
+{
+    auto args = utils::split_whitespace(event);
+
+    if (!m_uci_ok && args.at(0) == "uciok") {
+        m_uci_ok = true;
+        queue_command("ucinewgame");
+        queue_command("isready");
+    }
+
+    if (!m_uci_ready && args.at(0) == "readyok") {
+        m_uci_ready = true;
+    }
+
+    if(!m_uci_setup && m_uci_ready) {
+        m_uci_setup = true;
+    }
+
+    if (args.at(0) == "bestmove") {
+        queue_move(args.at(1));
+    }
+
+    std::cout << "<--   " << event << "\n";
+}
+
+void Chess::queue_command(std::string command)
+{
+    m_commands.push(command);
+}
+
 void Chess::initialize(dam::Context& ctx)
 {
     pieces = dam::graphics::load_texture("./content/sprites/pieces.png");
@@ -702,12 +944,58 @@ void Chess::initialize(dam::Context& ctx)
     handle_resize(ctx);
 
     srand(time(NULL));
+
+    m_uci.subscribe([&](std::string event) {
+        on_event(event);
+    });
+
+    static const auto regex_digit = std::regex("^\\d$");
+
+    for (int i = 0; i < (int)args().size(); ++i) {
+        if (args().at(i) == "--depth" && i != (int)args().size() - 1) {
+
+            auto arg = args().at(i + 1);
+
+            if (std::regex_match(arg, regex_digit)) {
+                m_search_depth = std::stoi(arg);
+            }
+        }
+    }
+
+    // auto perft_tests = std::vector<std::pair<std::string, int>> {
+    //     std::make_pair("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 5),
+    //     std::make_pair("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", 5),
+    //     std::make_pair("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1", 7),
+    //     std::make_pair("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 5),
+    //     std::make_pair("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", 5),
+    //     std::make_pair("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 5),
+    // };
+
+    // for (const auto& test : perft_tests) {
+    //     auto board = Board::create(test.first).value();
+    //     auto depth = test.second;
+
+    //     std::cout << "Board: " << test.first << "\n";
+
+    //     for (int i = 1; i <= depth; ++i) {
+    //         auto total = engine::Pescado::calculate_total_moves(board, i);
+
+    //         std::cout << "  Depth " << i << ": " << total << "\n";
+    //     }
+
+    //     std::cout << "\n";
+    // }
+
+    queue_command("uci");
 }
 
 void Chess::update(dam::Context& ctx)
 {
+    update_uci();
+
     update_input(ctx);
-    update_ai(ctx);
+    update_promotion(ctx);
+    update_ai();
     update_tweening(ctx);
 }
 
@@ -737,10 +1025,13 @@ void Chess::draw(dam::Context& ctx)
     draw_moves(ctx);
     draw_pieces(ctx);
     draw_move_animation(ctx);
+    draw_promotion(ctx);
 }
 
 void Chess::destroy(dam::Context& ctx)
 {
+    (void)ctx;
+
     using namespace dam::graphics;
 
     unload_font(font);
