@@ -77,6 +77,11 @@ std::optional<Match> Match::create_from_position(std::string fen)
     return Match(state);
 }
 
+Match Match::create_from_board(Board board)
+{
+    return create_from_position(Board::into_fen(board)).value();
+}
+
 std::string Match::get_moves() const
 {
     if (m_state.size() == 1) {

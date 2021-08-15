@@ -37,6 +37,7 @@ public:
 
     static Match create();
     static std::optional<Match> create_from_position(std::string fen);
+    static Match create_from_board(Board board);
     // TODO(thismarvin): setup `static std::optional<Match> from_pgn(std::string pgn);`
 private:
     unsigned int m_index { 0 };
