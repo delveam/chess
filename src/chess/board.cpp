@@ -83,7 +83,7 @@ std::optional<Board> Board::create(std::string fen)
     return Board(pieces, current_team, castling_rights, en_passant_target, half_moves, full_moves);
 }
 
-std::optional<std::string> Board::into_fen(Board board)
+std::string Board::into_fen(Board board)
 {
     std::string fen = "";
 
@@ -127,8 +127,8 @@ std::optional<std::string> Board::into_fen(Board board)
         fen += "b";
         break;
     }
-    case Team::None:
-        return std::nullopt;
+    default:
+        break;
     }
 
     fen += " ";

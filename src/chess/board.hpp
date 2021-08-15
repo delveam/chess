@@ -51,7 +51,7 @@ public:
     std::optional<Piece> get(unsigned int x, unsigned int y) const;
 
     static std::optional<Board> create(std::string fen);
-    static std::optional<std::string> into_fen(Board board);
+    static std::string into_fen(Board board);
 private:
     Pieces m_pieces;
     Team m_current_team { Team::None };

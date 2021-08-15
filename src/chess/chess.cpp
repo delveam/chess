@@ -154,7 +154,7 @@ void Chess::submit_move(std::string lan)
     match.submit_move(lan);
     reset_selection();
 
-    queue_command("position fen " + Board::into_fen(match.board()).value());
+    queue_command("position fen " + Board::into_fen(match.board()));
     m_sent_go_command = false;
 }
 
