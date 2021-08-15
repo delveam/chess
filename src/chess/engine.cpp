@@ -61,48 +61,116 @@ int engine::Pescado::calculate_total_moves(const Board& board, unsigned int dept
     return total;
 }
 
-int engine::Fisher::resolve_captures(const Board& board, unsigned int depth, int alpha, int beta, unsigned int& searched)
+int engine::Fisher::quiesce(const Board& board, int alpha, int beta, Strategy strategy, unsigned int& searched)
 {
-    if (depth == 0) {
-        return evaluate(board);
-    }
-
     auto analysis = gm::analyze(board, board.current_team()).value();
 
     if (analysis.king_safety() == gm::KingSafety::Checkmate) {
         return board.current_team() == Team::White ? -checkmate_value : checkmate_value;
     }
-
     if (analysis.king_safety() == gm::KingSafety::Stalemate) {
         return 0;
     }
+    if (analysis.king_safety() == gm::KingSafety::Check) {
+        return minimax_quiet(board, analysis, alpha, beta, strategy, searched);
+    }
+
+    auto stand_pat = evaluate(board);
+
+    if (strategy == Strategy::Maximizing) {
+        if (stand_pat >= beta) {
+            return beta;
+        }
+
+        if (stand_pat > alpha) {
+            alpha = stand_pat;
+        }
+    }
+    if (strategy == Strategy::Minimizing) {
+        if (stand_pat <= alpha) {
+            return alpha;
+        }
+
+        if (stand_pat < beta) {
+            beta = stand_pat;
+        }
+    }
 
     auto opponent = board.current_team() == Team::White ? Team::Black : Team::White;
-    auto strategy = board.current_team() == Team::White ? engine::Strategy::Maximizing : engine::Strategy::Minimizing;
 
-    auto can_capture = false;
+    std::vector<std::pair<int, Board>> states;
 
     for (const auto& pair : analysis.moves()) {
         for (const auto& move : pair.second) {
             auto temp_move = Move::create(move).value();
+            auto temp_board = gm::apply_move(board, temp_move);
             auto temp_end = board.pieces().at(temp_move.end().y() * constants::board_width + temp_move.end().x());
 
             if (temp_end.team() == opponent) {
-                can_capture = true;
-                break;
+                auto temp_start = board.pieces().at(temp_move.start().y() * constants::board_width + temp_move.start().x());
+                auto score = 0;
+
+                if (temp_start.type() == PieceType::King) {
+                    score += 800;
+                }
+                else {
+                    score += 900 + piece_value(temp_end) - piece_value(temp_start);
+                }
+
+                states.push_back(std::make_pair(score, temp_board));
             }
         }
+    }
 
-        if (can_capture) {
-            break;
+    if ((int)states.size() == 0) {
+        if (strategy == Strategy::Maximizing) {
+            return alpha;
+        }
+        if (strategy == Strategy::Minimizing) {
+            return beta;
+        }
+
+        return 0;
+    }
+
+    std::sort(states.begin(), states.end(), [&](std::pair<int, Board> a, std::pair<int, Board> b) {
+        return a.first > b.first;
+    });
+
+    auto next_strategy = strategy == Strategy::Maximizing ? Strategy::Minimizing : Strategy::Maximizing;
+
+    for (int i = 0; i < (int)states.size(); ++i) {
+        searched += 1;
+        auto score = quiesce(states.at(i).second, alpha, beta, next_strategy, searched);
+
+        if (strategy == Strategy::Maximizing) {
+            if (score >= beta) {
+                return beta;
+            }
+
+            if (score > alpha) {
+                alpha = score;
+            }
+        }
+        if (strategy == Strategy::Minimizing) {
+            if (score <= alpha) {
+                return alpha;
+            }
+
+            if (score < beta) {
+                beta = score;
+            }
         }
     }
 
-    if (!can_capture) {
-        return evaluate(board);
+    if (strategy == Strategy::Maximizing) {
+        return alpha;
+    }
+    if (strategy == Strategy::Minimizing) {
+        return beta;
     }
 
-    return minimax2(board, analysis, depth, alpha, beta, strategy, searched);
+    return 0;
 }
 
 int engine::Fisher::evaluate(const Board& board)
@@ -200,14 +268,12 @@ int engine::Fisher::evaluate_fast(const Board& board)
     return white_score - black_score;
 }
 
-int engine::Fisher::minimax(const Board& board, unsigned int depth, unsigned int depth2, int alpha, int beta, Strategy strategy, unsigned int& searched)
+int engine::Fisher::minimax(const Board& board, unsigned int depth, int alpha, int beta, Strategy strategy, unsigned int& searched)
 {
     if (depth == 0) {
-        // return engine::Fisher::resolve_captures(board, depth2, alpha, beta, searched);
-        return engine::Fisher::evaluate(board);
+        return engine::Fisher::quiesce(board, alpha, beta, strategy, searched);
     }
 
-    auto opponent = board.current_team() == Team::White ? Team::Black : Team::White;
     auto analysis = gm::analyze(board, board.current_team()).value();
 
     if (analysis.king_safety() == gm::KingSafety::Checkmate) {
@@ -217,20 +283,22 @@ int engine::Fisher::minimax(const Board& board, unsigned int depth, unsigned int
         return 0;
     }
 
-    std::vector<std::pair<int, Board>> states;
-
+    auto opponent = board.current_team() == Team::White ? Team::Black : Team::White;
     auto needs_sorting = false;
+
+    std::vector<std::pair<int, Board>> states;
 
     for (const auto& pair : analysis.moves()) {
         for (const auto& move : pair.second) {
             auto temp_move = Move::create(move).value();
             auto temp_board = gm::apply_move(board, temp_move);
-            auto temp_start = board.pieces().at(temp_move.start().y() * constants::board_width + temp_move.start().x());
             auto temp_end = board.pieces().at(temp_move.end().y() * constants::board_width + temp_move.end().x());
 
             auto score = 0;
 
             if (temp_end.team() == opponent) {
+                auto temp_start = board.pieces().at(temp_move.start().y() * constants::board_width + temp_move.start().x());
+
                 if (temp_start.type() == PieceType::King) {
                     score += 800;
                 }
@@ -251,85 +319,59 @@ int engine::Fisher::minimax(const Board& board, unsigned int depth, unsigned int
         });
     }
 
-    switch (strategy) {
-    case Strategy::Maximizing: {
-        auto best_score = std::numeric_limits<int>::lowest();
+    auto next_strategy = strategy == Strategy::Maximizing ? Strategy::Minimizing : Strategy::Maximizing;
 
-        for (int i = 0; i < (int)states.size(); ++i) {
-            searched += 1;
-            auto result = minimax(states.at(i).second, depth - 1, depth2, alpha, beta, Strategy::Minimizing, searched);
+    for (int i = 0; i < (int)states.size(); ++i) {
+        searched += 1;
 
-            if (result > best_score) {
-                best_score = result;
+        auto score = minimax(states.at(i).second, depth - 1, alpha, beta, next_strategy, searched);
+
+        if (strategy == Strategy::Maximizing) {
+            if (score >= beta) {
+                return beta;
             }
-
-            if (result > alpha) {
-                alpha = result;
-            }
-
-            if (beta <= alpha) {
-                break;
+            if (score > alpha) {
+                alpha = score;
             }
         }
-
-        return best_score;
-    }
-    case Strategy::Minimizing: {
-        auto best_score = std::numeric_limits<int>::max();
-
-        for (int i = 0; i < (int)states.size(); ++i) {
-            searched += 1;
-            auto result = minimax(states.at(i).second, depth - 1, depth2, alpha, beta, Strategy::Maximizing, searched);
-
-            if (result < best_score) {
-                best_score = result;
+        if (strategy == Strategy::Minimizing) {
+            if (score <= alpha) {
+                return alpha;
             }
-
-            if (result < beta) {
-                beta = result;
-            }
-
-            if (beta <= alpha) {
-                break;
+            if (score < beta) {
+                beta = score;
             }
         }
+    }
 
-        return best_score;
+    if (strategy == Strategy::Maximizing) {
+        return alpha;
     }
-    default:
-        return 0;
+    if (strategy == Strategy::Minimizing) {
+        return beta;
     }
+
+    return 0;
 }
 
-int engine::Fisher::minimax2(const Board& board, const gm::Analysis& analysis, unsigned int depth, int alpha, int beta, Strategy strategy, unsigned int& searched)
+int engine::Fisher::minimax_quiet(const Board& board, const gm::Analysis& analysis, int alpha, int beta, Strategy strategy, unsigned int& searched)
 {
-    if (depth == 0) {
-        return evaluate(board);
-    }
-
     auto opponent = board.current_team() == Team::White ? Team::Black : Team::White;
-
-    if (analysis.king_safety() == gm::KingSafety::Checkmate) {
-        return board.current_team() == Team::White ? -checkmate_value : checkmate_value;
-    }
-    if (analysis.king_safety() == gm::KingSafety::Stalemate) {
-        return 0;
-    }
+    auto needs_sorting = false;
 
     std::vector<std::pair<int, Board>> states;
-
-    auto needs_sorting = false;
 
     for (const auto& pair : analysis.moves()) {
         for (const auto& move : pair.second) {
             auto temp_move = Move::create(move).value();
             auto temp_board = gm::apply_move(board, temp_move);
-            auto temp_start = board.pieces().at(temp_move.start().y() * constants::board_width + temp_move.start().x());
             auto temp_end = board.pieces().at(temp_move.end().y() * constants::board_width + temp_move.end().x());
 
             auto score = 0;
 
             if (temp_end.team() == opponent) {
+                auto temp_start = board.pieces().at(temp_move.start().y() * constants::board_width + temp_move.start().x());
+
                 if (temp_start.type() == PieceType::King) {
                     score += 800;
                 }
@@ -350,56 +392,39 @@ int engine::Fisher::minimax2(const Board& board, const gm::Analysis& analysis, u
         });
     }
 
-    switch (strategy) {
-    case Strategy::Maximizing: {
-        auto best_score = std::numeric_limits<int>::lowest();
+    auto next_strategy = strategy == Strategy::Maximizing ? Strategy::Minimizing : Strategy::Maximizing;
 
-        for (int i = 0; i < (int)states.size(); ++i) {
-            // auto result = minimax(states.at(i).second, 0, depth2, alpha, beta, Strategy::Minimizing, searched);
-            searched += 1;
-            auto result = resolve_captures(board, depth - 1, alpha, beta, searched);
+    for (int i = 0; i < (int)states.size(); ++i) {
+        searched += 1;
 
-            if (result > best_score) {
-                best_score = result;
+        auto score = quiesce(states.at(i).second, alpha, beta, next_strategy, searched);
+
+        if (strategy == Strategy::Maximizing) {
+            if (score >= beta) {
+                return beta;
             }
-
-            if (result > alpha) {
-                alpha = result;
-            }
-
-            if (beta <= alpha) {
-                break;
+            if (score > alpha) {
+                alpha = score;
             }
         }
-
-        return best_score;
-    }
-    case Strategy::Minimizing: {
-        auto best_score = std::numeric_limits<int>::max();
-
-        for (int i = 0; i < (int)states.size(); ++i) {
-            // auto result = minimax(states.at(i).second, 0, depth2, alpha, beta, Strategy::Maximizing, searched);
-            searched += 1;
-            auto result = resolve_captures(board, depth - 1, alpha, beta, searched);
-
-            if (result < best_score) {
-                best_score = result;
+        if (strategy == Strategy::Minimizing) {
+            if (score <= alpha) {
+                return alpha;
             }
-
-            if (result < beta) {
-                beta = result;
-            }
-
-            if (beta <= alpha) {
-                break;
+            if (score < beta) {
+                beta = score;
             }
         }
+    }
 
-        return best_score;
+    if (strategy == Strategy::Maximizing) {
+        return alpha;
     }
-    default:
-        return 0;
+    if (strategy == Strategy::Minimizing) {
+        return beta;
     }
+
+    return 0;
 }
 
 std::optional<engine::Depth> engine::Depth::create(unsigned int depth)
@@ -420,7 +445,6 @@ std::optional<engine::Millisecond> engine::Millisecond::create(unsigned int mill
 engine::Suggestion engine::Fisher::go(Depth depth)
 {
     auto strategy = m_board.current_team() == Team::White ? Strategy::Minimizing : Strategy::Maximizing;
-    auto best_score = m_board.current_team() == Team::White ? std::numeric_limits<int>::lowest() : std::numeric_limits<int>::max();
     auto best_move = Move::nullmove;
 
     unsigned int nodes_searched = 0;
@@ -430,12 +454,14 @@ engine::Suggestion engine::Fisher::go(Depth depth)
     auto alpha = std::numeric_limits<int>::lowest();
     auto beta = std::numeric_limits<int>::max();
 
+    auto best_score = m_board.current_team() == Team::White ? alpha : beta;
+
     for (const auto& pair : analysis.moves()) {
         for (const auto& move : pair.second) {
             auto temp_move = Move::create(move).value();
 
             nodes_searched += 1;
-            auto score = minimax(gm::apply_move(m_board, temp_move), depth.value() - 1, 1, alpha, beta, strategy, nodes_searched);
+            auto score = minimax(gm::apply_move(m_board, temp_move), depth.value() - 1, alpha, beta, strategy, nodes_searched);
 
             if (m_board.current_team() == Team::White) {
                 if (score > best_score) {

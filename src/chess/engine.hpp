@@ -135,11 +135,11 @@ private:
     Board m_board { Board::create(constants::starting_fen).value() };
     // std::unordered_map<std::string, float> m_cache; // This is basically just for transpositions.
 
-    static int resolve_captures(const Board& board, unsigned int depth, int alpha, int beta, unsigned int& searched);
     static int evaluate(const Board& board);
     static int evaluate_fast(const Board& board);
-    static int minimax(const Board& board, unsigned int depth, unsigned int depth2, int alpha, int beta, Strategy strategy, unsigned int& searched);
-    static int minimax2(const Board& board, const gm::Analysis& analysis, unsigned int depth, int alpha, int beta, Strategy strategy, unsigned int& searched);
+    static int minimax(const Board& board, unsigned int depth, int alpha, int beta, Strategy strategy, unsigned int& searched);
+    static int minimax_quiet(const Board& board, const gm::Analysis& analysis, int alpha, int beta, Strategy strategy, unsigned int& searched);
+    static int quiesce(const Board& board, int alpha, int beta, Strategy strategy, unsigned int& searched);
 };
 
 class engine::Pescado {
