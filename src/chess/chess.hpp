@@ -21,23 +21,23 @@ public:
     void draw(dam::Context& ctx) override;
     void destroy(dam::Context& ctx) override;
 private:
-    dam::graphics::Font* font;
-    dam::graphics::Texture* pieces;
+    dam::graphics::Font* m_font;
+    dam::graphics::Texture* m_pieces;
     bool m_loaded_font { false };
 
-    int sprite_size { 32 };
-    int square_size;
-    float sprite_scale;
-    dam::Vector2F board_offset;
-    Match match { Match::create() };
-    bool board_flipped { false };
-    bool selected { false };
+    int m_sprite_size { 32 };
+    int m_square_size;
+    float m_sprite_scale;
+    dam::Vector2F m_board_offset;
+    Match m_match { Match::create() };
+    bool m_board_flipped { false };
+    bool m_selected { false };
 
     bool m_debug_danger_zone { false };
 
-    dam::graphics::Color board_light_color { dam::graphics::Color(0xdee3e6) };
-    dam::graphics::Color board_dark_color { dam::graphics::Color(0x8ca2ad) };
-    dam::graphics::Color board_selection_color { dam::graphics::Color(0x547c64) };
+    dam::graphics::Color m_board_light_color { dam::graphics::Color(0xdee3e6) };
+    dam::graphics::Color m_board_dark_color { dam::graphics::Color(0x8ca2ad) };
+    dam::graphics::Color m_board_selection_color { dam::graphics::Color(0x547c64) };
 
     bool m_ai_enabled { true };
     unsigned int m_search_depth { 2 };
@@ -50,17 +50,17 @@ private:
     bool m_sent_go_command { false };
     std::queue<std::string> m_commands;
 
-    std::optional<Coordinates> initial_selection { std::nullopt };
-    bool move_was_queued { false };
-    std::optional<Move> queued_move { std::nullopt };
+    std::optional<Coordinates> m_initial_selection { std::nullopt };
+    bool m_move_was_queued { false };
+    std::optional<Move> m_queued_move { std::nullopt };
 
-    float move_duration { 0.25 };
-    Tweenable primary_mover;
-    std::optional<Tweenable> secondary_mover;
-    int rook_index { 0 };
+    float m_move_duration { 0.25 };
+    Tweenable m_primary_mover;
+    std::optional<Tweenable> m_secondary_mover;
+    int m_rook_index { 0 };
 
-    Renderable primary_renderable;
-    Renderable secondary_renderable;
+    Renderable m_primary_renderable;
+    Renderable m_secondary_renderable;
 
     std::array<PieceType, 4> m_promotion_pieces { PieceType::Queen, PieceType::Knight, PieceType::Rook, PieceType::Bishop };
     bool m_promoting { false };
