@@ -444,59 +444,51 @@ std::optional<engine::Millisecond> engine::Millisecond::create(unsigned int mill
 
 engine::Suggestion engine::Fisher::go(Depth depth)
 {
-    auto strategy = m_board.current_team() == Team::White ? Strategy::Minimizing : Strategy::Maximizing;
-    auto best_move = Move::nullmove;
+    auto analysis = gm::analyze(m_board, m_board.current_team()).value();
 
     unsigned int nodes_searched = 0;
-
-    auto analysis = gm::analyze(m_board, m_board.current_team()).value();
+    auto strategy = m_board.current_team() == Team::White ? Strategy::Maximizing : Strategy::Minimizing;
+    auto next_strategy = strategy == Strategy::Maximizing ? Strategy::Minimizing : Strategy::Maximizing;
 
     auto alpha = std::numeric_limits<int>::lowest();
     auto beta = std::numeric_limits<int>::max();
 
-    auto best_score = m_board.current_team() == Team::White ? alpha : beta;
+    auto best_move = Move::nullmove;
 
     for (const auto& pair : analysis.moves()) {
         for (const auto& move : pair.second) {
             auto temp_move = Move::create(move).value();
 
             nodes_searched += 1;
-            auto score = minimax(gm::apply_move(m_board, temp_move), depth.value() - 1, alpha, beta, strategy, nodes_searched);
+            auto score = minimax(gm::apply_move(m_board, temp_move), depth.value() - 1, alpha, beta, next_strategy, nodes_searched);
 
-            if (m_board.current_team() == Team::White) {
-                if (score > best_score) {
-                    best_score = score;
-                    best_move = temp_move;
+            if (strategy == Strategy::Maximizing) {
+                if (score >= beta) {
+                    break;
                 }
-
                 if (score > alpha) {
                     alpha = score;
-                }
 
-                if (beta <= alpha) {
-                    break;
-                }
-            }
-            if (m_board.current_team() == Team::Black) {
-                if (score < best_score) {
-                    best_score = score;
                     best_move = temp_move;
                 }
-
+            }
+            if (strategy == Strategy::Minimizing) {
+                if (score <= alpha) {
+                    break;
+                }
                 if (score < beta) {
                     beta = score;
-                }
 
-                if (beta <= alpha) {
-                    break;
+                    best_move = temp_move;
                 }
             }
         }
     }
 
     // TODO(thismarvin): How can we broadcast this to the engine?
-    std::cout << "info depth " << depth.value() << " nodes " << nodes_searched << " score cp " << best_score << "\n";
-    // auto message = "info depth " + std::to_string(depth.value()) + " nodes " + std::to_string(nodes_searched) + " score cp " + std::to_string(best_score);
+    auto score = strategy == Strategy::Maximizing ? alpha : beta;
+    std::cout << "info depth " << depth.value() << " nodes " << nodes_searched << " score cp " << score << "\n";
+    // auto message = "info depth " + std::to_string(depth.value()) + " nodes " + std::to_string(nodes_searched) + " score cp " + std::to_string(score);
 
     return Suggestion(best_move, Move::nullmove);
 }
