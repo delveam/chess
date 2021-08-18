@@ -268,25 +268,29 @@ int engine::Fisher::evaluate_fast(const Board& board)
     return white_score - black_score;
 }
 
-int engine::Fisher::minimax(const Board& board, unsigned int depth, int alpha, int beta, Strategy strategy, unsigned int& searched)
+engine::SearchNode engine::Fisher::minimax(const Board& board, unsigned int depth, int alpha, int beta, Strategy strategy, unsigned int& searched)
 {
     if (depth == 0) {
-        return engine::Fisher::quiesce(board, alpha, beta, strategy, searched);
+        auto score = engine::Fisher::quiesce(board, alpha, beta, strategy, searched);
+
+        return SearchNode(score);
     }
 
     auto analysis = gm::analyze(board, board.current_team()).value();
 
     if (analysis.king_safety() == gm::KingSafety::Checkmate) {
-        return board.current_team() == Team::White ? -checkmate_value : checkmate_value;
+        auto score = board.current_team() == Team::White ? -checkmate_value : checkmate_value;
+
+        return SearchNode(score);
     }
     if (analysis.king_safety() == gm::KingSafety::Stalemate) {
-        return 0;
+        return SearchNode(0);
     }
 
     auto opponent = board.current_team() == Team::White ? Team::Black : Team::White;
     auto needs_sorting = false;
 
-    std::vector<std::pair<int, Board>> states;
+    std::vector<std::pair<int, Transformation>> states;
 
     for (const auto& pair : analysis.moves()) {
         for (const auto& move : pair.second) {
@@ -309,49 +313,58 @@ int engine::Fisher::minimax(const Board& board, unsigned int depth, int alpha, i
                 needs_sorting = true;
             }
 
-            states.push_back(std::make_pair(score, temp_board));
+            states.push_back(std::make_pair(score, Transformation(temp_move, temp_board)));
         }
     }
 
     if (needs_sorting) {
-        std::sort(states.begin(), states.end(), [&](std::pair<int, Board> a, std::pair<int, Board> b) {
+        std::sort(states.begin(), states.end(), [&](std::pair<int, Transformation> a, std::pair<int, Transformation> b) {
             return a.first > b.first;
         });
     }
 
     auto next_strategy = strategy == Strategy::Maximizing ? Strategy::Minimizing : Strategy::Maximizing;
 
+    std::optional<Move> best_move = std::nullopt;
+    std::shared_ptr<SearchNode> best_child = nullptr;
+
     for (int i = 0; i < (int)states.size(); ++i) {
         searched += 1;
 
-        auto score = minimax(states.at(i).second, depth - 1, alpha, beta, next_strategy, searched);
+        auto node = minimax(states.at(i).second.board().value(), depth - 1, alpha, beta, next_strategy, searched);
 
         if (strategy == Strategy::Maximizing) {
-            if (score >= beta) {
-                return beta;
+            if (node.score() >= beta) {
+                return SearchNode(beta);
             }
-            if (score > alpha) {
-                alpha = score;
+            if (node.score() > alpha) {
+                alpha = node.score().value();
+
+                best_move = states.at(i).second.move().value();
+                best_child = std::make_shared<SearchNode>(node);
             }
         }
         if (strategy == Strategy::Minimizing) {
-            if (score <= alpha) {
-                return alpha;
+            if (node.score() <= alpha) {
+                return SearchNode(alpha);
             }
-            if (score < beta) {
-                beta = score;
+            if (node.score() < beta) {
+                beta = node.score().value();
+
+                best_move = states.at(i).second.move().value();
+                best_child = std::make_shared<SearchNode>(node);
             }
         }
     }
 
     if (strategy == Strategy::Maximizing) {
-        return alpha;
+        return SearchNode(alpha, best_move, best_child);
     }
     if (strategy == Strategy::Minimizing) {
-        return beta;
+        return SearchNode(beta, best_move, best_child);
     }
 
-    return 0;
+    return SearchNode();
 }
 
 int engine::Fisher::minimax_quiet(const Board& board, const gm::Analysis& analysis, int alpha, int beta, Strategy strategy, unsigned int& searched)
@@ -444,53 +457,42 @@ std::optional<engine::Millisecond> engine::Millisecond::create(unsigned int mill
 
 engine::Suggestion engine::Fisher::go(Depth depth)
 {
-    auto analysis = gm::analyze(m_board, m_board.current_team()).value();
-
-    unsigned int nodes_searched = 0;
-    auto strategy = m_board.current_team() == Team::White ? Strategy::Maximizing : Strategy::Minimizing;
-    auto next_strategy = strategy == Strategy::Maximizing ? Strategy::Minimizing : Strategy::Maximizing;
-
     auto alpha = std::numeric_limits<int>::lowest();
     auto beta = std::numeric_limits<int>::max();
+    auto strategy = m_board.current_team() == Team::White ? Strategy::Maximizing : Strategy::Minimizing;
+    unsigned int nodes_searched = 0;
 
-    auto best_move = Move::nullmove;
+    auto result = minimax(m_board, depth.value(), alpha, beta, strategy, nodes_searched);
 
-    for (const auto& pair : analysis.moves()) {
-        for (const auto& move : pair.second) {
-            auto temp_move = Move::create(move).value();
-
-            nodes_searched += 1;
-            auto score = minimax(gm::apply_move(m_board, temp_move), depth.value() - 1, alpha, beta, next_strategy, nodes_searched);
-
-            if (strategy == Strategy::Maximizing) {
-                if (score >= beta) {
-                    break;
-                }
-                if (score > alpha) {
-                    alpha = score;
-
-                    best_move = temp_move;
-                }
-            }
-            if (strategy == Strategy::Minimizing) {
-                if (score <= alpha) {
-                    break;
-                }
-                if (score < beta) {
-                    beta = score;
-
-                    best_move = temp_move;
-                }
-            }
-        }
+    // This should never happen, but if something does go wrong then just return a random move.
+    if (!result.move().has_value()) {
+        return random();
     }
 
-    // TODO(thismarvin): How can we broadcast this to the engine?
-    auto score = strategy == Strategy::Maximizing ? alpha : beta;
-    std::cout << "info depth " << depth.value() << " nodes " << nodes_searched << " score cp " << score << "\n";
-    // auto message = "info depth " + std::to_string(depth.value()) + " nodes " + std::to_string(nodes_searched) + " score cp " + std::to_string(score);
+    auto head = std::make_shared<SearchNode>(result);
 
-    return Suggestion(best_move, Move::nullmove);
+    auto pv = std::string { head->move()->lan() };
+    head = head->child();
+
+    Move ponder = Move::nullmove;
+
+    if (head->child() != nullptr) {
+        ponder = head->move().value();
+        pv +=  " " + head->move()->lan();
+
+        head = head->child();
+    }
+
+    while (head->child() != nullptr) {
+        pv +=  " " + head->move()->lan();
+
+        head = head->child();
+    }
+
+    // TODO(thismarvin): How can we broadcast this to the engine? (Iterative Deepening!)
+    std::cout << "info depth " << depth.value() << " score cp " << result.score().value() << " nodes " << nodes_searched << " pv " << pv << "\n";
+
+    return Suggestion(result.move().value(), ponder);
 }
 
 engine::Suggestion engine::Fisher::go(engine::Millisecond milliseconds)

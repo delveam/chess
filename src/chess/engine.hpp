@@ -4,6 +4,7 @@
 #include <queue>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 #include "board.hpp"
 #include "gm.hpp"
 #include "move.hpp"
@@ -29,7 +30,9 @@ class Depth;
 class Fisher;
 class Millisecond;
 class Pescado;
+class SearchNode;
 class Suggestion;
+class Transformation;
 }
 
 class engine::Command {
@@ -115,6 +118,65 @@ private:
     Move m_ponder;
 };
 
+class engine::SearchNode {
+public:
+    SearchNode() = default;
+    SearchNode(std::optional<int> score) :
+        m_score(score)
+    {
+    }
+    SearchNode(std::optional<int> score, std::optional<Move> move) :
+        m_score(score),
+        m_move(move)
+    {
+    }
+    SearchNode(std::optional<int> score, std::optional<Move> move, std::shared_ptr<SearchNode>& child) :
+        m_score(score),
+        m_move(move),
+        m_child(child)
+    {
+    }
+
+    std::optional<int> score() const
+    {
+        return m_score;
+    }
+    std::optional<Move> move() const
+    {
+        return m_move;
+    }
+    const std::shared_ptr<SearchNode>& child() const
+    {
+        return m_child;
+    }
+private:
+    std::optional<int> m_score { std::nullopt };
+    std::optional<Move> m_move { std::nullopt };
+    std::shared_ptr<SearchNode> m_child { nullptr };
+};
+
+class engine::Transformation {
+public:
+    Transformation() = default;
+    Transformation(Move move, Board board) :
+        m_move(move),
+        m_board(board)
+    {
+    }
+
+    std::optional<Move> move() const
+    {
+        return m_move;
+    }
+    std::optional<Board> board() const
+    {
+        return m_board;
+    }
+private:
+    std::optional<Move> m_move { std::nullopt };
+    std::optional<Board> m_board { std::nullopt };
+};
+
 class engine::Fisher {
 public:
     Fisher() = default;
@@ -137,7 +199,7 @@ private:
 
     static int evaluate(const Board& board);
     static int evaluate_fast(const Board& board);
-    static int minimax(const Board& board, unsigned int depth, int alpha, int beta, Strategy strategy, unsigned int& searched);
+    static SearchNode minimax(const Board& board, unsigned int depth, int alpha, int beta, Strategy strategy, unsigned int& searched);
     static int minimax_quiet(const Board& board, const gm::Analysis& analysis, int alpha, int beta, Strategy strategy, unsigned int& searched);
     static int quiesce(const Board& board, int alpha, int beta, Strategy strategy, unsigned int& searched);
 };
