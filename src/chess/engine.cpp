@@ -242,6 +242,24 @@ int engine::Fisher::evaluate(const Board& board)
     white_score += (int)(white_total_moves * 0.25) - (int)(black_total_moves * 0.125);
     black_score += (int)(black_total_moves * 0.25) - (int)(white_total_moves * 0.125);
 
+    auto half_move_penalty = 0;
+
+    if (board.half_moves() > 45) {
+        half_move_penalty = board.half_moves() * 6;
+    }
+    else if (board.half_moves() > 40) {
+        half_move_penalty = board.half_moves() * 4;
+    }
+    else if (board.half_moves() > 25) {
+        half_move_penalty = board.half_moves() * 2;
+    }
+    else if (board.half_moves() > 10) {
+        half_move_penalty = board.half_moves();
+    }
+
+    white_score -= half_move_penalty;
+    black_score -= half_move_penalty;
+
     return white_score - black_score;
 }
 
