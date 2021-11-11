@@ -616,125 +616,125 @@ DangerZone generate_danger_zone(const Board& board, Team team)
     DangerZone result;
     result.fill(false);
 
-    auto other_team = team == Team::White ? Team::Black : Team::White;
-    auto opponents_moves = generate_move_canidates(board, other_team);
-
     // Generate the DangerZone of our opponent's moves.
-    for (const auto& pair : opponents_moves) {
-        auto attacker = board.pieces().at(pair.first);
+    for (int y = 0; y < constants::board_height; ++y) {
+        for (int x = 0; x < constants::board_width; ++x) {
+            auto attacker = board.pieces().at(y * constants::board_width + x);
 
-        auto x = pair.first % constants::board_width;
-        auto y = pair.first / constants::board_width;
+            if (attacker.team() == team) {
+                continue;
+            }
 
-        switch (attacker.type()) {
-        case PieceType::Pawn: {
-            std::optional<Coordinates> left = std::nullopt;
-            std::optional<Coordinates> right = std::nullopt;
+            switch (attacker.type()) {
+            case PieceType::Pawn: {
+                std::optional<Coordinates> left = std::nullopt;
+                std::optional<Coordinates> right = std::nullopt;
 
-            switch (attacker.team()) {
-            case Team::White: {
-                left = Coordinates::create(x - 1, y - 1);
-                right = Coordinates::create(x + 1, y - 1);
+                switch (attacker.team()) {
+                case Team::White: {
+                    left = Coordinates::create(x - 1, y - 1);
+                    right = Coordinates::create(x + 1, y - 1);
+                    break;
+                }
+                case Team::Black: {
+                    left = Coordinates::create(x - 1, y + 1);
+                    right = Coordinates::create(x + 1, y + 1);
+                    break;
+                }
+                default:
+                    break;
+                }
+
+                if (left.has_value()) {
+                    auto index = left->y() * constants::board_width + left->x();
+
+                    result[index] = true;
+                }
+                if (right.has_value()) {
+                    auto index = right->y() * constants::board_width + right->x();
+
+                    result[index] = true;
+                }
+
                 break;
             }
-            case Team::Black: {
-                left = Coordinates::create(x - 1, y + 1);
-                right = Coordinates::create(x + 1, y + 1);
+            case PieceType::Knight: {
+                auto coords_to_index = [](unsigned int x, unsigned int y) {
+                    return y * constants::board_width + x;
+                };
+                auto setup = [&](unsigned int x, unsigned int y) {
+                    if (coords_are_valid(x, y)) {
+                        auto index = coords_to_index(x, y);
+
+                        result[index] = true;
+                    }
+                };
+
+                setup(x + 1, y - 2);
+                setup(x + 2, y - 1);
+                setup(x + 2, y + 1);
+                setup(x + 1, y + 2);
+                setup(x - 1, y + 2);
+                setup(x - 2, y + 1);
+                setup(x - 2, y - 1);
+                setup(x - 1, y - 2);
+
+                break;
+            }
+            case PieceType::Bishop: {
+                walk_dangerously(board, result, x, y, 1, -1, attacker.team());
+                walk_dangerously(board, result, x, y, 1, 1, attacker.team());
+                walk_dangerously(board, result, x, y, -1, 1, attacker.team());
+                walk_dangerously(board, result, x, y, -1, -1, attacker.team());
+
+                break;
+            }
+            case PieceType::Rook: {
+                walk_dangerously(board, result, x, y, 0, -1, attacker.team());
+                walk_dangerously(board, result, x, y, 1, 0, attacker.team());
+                walk_dangerously(board, result, x, y, 0, 1, attacker.team());
+                walk_dangerously(board, result, x, y, -1, 0, attacker.team());
+
+                break;
+            }
+            case PieceType::Queen: {
+                walk_dangerously(board, result, x, y, 1, -1, attacker.team());
+                walk_dangerously(board, result, x, y, 1, 1, attacker.team());
+                walk_dangerously(board, result, x, y, -1, 1, attacker.team());
+                walk_dangerously(board, result, x, y, -1, -1, attacker.team());
+                walk_dangerously(board, result, x, y, 0, -1, attacker.team());
+                walk_dangerously(board, result, x, y, 1, 0, attacker.team());
+                walk_dangerously(board, result, x, y, 0, 1, attacker.team());
+                walk_dangerously(board, result, x, y, -1, 0, attacker.team());
+
+                break;
+            }
+            case PieceType::King: {
+                auto coords_to_index = [](unsigned int x, unsigned int y) {
+                    return y * constants::board_width + x;
+                };
+                auto setup = [&](unsigned int x, unsigned int y) {
+                    if (coords_are_valid(x, y)) {
+                        auto index = coords_to_index(x, y);
+
+                        result[index] = true;
+                    }
+                };
+
+                setup(x + 1, y - 1);
+                setup(x + 1, y);
+                setup(x + 1, y + 1);
+                setup(x, y + 1);
+                setup(x - 1, y + 1);
+                setup(x - 1, y);
+                setup(x - 1, y - 1);
+                setup(x, y - 1);
+
                 break;
             }
             default:
                 break;
             }
-
-            if (left.has_value()) {
-                auto index = left->y() * constants::board_width + left->x();
-
-                result[index] = true;
-            }
-            if (right.has_value()) {
-                auto index = right->y() * constants::board_width + right->x();
-
-                result[index] = true;
-            }
-
-            break;
-        }
-        case PieceType::Knight: {
-            auto coords_to_index = [](unsigned int x, unsigned int y) {
-                return y * constants::board_width + x;
-            };
-            auto setup = [&](unsigned int x, unsigned int y) {
-                if (coords_are_valid(x, y)) {
-                    auto index = coords_to_index(x, y);
-
-                    result[index] = true;
-                }
-            };
-
-            setup(x + 1, y - 2);
-            setup(x + 2, y - 1);
-            setup(x + 2, y + 1);
-            setup(x + 1, y + 2);
-            setup(x - 1, y + 2);
-            setup(x - 2, y + 1);
-            setup(x - 2, y - 1);
-            setup(x - 1, y - 2);
-
-            break;
-        }
-        case PieceType::Bishop: {
-            walk_dangerously(board, result, x, y, 1, -1, attacker.team());
-            walk_dangerously(board, result, x, y, 1, 1, attacker.team());
-            walk_dangerously(board, result, x, y, -1, 1, attacker.team());
-            walk_dangerously(board, result, x, y, -1, -1, attacker.team());
-
-            break;
-        }
-        case PieceType::Rook: {
-            walk_dangerously(board, result, x, y, 0, -1, attacker.team());
-            walk_dangerously(board, result, x, y, 1, 0, attacker.team());
-            walk_dangerously(board, result, x, y, 0, 1, attacker.team());
-            walk_dangerously(board, result, x, y, -1, 0, attacker.team());
-
-            break;
-        }
-        case PieceType::Queen: {
-            walk_dangerously(board, result, x, y, 1, -1, attacker.team());
-            walk_dangerously(board, result, x, y, 1, 1, attacker.team());
-            walk_dangerously(board, result, x, y, -1, 1, attacker.team());
-            walk_dangerously(board, result, x, y, -1, -1, attacker.team());
-            walk_dangerously(board, result, x, y, 0, -1, attacker.team());
-            walk_dangerously(board, result, x, y, 1, 0, attacker.team());
-            walk_dangerously(board, result, x, y, 0, 1, attacker.team());
-            walk_dangerously(board, result, x, y, -1, 0, attacker.team());
-
-            break;
-        }
-        case PieceType::King: {
-            auto coords_to_index = [](unsigned int x, unsigned int y) {
-                return y * constants::board_width + x;
-            };
-            auto setup = [&](unsigned int x, unsigned int y) {
-                if (coords_are_valid(x, y)) {
-                    auto index = coords_to_index(x, y);
-
-                    result[index] = true;
-                }
-            };
-
-            setup(x + 1, y - 1);
-            setup(x + 1, y);
-            setup(x + 1, y + 1);
-            setup(x, y + 1);
-            setup(x - 1, y + 1);
-            setup(x - 1, y);
-            setup(x - 1, y - 1);
-            setup(x, y - 1);
-
-            break;
-        }
-        default:
-            break;
         }
     }
 
