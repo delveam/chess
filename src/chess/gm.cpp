@@ -412,7 +412,7 @@ MoveSet generate_king_moves(const Board& board, unsigned int x, unsigned int y)
     return result;
 }
 
-Moves generate_move_canidates(const Board& board, Team team)
+Moves generate_move_candidates(const Board& board, Team team)
 {
     Moves result;
 
@@ -1169,7 +1169,7 @@ std::optional<gm::Analysis> gm::analyze(const Board& board, Team team)
 
     auto opponent = team == Team::White ? Team::Black : Team::White;
 
-    auto moves = generate_move_canidates(board, team);
+    auto moves = generate_move_candidates(board, team);
     auto danger_zone = generate_danger_zone(board, team);
     auto pins = find_pins(board, team).value();
     auto attackers = find_attackers(board, danger_zone, king_x, king_y);
